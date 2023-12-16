@@ -2,10 +2,9 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+require('dotenv').config();
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var googleRuter = require('./routes/oauthGoogle')
+const router = require('./src/routes/index')
 
 var app = express();
 
@@ -15,11 +14,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/', googleRuter)
+// app.use('/', indexRouter);
+app.use('/users', router.users);
+app.use('/', router.oauthGoogle)
+app.use('/', router.auth)
 
-// error handler
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
