@@ -16,8 +16,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // app.use('/', indexRouter);
 app.use('/users', router.users);
-app.use('/', router.oauthGoogle)
-app.use('/', router.auth)
+app.use('/oauth2', router.oauthGoogle)
+app.use('/auth', router.auth)
 
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;

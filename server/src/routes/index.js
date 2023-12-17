@@ -1,5 +1,5 @@
 const users = require('./users')
-const oauthGoogle = require('./oauthGoogle')
+const oauthGoogle = require('./oAuth2')
 const auth = require('./auth')
 
 const router = {}

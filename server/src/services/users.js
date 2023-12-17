@@ -12,6 +12,14 @@ const createDataUser = async (params) => {
   return true
 }
 
+const createDataUserByGoogleOAuth = async (params) => {
+  const { email, fullname, user_image, google } = params
+  const sql = `INSERT IGNORE INTO users (email,fullname,password_hash,user_image,google) VALUES ('${email}','${fullname}','0','${user_image}',${google})`
+  const [rows] = await promisePool.query(sql)
+  if (rows.affectedRows == 0) return false
+  return true
+}
+
 const checkAvailablelUsername = async (params) => {
   const sql = `SELECT username FROM users WHERE username='${params.username}'`
   const [rows] = await promisePool.query(sql)
@@ -26,8 +34,22 @@ const checkAvailableEmail = async (params) => {
   return false
 }
 
+const checkAvailableEmailAndGoogle = async (params) => {
+  const sql = `SELECT email FROM users WHERE email='${params.email}' AND google=1`
+  const [rows] = await promisePool.query(sql)
+  if (rows[0] == undefined) return true
+  return false
+}
+
 const getUserByUsernameOrEmail = async (params) => {
   const sql = `SELECT id,email,password_hash,google,user_image FROM users WHERE (email='${params.emailOrUsername}' OR username='${params.emailOrUsername}') AND google=0`
+  const [rows] = await promisePool.query(sql)
+  if (rows[0] == undefined) return false
+  return rows[0]
+}
+
+const getUserByEmailAndGoogle = async (params) => {
+  const sql = `SELECT id,google,user_image FROM users WHERE email='${params.email}' AND google=1`
   const [rows] = await promisePool.query(sql)
   if (rows[0] == undefined) return false
   return rows[0]
@@ -59,5 +81,5 @@ const deleteRefreshToken = async (params) => {
 
 module.exports = { 
 getDataUsers, createDataUser, checkAvailablelUsername, checkAvailableEmail, getUserByUsernameOrEmail, storeRefreshToken, checkUsesrByRefreshToken,
-deleteRefreshToken, checkAvailableRefreshToken
+deleteRefreshToken, checkAvailableRefreshToken, getUserByEmailAndGoogle, checkAvailableEmailAndGoogle, createDataUserByGoogleOAuth
 }

@@ -1,0 +1,63 @@
+const { authUrlLoginGoogleController, logoutGoogleController, authUrlRegisterGoogleController, loginGoogleController, registerGoogleController } = require("../controllers/oAuth2Controller");
+
+const registerGoogleHandler = async (req, res) => {
+    try {
+        const authorizationUrl = await authUrlRegisterGoogleController()
+        return res.redirect(authorizationUrl)
+    } catch (error) {
+        console.log(error);
+        return error
+    }
+}
+
+const loginGoogleHandler = async (req, res) => {
+    try {
+        const authorizationUrl = await authUrlLoginGoogleController()
+        return res.redirect(authorizationUrl)
+    } catch (error) {
+        console.log(error);
+        return error
+    }
+}
+
+const registerGoogleCallBackHandler = async (req, res) => {
+    const register = await registerGoogleController(req.query)
+    if (register == 'Email is registered, please login') return res.status(401).send({status: 'failed', msg: 'email is registerd, please login'})
+
+    return res.status(201).send({status: 'success', msg: 'registrasi berhasil'})
+}
+
+const loginGoogleCallBackHandler = async (req, res) => {
+    const login = await loginGoogleController(req.query)
+    if (login == 'not registered') return res.status(404).send({status: 'failed', msg: 'Email not registered'})
+
+    res.cookie('refreshToken', login.refreshToken, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        // secure: false karena masih di lokalhost belum pakai https
+    })
+    res.cookie('accessTokenByGoogle', login.accessTokenByGoogle, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        // secure: false karena masih di lokalhost belum pakai https
+    })
+    return res.status(200).send({status:'success', accessToken: login.accessToken})
+}
+
+const logoutGoogleHandler = async (req, res) => {
+    const refreshToken = req.cookies.refreshToken
+    if (!refreshToken) return res.sendStatus(204)
+
+    const accessTokenByGoogle = req.cookies.accessTokenByGoogle
+
+    const token = await logoutGoogleController({ refreshToken, accessTokenByGoogle })
+    if (!token) return res.sendStatus(204)
+
+    res.clearCookie('refreshToken')
+    res.clearCookie('accessTokenByGoogle')
+
+    return res.sendStatus(200)
+}
+
+module.exports = { registerGoogleHandler, registerGoogleCallBackHandler, loginGoogleHandler, loginGoogleCallBackHandler,logoutGoogleHandler }
+
