@@ -5,7 +5,7 @@ const { getUserByEmailAndGoogle, storeRefreshToken, checkAvailableEmailAndGoogle
 const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    'http://localhost:3000/oauth2/google/callback'
+    'http://localhost:3001/api/oauth2/google/callback'
   );
 
 const scopes = [
@@ -101,7 +101,25 @@ const logoutGoogleController = async (payload) => {
     return deleted = await deleteRefreshToken(checkIdUser)
 }
 
+const signInGoogleController = async (payload) => {
+    try {
+        const { name, email, picture } = payload
+        const availableEmailAndGoogle = await checkAvailableEmailAndGoogle({email})
+        if (availableEmailAndGoogle) await createDataUserByGoogleOAuth({ email, fullname: name, user_image: picture, google: 1 })
+    
+        const user = await getUserByEmailAndGoogle({email})
+        const { id,user_image } = user
+        const accessToken = jwt.sign({ id,email,google,user_image }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' })
+        const refreshToken = jwt.sign({ id,email,google,user_image }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d'})
+        await storeRefreshToken({ refreshToken, email, google:1 })
+
+        return { accessToken, refreshToken, id, email, user_image, name,  google:1 }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 module.exports = {
     authUrlRegisterGoogleController, authUrlLoginGoogleController, callBackGoogleByPass, registerGoogleController, logoutGoogleController, loginGoogleController,
-
+    signInGoogleController
 }

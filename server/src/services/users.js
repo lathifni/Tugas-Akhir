@@ -42,7 +42,7 @@ const checkAvailableEmailAndGoogle = async (params) => {
 }
 
 const getUserByUsernameOrEmail = async (params) => {
-  const sql = `SELECT id,email,password_hash,google,user_image FROM users WHERE (email='${params.emailOrUsername}' OR username='${params.emailOrUsername}') AND google=0`
+  const sql = `SELECT id,fullname,email,password_hash,google,user_image FROM users WHERE (email='${params.emailOrUsername}' OR username='${params.emailOrUsername}') AND google=0`
   const [rows] = await promisePool.query(sql)
   if (rows[0] == undefined) return false
   return rows[0]

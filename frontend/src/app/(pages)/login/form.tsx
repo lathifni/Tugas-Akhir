@@ -1,0 +1,178 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import Image from 'next/image';
+
+export default function Form() {
+   const [emailOrUsername, setEmailOrUsername] = useState('');
+   const [password, setPassword] = useState('');
+
+   const router = useRouter();
+
+   const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      // try {
+      //   const response = await axios.post('http://localhost:3000/auth/login', {
+      //     emailOrUsername,
+      //     password,
+      //   }, { withCredentials: true });
+
+      //   axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.accessToken}`
+
+      //   router.push('/users')
+      // } catch (error) {
+      //   console.error('Login gagal:', error);
+      // }
+      const loginData = {
+         emailOrUsername: emailOrUsername,
+         password: password,
+         redirect: true,
+         callbackUrl: '/'
+      };
+      const login = await signIn('credentials', loginData);
+      console.log(login);
+
+      if (login?.ok) {
+         console.log('okey berhasil');
+      } else {
+         console.log('gabisa login');
+      }
+   };
+
+   const loginGoogle = async (e: any) => {
+      try {
+         const response = await fetch(
+            'http://localhost:3000/oauth2/google/login'
+         );
+         const data = await response.json();
+
+         console.log('Respons:', data);
+         // const res = await axios.get('http://localhost:3000/oauth2/google/login', { withCredentials: true })
+         // const loginUrl = res.data.loginUrl;
+
+         // // Redirect ke URL login Google
+         // window.open(loginUrl, '_blank');
+         // <Link href={loginUrl}>
+         //   <a  target='_blank'> testt</a>
+         // </Link>
+      } catch (error) {
+         console.error(error);
+      }
+   };
+   return (
+      <>
+         {/* <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-2 mx-auto max-w-md mt-10"
+      >
+      <input
+        name="emailOrUsername"
+        id="emailOrUsername"
+        className="border border-black text-black"
+        value={emailOrUsername}
+        onChange={(e) => setEmailOrUsername(e.target.value)}
+        type="text"
+        />
+      <input
+        name="password"
+        id='password'
+        className="border border-black  text-black"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        type="password"
+        />
+      <button type="submit">Login</button>
+    </form>
+    <button onClick={loginGoogle}>ke Google</button> */}
+         <section className="flex flex-col md:flex-row h-screen items-center">
+            <div className="bg-indigo-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
+               <img
+                  src="https://www.kabaribukota.id/wp-content/uploads/2023/12/22818.jpg"
+                  alt=""
+                  className="w-full h-full object-cover"
+               />
+            </div>
+
+            <div
+               className="bg-white w-full md:max-w-md lg:max-w-full md:mx-auto md:w-1/2 xl:w-1/3 h-screen px-6 lg:px-16 xl:px-12 flex items-center justify-center"
+            >
+               <div className="w-full h-100">
+                  <h1 className="text-xl md:text-2xl font-bold leading-tight mt-12 text-center">
+                     Log in to your account
+                  </h1>
+                  <form className="mt-6" onSubmit={handleSubmit}>
+                     <div>
+                        <label className="block text-gray-700">
+                           Email Address or Username
+                        </label>
+                        <input
+                           value={emailOrUsername}
+                           onChange={(e) => setEmailOrUsername(e.target.value)}
+                           type="string"
+                           name="emailOrUsername"
+                           id="emailOrUsername"
+                           placeholder="Enter Email Address or Username"
+                           className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
+                           autoFocus
+                           autoComplete="true"
+                           required
+                        />
+                     </div>
+
+                     <div className="mt-4">
+                        <label className="block text-gray-700">Password</label>
+                        <input
+                           value={password}
+                           onChange={(e) => setPassword(e.target.value)}
+                           type="password"
+                           name="password"
+                           id="password"
+                           placeholder="Enter Password"
+                           minLength={8}
+                           className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
+                           required
+                        />
+                     </div>
+
+                     <button
+                        type="submit"
+                        className="w-full block bg-indigo-500 hover:bg-indigo-400 focus:bg-indigo-400 text-white font-semibold rounded-lg px-4 py-3 mt-6"
+                     >
+                        Log In
+                     </button>
+                  </form>
+
+                  <hr className="my-6 border-gray-300 w-full" />
+
+                  <button
+                     type="button" 
+                     className="w-full block bg-white hover:bg-gray-100 focus:bg-gray-100 text-gray-900 font-semibold rounded-lg px-4 py-3 border border-gray-300"
+                  >
+                     <div className="flex items-center justify-center">
+                        <img 
+                      src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png" // Gantikan dengan path atau URL gambar Google Anda
+                      alt="Google Logo"
+                      className="w-6 h-6"
+                    />    
+                    {/* <Image src={'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png'}  alt="Google Logo" className="w-6 h-6"/> */}
+                        <span className="ml-4">Log in with Google</span>
+                     </div>
+                  </button>
+
+                  <p className="mt-8 text-center">
+                     Need an account?{' '}
+                     <a
+                        href="register"
+                        className="text-blue-500 hover:text-blue-700 font-semibold"
+                     >
+                        Create an account
+                     </a>
+                  </p>
+               </div>
+            </div>
+         </section>
+      </>
+   );
+}

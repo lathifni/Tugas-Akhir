@@ -1,4 +1,4 @@
-const { authUrlLoginGoogleController, logoutGoogleController, authUrlRegisterGoogleController, loginGoogleController, registerGoogleController } = require("../controllers/oAuth2Controller");
+const { authUrlLoginGoogleController, logoutGoogleController, authUrlRegisterGoogleController, loginGoogleController, registerGoogleController, signInGoogleController } = require("../controllers/oAuth2Controller");
 
 const registerGoogleHandler = async (req, res) => {
     try {
@@ -31,16 +31,6 @@ const loginGoogleCallBackHandler = async (req, res) => {
     const login = await loginGoogleController(req.query)
     if (login == 'not registered') return res.status(404).send({status: 'failed', msg: 'Email not registered'})
 
-    res.cookie('refreshToken', login.refreshToken, {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        // secure: false karena masih di lokalhost belum pakai https
-    })
-    res.cookie('accessTokenByGoogle', login.accessTokenByGoogle, {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        // secure: false karena masih di lokalhost belum pakai https
-    })
     return res.status(200).send({status:'success', accessToken: login.accessToken})
 }
 
@@ -53,11 +43,24 @@ const logoutGoogleHandler = async (req, res) => {
     const token = await logoutGoogleController({ refreshToken, accessTokenByGoogle })
     if (!token) return res.sendStatus(204)
 
-    res.clearCookie('refreshToken')
-    res.clearCookie('accessTokenByGoogle')
-
     return res.sendStatus(200)
 }
 
-module.exports = { registerGoogleHandler, registerGoogleCallBackHandler, loginGoogleHandler, loginGoogleCallBackHandler,logoutGoogleHandler }
+const signInGoogle = async (req, res) => {
+    const payload = req.body.profile
+    const signIn = await signInGoogleController(payload)
+
+    return res.status(200).send({
+        status:'success', 
+        id: signIn.id,
+        accessToken: signIn.accessToken,
+        email: signIn.email,
+        google: signIn.google,
+        user_image: signIn.user_image,
+        name: signIn.name,
+        refreshToken: signIn.refreshToken
+    })
+}
+
+module.exports = { registerGoogleHandler, registerGoogleCallBackHandler, loginGoogleHandler, loginGoogleCallBackHandler,logoutGoogleHandler, signInGoogle }
 

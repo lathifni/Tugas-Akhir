@@ -4,7 +4,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require('dotenv').config();
 const cors = require('cors')
-
+const corsOptions = {
+  origin: ['http://localhost:3001', 'http://localhost:3000'], // Sesuaikan dengan kebutuhan Anda
+  credentials: true,
+};
 const router = require('./src/routes/index')
 
 var app = express();
@@ -14,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({ origin: 'http://localhost:3001', credentials: true }))
+app.use(cors(corsOptions))
 
 app.use('/users', router.users);
 app.use('/oauth2', router.oauthGoogle)

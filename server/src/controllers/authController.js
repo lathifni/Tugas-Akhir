@@ -11,13 +11,13 @@ const loginController = async (payload) => {
     const match = await bcrypt.compare(password, getUser.password_hash)
     if (!match) return 'wrong password'
 
-    const { id, email, google, user_image } = getUser
+    const { id, email, google, user_image, fullname } = getUser
 
     const accessToken = jwt.sign({ id,email,google,user_image }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' })
     const refreshToken = jwt.sign({ id,email,google,user_image }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d'})
     await storeRefreshToken({ refreshToken, email, google })
 
-    return { accessToken, refreshToken }
+    return { accessToken, refreshToken, id, email, google, user_image, fullname }
 }
 
 const refreshTokenController = async (payload) => {

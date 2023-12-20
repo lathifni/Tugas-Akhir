@@ -3,7 +3,7 @@ const { loginHandler, updateTokenHandler, logoutHandler } = require('../handlers
 var router = express.Router();
 
 router.post('/login', loginHandler)
-router.get('/token', updateTokenHandler)
+router.post('/token', updateTokenHandler)
 router.get('/logout', logoutHandler)
 
 module.exports = router;
