@@ -16,6 +16,7 @@ const UserPage: React.FC = () => {
    const [users, setUsers] = useState<User[]>([]);
    const axiosAuth = useAxiosAuth();
    const { data: session } = useSession()
+   // console.log('di page users ', session?.user);
    
    useEffect(() => {
       const fetchData = async () => {
@@ -26,9 +27,16 @@ const UserPage: React.FC = () => {
             console.error('Error fetching user data:', error);
          }
       };
-      fetchData();
-   }, [axiosAuth, session]);
 
+      // Memeriksa apakah session telah diinisialisasi
+      if (session) {
+         fetchData();
+      }
+   }, [session, axiosAuth]); // Tambahkan session sebagai dependency
+
+   if (!session) {
+      return <div>Loading...</div>; // Atau tampilkan pesan lain saat session belum tersedia
+   }
    return (
       <>
          <div>

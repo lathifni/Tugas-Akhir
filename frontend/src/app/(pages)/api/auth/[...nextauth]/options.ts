@@ -20,32 +20,31 @@ export const options: NextAuthOptions = {
       }),
       CredentialsProvider({
          name: 'Credentials',
-         credentials: {},
+         credentials: {
+            emailOrUsername: { label: "Username", type: "text", placeholder: "jsmith" },
+            password: { label: "Password", type: "password" },
+         },
          async authorize(credentials) {
-            const { emailOrUsername, password } = credentials as { emailOrUsername: string; password: string}
             const res = await fetch('http://localhost:3000/auth/login', {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify({
-                  emailOrUsername: emailOrUsername,
-                  password: password,
+                  emailOrUsername: credentials?.emailOrUsername,
+                  password: credentials?.password,
                }),
             });
+            const loginResponse = await res.json();
 
-            const user = await res.json();
-
-            if (user.status == 'success') {
-               console.log(user);
-               return user;
-            } else {
-               console.log(user);
-               return null;
-            }
+            if (loginResponse.status == 'failed') return null
+            
+            return loginResponse;
          },
       }),
    ],
    callbacks: {
       async jwt({ token, user, account, profile }) {
+         console.log(user);
+         
          if (account?.provider == 'google' && profile) {
             const requestLogin = await fetch(
                'http://localhost:3000/oauth2/google/frontend',
@@ -68,7 +67,8 @@ export const options: NextAuthOptions = {
          }
          return { ...token, ...user};
       },
-      // async signIn({ profile }) {
+      // async signIn({ profile, account, user }) {
+      //    console.log('ni user di sign in', user);
       //    if (profile !== undefined) {
       //       try {
       //          const res = await fetch(
@@ -84,11 +84,15 @@ export const options: NextAuthOptions = {
       //       } catch (error) {
       //          console.log(error);
       //       }
+      //       // account = Object.assign({}, account, { accessToken: 'test'}, { refreshToken: 'testlagi' })
       //    }
+         
       //    return true;
       // },
       async session({ session, token }) {
          session.user = token as any;
+         console.log('ini dibagian session mau cek untuk google ',session);
+         
          return session;
       },
    },

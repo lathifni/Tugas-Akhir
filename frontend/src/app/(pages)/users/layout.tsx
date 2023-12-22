@@ -1,24 +1,22 @@
 import { ReactNode } from "react";
-import Provider from "../../../../context/provider";
 import AppBar from "@/components/appBar";
-import { SessionProvider } from "next-auth/react";
-import UserPage from "./page";
 import AuthProvider from "../../../../context/provider";
 
 interface IProps {
-    children: ReactNode;
-  }
+  children: ReactNode;
+}
 
-  export default function RootLayout({ children }: IProps) {
-    return (
-      <html lang="en">
-          <body suppressHydrationWarning={true}>
-            <div className={"  min-h-screen "}>
-              <AuthProvider>
-                {children}
-              </AuthProvider>
-            </div>
-          </body>
-      </html>
-    );
-  }
+export default function RootLayout({ children }: IProps) {
+  return (
+    <AuthProvider>
+      {/* <html lang="en"> */}
+      {/* <body suppressHydrationWarning={true}> */}
+      <AppBar/>
+        <div className={"  min-h-screen "}>
+        {children}
+      </div>
+      {/* </body> */}
+      {/* </html> */}
+    </AuthProvider>
+  );
+}

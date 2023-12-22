@@ -6,7 +6,6 @@ require('dotenv').config();
 const cors = require('cors')
 const corsOptions = {
   origin: ['http://localhost:3001', 'http://localhost:3000'], // Sesuaikan dengan kebutuhan Anda
-  credentials: true,
 };
 const router = require('./src/routes/index')
 

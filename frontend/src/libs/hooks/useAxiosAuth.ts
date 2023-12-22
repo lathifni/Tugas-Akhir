@@ -8,12 +8,17 @@ import { useRefreshToken } from "./useRefreshToken";
 const useAxiosAuth = () => {
   const { data: session } = useSession();
   const refreshToken = useRefreshToken();
+  // console.log('di hooks use Axios', session?.user.accessToken);
+  
 
   useEffect(() => {
     const requestIntercept = axiosAuth.interceptors.request.use(
       (config) => {
         if (!config.headers["Authorization"]) {
+          // console.log(`Bearer ${session?.user?.accessToken}`);
           config.headers["Authorization"] = `Bearer ${session?.user?.accessToken}`;
+          // console.log('test headernyaa ', config.headers['Authorization']);
+          
         }
         return config;
       },

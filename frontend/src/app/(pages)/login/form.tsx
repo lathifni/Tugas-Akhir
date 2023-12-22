@@ -8,59 +8,35 @@ import Image from 'next/image';
 export default function Form() {
    const [emailOrUsername, setEmailOrUsername] = useState('');
    const [password, setPassword] = useState('');
+   const [errorLogin, setErrorLogin] = useState('')
 
    const router = useRouter();
 
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      // try {
-      //   const response = await axios.post('http://localhost:3000/auth/login', {
-      //     emailOrUsername,
-      //     password,
-      //   }, { withCredentials: true });
-
-      //   axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.accessToken}`
-
-      //   router.push('/users')
-      // } catch (error) {
-      //   console.error('Login gagal:', error);
-      // }
-      const loginData = {
-         emailOrUsername: emailOrUsername,
-         password: password,
-         redirect: true,
-         callbackUrl: '/'
-      };
-      const login = await signIn('credentials', loginData);
-      console.log(login);
-
-      if (login?.ok) {
-         console.log('okey berhasil');
-      } else {
-         console.log('gabisa login');
-      }
-   };
-
-   const loginGoogle = async (e: any) => {
       try {
-         const response = await fetch(
-            'http://localhost:3000/oauth2/google/login'
-         );
-         const data = await response.json();
-
-         console.log('Respons:', data);
-         // const res = await axios.get('http://localhost:3000/oauth2/google/login', { withCredentials: true })
-         // const loginUrl = res.data.loginUrl;
-
-         // // Redirect ke URL login Google
-         // window.open(loginUrl, '_blank');
-         // <Link href={loginUrl}>
-         //   <a  target='_blank'> testt</a>
-         // </Link>
-      } catch (error) {
-         console.error(error);
+         const loginData = {
+            emailOrUsername: emailOrUsername,
+            password: password,
+            redirect: false,
+         };
+         const res = await signIn('credentials', loginData)
+         if (res?.error) {
+            setErrorLogin('Invalid Email/Username or Password');
+         } else {
+             router.replace('/users');
+          }
+      } catch (error: any) {
+         setErrorLogin(error)
       }
    };
+
+   const handleSignInGoogle = () => {
+      signIn('google', {
+         callbackUrl: '/users'
+      })
+   }
+
    return (
       <>
          {/* <form
@@ -102,10 +78,15 @@ export default function Form() {
                   <h1 className="text-xl md:text-2xl font-bold leading-tight mt-12 text-center">
                      Log in to your account
                   </h1>
-                  <form className="mt-6" onSubmit={handleSubmit}>
+                  <form className="mt-6 text" onSubmit={handleSubmit}>
+                  { errorLogin? ( 
+                     <div>
+                        <h1 className='text-red-600 text-center'>{ errorLogin }</h1>
+                     </div>
+                  ): null}
                      <div>
                         <label className="block text-gray-700">
-                           Email Address or Username
+                           Email or Username
                         </label>
                         <input
                            value={emailOrUsername}
@@ -147,6 +128,7 @@ export default function Form() {
                   <hr className="my-6 border-gray-300 w-full" />
 
                   <button
+                  onClick={handleSignInGoogle}
                      type="button" 
                      className="w-full block bg-white hover:bg-gray-100 focus:bg-gray-100 text-gray-900 font-semibold rounded-lg px-4 py-3 border border-gray-300"
                   >
