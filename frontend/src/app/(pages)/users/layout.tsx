@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import AppBar from "@/components/appBar";
-import AuthProvider from "../../../../context/provider";
+import AuthProvider from "../../../../context/authProvider";
 
 interface IProps {
   children: ReactNode;

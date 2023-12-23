@@ -15,8 +15,7 @@ interface User {
 const UserPage: React.FC = () => {
    const [users, setUsers] = useState<User[]>([]);
    const axiosAuth = useAxiosAuth();
-   const { data: session } = useSession()
-   // console.log('di page users ', session?.user);
+   const { data: session, update } = useSession()
    
    useEffect(() => {
       const fetchData = async () => {
@@ -27,12 +26,10 @@ const UserPage: React.FC = () => {
             console.error('Error fetching user data:', error);
          }
       };
-
-      // Memeriksa apakah session telah diinisialisasi
       if (session) {
          fetchData();
       }
-   }, [session, axiosAuth]); // Tambahkan session sebagai dependency
+   }, [update]); // Tambahkan session sebagai dependency
 
    if (!session) {
       return <div>Loading...</div>; // Atau tampilkan pesan lain saat session belum tersedia
@@ -50,10 +47,6 @@ const UserPage: React.FC = () => {
                ))}
             </ul>
          </div>
-         {/* <div>
-            <button onClick={fetchData}>Get User Posts</button>
-            {users && JSON.stringify(users)}
-         </div> */}
       </>
    );
 };
