@@ -15,33 +15,14 @@ interface User {
 }
 
 const UserPage: React.FC = () => {
-   // const [users, setUsers] = useState<User[]>([]);
-   // const axiosAuth = useAxiosAuth();
-   // const { data: session, update } = useSession()
-   
-   // useEffect(() => {
-   //    const fetchData = async () => {
-   //       try {
-   //          const response: AxiosResponse<{ data: User[] }> = await axiosAuth.get('/users');
-   //          setUsers(response.data.data);
-   //       } catch (error) {
-   //          console.error('Error fetching user data:', error);
-   //       }
-   //    };
-   //    if (session) {
-   //       fetchData();
-   //    }
-   // }, [update]); // Tambahkan session sebagai dependency
-
-   // if (!session) {
-   //    return <div>Loading...</div>; // Atau tampilkan pesan lain saat session belum tersedia
-   // }
    const { isError, isSuccess, isLoading, data, error } = useQuery({
       queryKey: ['users'],
       queryFn: fetchUsers,
    })
 
    if (isSuccess && data) {
+      // console.log(data);
+      
       return (
          <>
             <div>

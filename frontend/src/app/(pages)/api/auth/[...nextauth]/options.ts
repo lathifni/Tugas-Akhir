@@ -43,8 +43,6 @@ export const options: NextAuthOptions = {
    ],
    callbacks: {
       async jwt({ token, user, account, profile }) {
-         console.log(user);
-         
          if (account?.provider == 'google' && profile) {
             const requestLogin = await fetch(
                'http://localhost:3000/oauth2/google/frontend',
@@ -91,8 +89,6 @@ export const options: NextAuthOptions = {
       // },
       async session({ session, token }) {
          session.user = token as any;
-         console.log('ini dibagian session mau cek untuk google ',session);
-         
          return session;
       },
    },

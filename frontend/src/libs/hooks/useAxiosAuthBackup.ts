@@ -3,13 +3,12 @@
 import { axiosAuth } from "../axios";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { useRefreshToken } from "./useRefreshToken";
+import { useRefreshToken } from "./useRefreshTokenBackup";
 
 const useAxiosAuth = () => {
   const { data: session } = useSession();
   const refreshToken = useRefreshToken();
-  // console.log('di hooks use Axios', session?.user.accessToken);
-  
+  console.log(`Bearer ${session?.user?.accessToken}`);
 
   useEffect(() => {
     const requestIntercept = axiosAuth.interceptors.request.use(
