@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import AuthProvider from '../../context/authProvider'
-import ReactQueryProvider from '../../context/reactQueryProvider'
+import AuthProvider from '../../provider/authProvider'
+import ReactQueryProvider from '../../provider/reactQueryProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Green Talao Park',
   description: 'GTP Village',
+  icons: '/icon/logo.svg'
 }
 
 export default function RootLayout({
@@ -17,14 +18,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <AuthProvider>
     <html lang="en">
       <body className={inter.className}>
-      <ReactQueryProvider>
-        {children}
-      </ReactQueryProvider>
+        <AuthProvider>
+          <ReactQueryProvider>
+            {children}
+          </ReactQueryProvider>
+        </AuthProvider>
       </body>
     </html>
-    </AuthProvider>
   )
 }

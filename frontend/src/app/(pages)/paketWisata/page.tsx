@@ -1,6 +1,6 @@
 'use client'
 
-import SideBar from "@/components/sideBar"
+import SideBar from "@/components/sideBarTest"
 
 export default async function PaketWisata() {
     

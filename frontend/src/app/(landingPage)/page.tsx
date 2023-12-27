@@ -1,14 +1,10 @@
 'use client'
 
-import { IoMenu } from "react-icons/io5";
 import { BsChevronCompactLeft, BsChevronCompactRight } from 'react-icons/bs';
 import { RxDotFilled } from 'react-icons/rx';
 import { useEffect, useState } from 'react';
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { IoIosPlayCircle } from "react-icons/io";
-import { FaLocationDot } from "react-icons/fa6";
-import { FaPhoneAlt } from "react-icons/fa";
-import { IoMailSharp } from "react-icons/io5";
 import Modal from 'react-modal';
 import ReactPlayer from 'react-player';
 import { FaRegWindowClose } from "react-icons/fa";
@@ -69,31 +65,7 @@ export default function Home() {
     };
 
     return (
-        <div className='relative flex flex-wrap justify-center items-center w-full mt-16'>
-            {/* <!-- Navbar Start --> */}
-            <nav className="w-full mb-16 fixed top-0 z-50 flex items-center justify-between px-4 py-2 bg-white text-blue-800 shadow-md">
-                <div>
-                    <a href="/" className="flex gap-2">
-                        <img className="w-8 sm:w-10" src="/icon/logo.svg" alt="Icon" />
-                        <h1 className="text-xl sm:text-2xl lg:tracking-widest font-medium ">Tourism Village</h1>
-                    </a>
-                </div>
-                <div>
-                    <button type="button" className="block md:hidden">
-                        <IoMenu size={40} />
-                    </button>
-                    <div className="hidden md:block">
-                        <div className="flex gap-4 items-center text-sm">
-                            <a href="#home" className="text-blue-600 ">Home</a>
-                            <a href="#about" className="text-black hover:text-blue-500 ">About</a>
-                            <a href="#award" className="text-black hover:text-blue-500 ">Award</a>
-                            <a href="/login" className="ml-4 p-1 text-white  bg-blue-500 hover:bg-green-400">Login</a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-            {/* <!-- Navbar End --> */}
-
+        <div className='relative flex flex-wrap justify-center items-center w-full'>
             <div className='w-full lg:w-1/2 px-1 lg:h-96 h-96 m-auto relative group' id="home">
                 <div
                     style={{ backgroundImage: `url(${slides[currentIndex].url})` }}
@@ -130,7 +102,7 @@ export default function Home() {
                             Desa Wisata<br />Green Talao Park<br />(GTP) Ulakan
                         </h1>
                         <div className="flex items-center pt-4" id="root">
-                            <a href="/web" className="absolute py-3 px-5 me-5 text-white bg-blue-500 hover:bg-green-400">
+                            <a href="/explore" className="absolute py-3 px-5 me-5 text-white rounded-sm bg-blue-500 hover:bg-green-400">
                                 Explore
                             </a>
                             <button onClick={openModal}>
@@ -184,11 +156,11 @@ export default function Home() {
                                 <li className="mb-1 flex items-center"><IoCheckmarkCircleOutline className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Edukasi</li>
                                 <li className="mb-1 flex items-center"><IoCheckmarkCircleOutline className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Kuliner</li>
                             </ul>
-                            <a className="bg-blue-500 hover:bg-green-400 text-white py-3 px-5 mt-3 inline-block" href="/web">Explore</a>
+                            <a className="bg-blue-500 hover:bg-green-400 text-white rounded-sm py-3 px-5 mt-3 inline-block" href="/explore">Explore</a>
                         </div>
                         <div className="h-96 lg:w-full lg:h-full mx-4 lg:mx-0 lg:py-20 col-span-1 lg:col-span-1">
-                            <div className="w-full h-full rounded-md relative">
-                                <div className="absolute top-0 left-0 h-5/6 w-5/6 border-4 border-blue-500"></div>
+                            <div className="w-full h-full relative">
+                                <div className="absolute top-0 left-0 h-5/6 w-5/6 rounded-md border-4 border-blue-500"></div>
                                 <img className="absolute bottom-0 right-0 h-5/6 w-5/6 rounded-md object-cover" src="/landingPage/bg-about.jpg" alt="" />
                             </div>
                         </div>
@@ -217,62 +189,6 @@ export default function Home() {
                     </div>
                 </div>
             </div>
-            <div className="w-full bg-gradient-to-tr from-black via-gray-800 to-black text-white mt-10 pt-5">
-                <div className="py-5 w-full ">
-                    <div className="ml-10 xl:mx-52 grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="col-span-1 md:col-span-1">
-                            <h5 className="text-white mb-4">Address</h5>
-                            <p className="mb-2 flex">
-                                <FaLocationDot className="mr-3" style={{ fontSize: '1.8em' }} />
-                                Nagari Ulakan, Ulakan Tapakis, Kabupaten Padang Pariaman, Sumatera Barat
-                            </p>
-                            <p className="mb-2 flex">
-                                <FaPhoneAlt className="mr-3" style={{ fontSize: '1.5em' }} />
-                                082383985824
-                            </p>
-                            <p className="mb-2 flex">
-                                <IoMailSharp className="mr-3" style={{ fontSize: '1.5em' }} />
-                                adikurniawan.gtp@gmail.com
-                            </p>
-                            <div className="flex pt-2 space-x-3">
-                                <a href="https://www.instagram.com/Green_Talao_Park/">
-                                    <i className="fab fa-instagram"></i>
-                                </a>
-                                <a href="https://web.facebook.com/Ekowisata%20dan%20edukasi%20Nagari%20Ulakan?_rdc=1&_rdr">
-                                    <i className="fab fa-facebook-f"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div className="col-span-1 md:col-span-1 md:ml-52">
-                            <h5 className="text-white mb-4">Links</h5>
-                            <ul className="list-disc list-inside">
-                                <li><a href="#home">Home</a></li>
-                                <li><a href="#about">About</a></li>
-                                <li><a href="#award">Award</a></li>
-                                <li><a href="/login">Login</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div className=" w-full">
-                    <div className="row w-full">
-                        <div className="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                            &copy; <a href="#">Lathif Nur Irsyad</a>. All Right Reserved.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* <div>z
-                <div>
-                    ..
-                </div>
-                <div>
-                    <div>
-                        <img src="" alt="" />
-                    </div>
-                </div>
-            </div> */}
         </div>
     )
 }

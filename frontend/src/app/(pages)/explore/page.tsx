@@ -1,13 +1,10 @@
-'use client'
-
-import SideBar from "@/components/sideBar";
+import Map from "@/components/maps/map";
 
 export default function Explore() {
   return (
     <>
-      <div>
-        <SideBar/>
-      </div>
+      <h1>testt</h1>
+      <Map />
     </>
   )
 }

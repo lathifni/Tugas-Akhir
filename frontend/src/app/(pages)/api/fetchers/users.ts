@@ -1,4 +1,4 @@
-import useAxiosAuth from "@/libs/useAxiosAuth";
+import useAxiosAuth from "../../../../../libs/useAxiosAuth";
 
 interface User {
   id: number;
