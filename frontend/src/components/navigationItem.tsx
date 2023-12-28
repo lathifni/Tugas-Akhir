@@ -1,39 +1,8 @@
-import { BarChart, Bookmark, Calendar, ChevronDown, Files, HomeIcon, Inbox, LayoutDashboard, LayoutDashboardIcon, LogOut, MessageCircleCodeIcon, ServerIcon, Settings, User } from "lucide-react";
+import { BarChart, Bookmark, Calendar, ChevronDown, Files, Home, HomeIcon, Inbox, LayoutDashboard, LayoutDashboardIcon, LogOut, MessageCircleCodeIcon, ServerIcon, Settings, User } from "lucide-react";
 import { useState } from "react";
-
-const Menus = [
-  { title: 'Dashboard', src: 'Chart_fill', icon: <LayoutDashboardIcon /> },
-  { title: 'Inbox', src: 'Chat', icon: <Inbox /> },
-  { title: 'Accounts', src: 'User', gap: true, icon: <User /> },
-  { title: 'Schedule ', src: 'Calendar', icon: <Calendar /> },
-  {
-    title: 'Services',
-    src: 'Services',
-    icon: <ServerIcon />,
-    subMenus: [
-      {
-        title: 'Service 1',
-        src: '/services/services1',
-
-        cName: 'sub-nav',
-      },
-      {
-        title: 'Service 2',
-        src: '/services/services2',
-
-        cName: 'sub-nav',
-      },
-      {
-        title: 'Service 3',
-        src: '/services/services3',
-      },
-    ],
-  },
-  { title: 'Analytics', src: 'Chart', icon: <BarChart /> },
-  { title: 'Files ', src: 'Folder', gap: true, icon: <Files /> },
-  { title: 'Setting', src: 'Setting', icon: <Settings /> },
-  { title: 'Logout', src: 'Logout', icon: <LogOut /> },
-]
+import { faBed, faBridgeWater, faBullhorn, faFish, faHouse, faMap, faMosque, faMusic, faShip, faSquare, faSquarePollHorizontal, faStar, faUniversalAccess, faWater } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 export default function NavigationItem() {
   const subMenuAction = () => {
@@ -41,7 +10,8 @@ export default function NavigationItem() {
   }
 
   const [open, setOpen] = useState(true);
-  const [subMenuOpen, setSubMenuOpen] = useState(false);
+  const [subMenuOpenUniqueAttractions, setSubMenuOpenUniqueAttractions] = useState(false);
+  const [subMenuOpenOrdinaryAttractions, setSubMenuOpenOrdinaryAttractions] = useState(false);
   const toggleSidebar = () => {
     setOpen(!open);
   };
@@ -80,9 +50,7 @@ export default function NavigationItem() {
           <i className="bi bi-box-arrow-in-right"></i>
           <span className="text-[15px] ml-4 text-slate-600">Logout</span>
         </div> */}
-      <div
-        className={` bg-teal-800 relative duration-500`}
-      >
+      <div className={` bg-teal-800 relative duration-500`} >
         <div className=" justify-center mt-3">
           <h1
             className={`text-white  font-medium text-2xl text-center duration-200 ${!open && 'invisible'
@@ -92,133 +60,76 @@ export default function NavigationItem() {
           </h1>
         </div>
         <ul className="pt-6">
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
+            <FontAwesomeIcon icon={faHouse} />
             <span className="flex-1">Home</span>
           </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Unique Atraction</span>
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 transition-all ease-in-out duration-300`} >
+            <FontAwesomeIcon icon={faStar} />
+            <span className="flex-1">Unique Atractions</span>
             <ChevronDown
-              onClick={() => setSubMenuOpen(!subMenuOpen)}
-              className={`${subMenuOpen && 'rotate-180'}`} />
+              onClick={() => setSubMenuOpenUniqueAttractions(!subMenuOpenUniqueAttractions)}
+              className={`${subMenuOpenUniqueAttractions && 'rotate-180'}`} 
+            />
           </li>
-          { subMenuOpen && (
+          { subMenuOpenUniqueAttractions && (
           <ul>
             <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
+              <FontAwesomeIcon icon={faShip} />
               <h1>Estuary</h1>
             </li>
             <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
+              <FontAwesomeIcon icon={faBridgeWater} />
               <h1>Tracking Mangrove</h1>
             </li>
             <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
+              <FontAwesomeIcon icon={faFish} />
               <h1>Trip Pieh Island</h1>
             </li>
             <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
+              <FontAwesomeIcon icon={faMosque} />
               <h1>Makan Syeikh Burhanuddin</h1>
             </li>
           </ul>
           )}
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Ordinary Action</span>
-          </li>
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Unique Atraction</span>
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
+            <FontAwesomeIcon icon={faUniversalAccess} />
+            <span className="flex-1">Ordinary Attractions</span>
             <ChevronDown
-              onClick={() => setSubMenuOpen(!subMenuOpen)}
-              className={`${subMenuOpen && 'rotate-180'}`} />
+              onClick={() => setSubMenuOpenOrdinaryAttractions(!subMenuOpenOrdinaryAttractions)}
+              className={`${subMenuOpenOrdinaryAttractions && 'rotate-180'}`} 
+            />
           </li>
-          { subMenuOpen && (
+          { subMenuOpenOrdinaryAttractions && (
           <ul>
             <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <h1>Estuary</h1>
+              <FontAwesomeIcon icon={faWater} />
+              <h1>Water Attraction</h1>
             </li>
             <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <h1>Tracking Mangrove</h1>
-            </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <h1>Trip Pieh Island</h1>
-            </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <h1>Makan Syeikh Burhanuddin</h1>
+              <FontAwesomeIcon icon={faMusic} />
+              <h1>Culture Attraction</h1>
             </li>
           </ul>
           )}
-          <li
-            className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `}
-          >
-            <span className="flex-1">Unique Atraction</span>
-            <ChevronDown
-              onClick={() => setSubMenuOpen(!subMenuOpen)}
-              className={`${subMenuOpen && 'rotate-180'}`} />
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
+            <FontAwesomeIcon icon={faBullhorn} />
+            <span className="flex-1">Event</span>
           </li>
-          { subMenuOpen && (
-          <ul>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <h1>Estuary</h1>
-            </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <h1>Tracking Mangrove</h1>
-            </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <h1>Trip Pieh Island</h1>
-            </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <h1>Makan Syeikh Burhanuddin</h1>
-            </li>
-          </ul>
-          )}
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
+            <FontAwesomeIcon icon={faSquarePollHorizontal} />
+            <span className="flex-1">Tourism Package</span>
+          </li>
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
+            <FontAwesomeIcon icon={faBed} />
+            <span className="flex-1">Homestay</span>
+          {/* tambah untuk admin nanti yaaaaa..... */}
+          </li>
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
+            <FontAwesomeIcon icon={faMap} />
+            <span className="flex-1">Explore Ulakan</span>
+          </li>
+          {/* tambah dashboard nanti yaaaa..... */}
         </ul>
       </div>
     </div>

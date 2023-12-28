@@ -68,7 +68,7 @@ export default function NavigationTest() {
       setIsCollapsed(false);
       setIsResetting(true);
 
-      sideBarRef.current.style.width = isMobile ? "100%" : "240px";
+      sideBarRef.current.style.width = isMobile ? "100%" : "288px";
       navBarRef.current.style.setProperty(
         "width",
         isMobile ? "0" : "calc(100% - 240px)"
@@ -98,7 +98,7 @@ export default function NavigationTest() {
       <aside
         ref={sideBarRef}
         className={cn(
-          "group/sidebar h-full bg-secondary overflow-y-auto relative flex w-60 flex-col z-[99999]",
+          "group/sidebar h-full bg-secondary overflow-y-auto relative flex w-72 flex-col z-[99999]",
           isResetting && "transition-all ease-in-out duration-300",
           isMobile && "w-0"
         )}
