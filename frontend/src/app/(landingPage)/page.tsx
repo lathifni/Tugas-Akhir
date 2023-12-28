@@ -1,13 +1,9 @@
 'use client'
 
-import { BsChevronCompactLeft, BsChevronCompactRight } from 'react-icons/bs';
-import { RxDotFilled } from 'react-icons/rx';
 import { useEffect, useState } from 'react';
-import { IoCheckmarkCircleOutline } from "react-icons/io5";
-import { IoIosPlayCircle } from "react-icons/io";
 import Modal from 'react-modal';
 import ReactPlayer from 'react-player';
-import { FaRegWindowClose } from "react-icons/fa";
+import { ChevronLeft, ChevronRight, Dot, PlayCircle, SearchCheck, XSquare } from 'lucide-react';
 
 const slides = [
     {
@@ -73,11 +69,11 @@ export default function Home() {
                 ></div>
                 {/* Left Arrow */}
                 <div className='hidden group-hover:block absolute top-[50%] -translate-x-0 translate-y-[-50%] left-5 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer'>
-                    <BsChevronCompactLeft onClick={prevSlide} size={30} />
+                    <ChevronLeft onClick={prevSlide} size={30} />
                 </div>
                 {/* Right Arrow */}
                 <div className='hidden group-hover:block absolute top-[50%] -translate-x-0 translate-y-[-50%] right-5 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer'>
-                    <BsChevronCompactRight onClick={nextSlide} size={30} />
+                    <ChevronRight onClick={nextSlide} size={30} />
                 </div>
                 <div className='absolute bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center space-x-2'>
                     {slides.map((slide, slideIndex) => (
@@ -86,7 +82,7 @@ export default function Home() {
                             onClick={() => goToSlide(slideIndex)}
                             className={`text-2xl cursor-pointer ${currentIndex === slideIndex ? 'text-gray-600' : 'text-gray-200'}`}
                         >
-                            <RxDotFilled />
+                            <Dot />
                         </div>
                     ))}
                 </div>
@@ -106,7 +102,7 @@ export default function Home() {
                                 Explore
                             </a>
                             <button onClick={openModal}>
-                                <IoIosPlayCircle className='ml-32 text-5xl animate-pulse animate h-14 w-14 bg-blue-500 rounded-full text-white' />
+                                <PlayCircle className='ml-32 text-5xl animate-pulse animate h-14 w-14 bg-blue-500 rounded-full text-white' />
                             </button>
                             <Modal
                                 isOpen={isOpen}
@@ -114,7 +110,7 @@ export default function Home() {
                                 contentLabel="Video Modal"
                             >
                                 <button onClick={closeModal}>
-                                    <FaRegWindowClose className="text-5xl" style={{ color: 'red', fontSize: '2em' }} />
+                                    <XSquare className="text-5xl" style={{ color: 'red', fontSize: '2em' }} />
                                 </button>
                                 <div className="relative h-96 w-full max-w-screen-lg flex items-center justify-center">
                                     <ReactPlayer
@@ -151,10 +147,10 @@ export default function Home() {
                                 yaitu makam Syekh Burhanudin, seorang ulama besar penyiar agama islam di ranah minang dan kawasan Taman Wisata Pulau (TWP) Pieh.
                             </p>
                             <ul className="list-none mb-3 text-xs sm:text-lg">
-                                <li className="mb-1 flex items-center"><IoCheckmarkCircleOutline className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Alam</li>
-                                <li className="mb-1 flex items-center"><IoCheckmarkCircleOutline className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Budaya</li>
-                                <li className="mb-1 flex items-center"><IoCheckmarkCircleOutline className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Edukasi</li>
-                                <li className="mb-1 flex items-center"><IoCheckmarkCircleOutline className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Kuliner</li>
+                                <li className="mb-1 flex items-center"><SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Alam</li>
+                                <li className="mb-1 flex items-center"><SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Budaya</li>
+                                <li className="mb-1 flex items-center"><SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Edukasi</li>
+                                <li className="mb-1 flex items-center"><SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Wisata Kuliner</li>
                             </ul>
                             <a className="bg-blue-500 hover:bg-green-400 text-white rounded-sm py-3 px-5 mt-3 inline-block" href="/explore">Explore</a>
                         </div>

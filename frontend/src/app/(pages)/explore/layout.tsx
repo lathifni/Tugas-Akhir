@@ -1,3 +1,7 @@
+'use client'
+
+import NavigationTest from "@/components/navigation";
+import SideBar from "@/components/sideBar";
 
 export default function ExploreLayout({
   children,
@@ -6,7 +10,9 @@ export default function ExploreLayout({
 }) {
   return (
     <div className="h-full flex">
-      <main className="flex-1 h-full overflow-y-auto">
+      {/* <SideBar/> */}
+      <NavigationTest/>
+      <main className="flex-1 h-full overflow-y-auto bg-slate-100">
         {children}
       </main>
     </div>

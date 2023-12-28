@@ -1,6 +1,4 @@
-import { FaLocationDot } from "react-icons/fa6";
-import { FaPhoneAlt } from "react-icons/fa";
-import { IoMailSharp } from "react-icons/io5";
+import { MailOpen, MapPin, Phone } from "lucide-react";
 
 export default function FooterLandingPage() {
   return (
@@ -10,15 +8,15 @@ export default function FooterLandingPage() {
           <div className="col-span-1 md:col-span-1">
             <h5 className="text-white mb-4">Address</h5>
             <p className="mb-2 flex">
-              <FaLocationDot className="mr-3" style={{ fontSize: '1.8em' }} />
+              <MapPin className="mr-3" style={{ fontSize: '1.8em' }} />
               Nagari Ulakan, Ulakan Tapakis, Kabupaten Padang Pariaman, Sumatera Barat
             </p>
             <p className="mb-2 flex">
-              <FaPhoneAlt className="mr-3" style={{ fontSize: '1.5em' }} />
+              <Phone className="mr-3" style={{ fontSize: '1.5em' }} />
               082383985824
             </p>
             <p className="mb-2 flex">
-              <IoMailSharp className="mr-3" style={{ fontSize: '1.5em' }} />
+              <MailOpen className="mr-3" style={{ fontSize: '1.5em' }} />
               adikurniawan.gtp@gmail.com
             </p>
             <div className="flex pt-2 space-x-3">

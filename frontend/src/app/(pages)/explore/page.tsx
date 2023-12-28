@@ -5,6 +5,9 @@ export default function Explore() {
     <>
       <h1>testt</h1>
       <Map />
+      {/* <Map />
+      <Map />
+      <Map /> */}
     </>
   )
 }
