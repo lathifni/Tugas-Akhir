@@ -4,7 +4,7 @@ export default function Explore() {
   return (
     <>
       <h1>testt</h1>
-      <Map />
+      {/* <Map /> */}
       {/* <Map />
       <Map />
       <Map /> */}

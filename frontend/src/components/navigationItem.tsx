@@ -59,13 +59,13 @@ export default function NavigationItem() {
             LOGO
           </h1>
         </div>
-        <ul className="pt-6">
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
-            <FontAwesomeIcon icon={faHouse} />
+        <ul className="pt-6 px-3 font-medium text-base">
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4 mb-2`} >
+            <FontAwesomeIcon icon={faHouse} style={{ fontSize: '1.3em' }}/>
             <span className="flex-1">Home</span>
           </li>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 transition-all ease-in-out duration-300`} >
-            <FontAwesomeIcon icon={faStar} />
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4 mb-2`} >
+            <FontAwesomeIcon icon={faStar} style={{ fontSize: '1.3em' }}/>
             <span className="flex-1">Unique Atractions</span>
             <ChevronDown
               onClick={() => setSubMenuOpenUniqueAttractions(!subMenuOpenUniqueAttractions)}
@@ -74,26 +74,34 @@ export default function NavigationItem() {
           </li>
           { subMenuOpenUniqueAttractions && (
           <ul>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <FontAwesomeIcon icon={faShip} />
-              <h1>Estuary</h1>
+            <li className="flex rounded-md ml-5 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+              <div className="flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+                <FontAwesomeIcon icon={faShip} style={{ fontSize: '1.3em' }}/>
+                <h1 className="">Estuary</h1>
+              </div>
             </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <FontAwesomeIcon icon={faBridgeWater} />
-              <h1>Tracking Mangrove</h1>
+            <li className="flex rounded-md ml-5 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+              <div className="flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+                <FontAwesomeIcon icon={faBridgeWater}style={{ fontSize: '1.3em' }} />
+                <h1>Tracking Mangrove</h1>
+              </div>
             </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <FontAwesomeIcon icon={faFish} />
-              <h1>Trip Pieh Island</h1>
+            <li className="flex rounded-md ml-5 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+              <div className="flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+                <FontAwesomeIcon icon={faFish} style={{ fontSize: '1.3em' }}/>
+                <h1>Trip Pieh Island</h1>
+              </div>
             </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <FontAwesomeIcon icon={faMosque} />
-              <h1>Makan Syeikh Burhanuddin</h1>
+            <li className="flex rounded-md ml-5 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+              <div className="flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+                <FontAwesomeIcon icon={faMosque} style={{ fontSize: '1.3em' }}/>
+                <h1>Makan Syeikh Burhanuddin</h1>
+              </div>
             </li>
           </ul>
           )}
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
-            <FontAwesomeIcon icon={faUniversalAccess} />
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4 mb-2`} >
+            <FontAwesomeIcon icon={faUniversalAccess} style={{ fontSize: '1.3em' }}/>
             <span className="flex-1">Ordinary Attractions</span>
             <ChevronDown
               onClick={() => setSubMenuOpenOrdinaryAttractions(!subMenuOpenOrdinaryAttractions)}
@@ -102,31 +110,35 @@ export default function NavigationItem() {
           </li>
           { subMenuOpenOrdinaryAttractions && (
           <ul>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <FontAwesomeIcon icon={faWater} />
-              <h1>Water Attraction</h1>
+            <li className="flex rounded-md ml-5 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+              <div className="flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+                <FontAwesomeIcon icon={faWater} style={{ fontSize: '1.3em' }}/>
+                <h1>Water Attraction</h1>
+              </div>
             </li>
-            <li className="flex px-5 cursor-pointer text-center text-sm text-gray-200 py-1">
-              <FontAwesomeIcon icon={faMusic} />
-              <h1>Culture Attraction</h1>
+            <li className="flex rounded-md ml-5 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+              <div className="flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4">
+                <FontAwesomeIcon icon={faMusic} style={{ fontSize: '1.3em' }}/>
+                <h1>Culture Attraction</h1>
+              </div>
             </li>
           </ul>
           )}
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
-            <FontAwesomeIcon icon={faBullhorn} />
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4 mb-2`} >
+            <FontAwesomeIcon icon={faBullhorn} style={{ fontSize: '1.3em' }}/>
             <span className="flex-1">Event</span>
           </li>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
-            <FontAwesomeIcon icon={faSquarePollHorizontal} />
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4 mb-2`} >
+            <FontAwesomeIcon icon={faSquarePollHorizontal} style={{ fontSize: '1.3em' }}/>
             <span className="flex-1">Tourism Package</span>
           </li>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4 mb-2`} >
             <FontAwesomeIcon icon={faBed} />
             <span className="flex-1">Homestay</span>
           {/* tambah untuk admin nanti yaaaaa..... */}
           </li>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white text-sm items-center gap-x-4 `} >
-            <FontAwesomeIcon icon={faMap} />
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-teal-400 text-white items-center gap-x-4 mb-2`} >
+            <FontAwesomeIcon icon={faMap} style={{ fontSize: '1.3em' }}/>
             <span className="flex-1">Explore Ulakan</span>
           </li>
           {/* tambah dashboard nanti yaaaa..... */}
