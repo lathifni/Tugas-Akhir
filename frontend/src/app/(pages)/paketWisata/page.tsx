@@ -1,12 +1,12 @@
 'use client'
 
-import SideBar from "@/components/sideBarTest"
+// import SideBar from "@/components/sideBarTest"
 
 export default async function PaketWisata() {
     
     return (
         <div>
-            <SideBar/>
+            {/* <SideBar/> */}
         </div>
     )
 }
