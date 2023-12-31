@@ -113,12 +113,8 @@ export default function NavigationTest() {
         >
           <ChevronsLeft className="h-6 w-6" />
         </div>
-        <div className=" pt-4">
-            <NavigationHeader />
-        </div>
-        <div className="mt-4">
-          <NavigationItem />
-        </div>
+        <NavigationHeader />
+        <NavigationItem />
         <div
           onMouseDown={handleMouseDown}
           onClick={resetWidth}
@@ -135,7 +131,7 @@ export default function NavigationTest() {
         )}
       >
         <nav className="bg-transparent px-3 py-2 w-full">
-          {isCollapsed && <MenuIcon onClick={resetWidth} role="button" className="h-6 w-6 text-muted-foreground" />}
+          {isCollapsed && <MenuIcon onClick={resetWidth} role="button" className="h-8 w-8" />}
         </nav>
       </div>
     </>

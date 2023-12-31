@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import Image from 'next/image';
 
 export default function Form() {
    const [emailOrUsername, setEmailOrUsername] = useState('');
@@ -24,7 +23,7 @@ export default function Form() {
          if (res?.error) {
             setErrorLogin('Invalid Email/Username or Password');
          } else {
-             router.replace('/users');
+             router.replace('/');
           }
       } catch (error: any) {
          setErrorLogin(error)
@@ -33,35 +32,12 @@ export default function Form() {
 
    const handleSignInGoogle = () => {
       signIn('google', {
-         callbackUrl: '/users'
+         callbackUrl: '/'
       })
    }
 
    return (
       <>
-         {/* <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-2 mx-auto max-w-md mt-10"
-      >
-      <input
-        name="emailOrUsername"
-        id="emailOrUsername"
-        className="border border-black text-black"
-        value={emailOrUsername}
-        onChange={(e) => setEmailOrUsername(e.target.value)}
-        type="text"
-        />
-      <input
-        name="password"
-        id='password'
-        className="border border-black  text-black"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        type="password"
-        />
-      <button type="submit">Login</button>
-    </form>
-    <button onClick={loginGoogle}>ke Google</button> */}
          <section className="flex flex-col md:flex-row h-screen items-center">
             <div className="bg-indigo-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
                <img

@@ -2,29 +2,22 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { faBed, faBridgeWater, faBullhorn, faFish, faHouse, faMap, faMosque, faMusic, faShip, faSquarePollHorizontal, faStar, faUniversalAccess, faWater } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { } from '@fortawesome/free-solid-svg-icons'
-// import { icon } from "@fortawesome/fontawesome-svg-core/import.macro";
+import Link from "next/link";
 
 export default function NavigationItem() {
-  const subMenuAction = () => {
-    return;
-  }
-
-  const [open, setOpen] = useState(true);
   const [subMenuOpenUniqueAttractions, setSubMenuOpenUniqueAttractions] = useState(false);
   const [subMenuOpenOrdinaryAttractions, setSubMenuOpenOrdinaryAttractions] = useState(false);
-  const toggleSidebar = () => {
-    setOpen(!open);
-  };
 
   return (
-    <div>
+    <>
       <div className={`relative duration-500 select-none text-slate-700`} >
         <ul className="pt-6 px-3 font-medium text-base">
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
-            <FontAwesomeIcon icon={faHouse} style={{ fontSize: '1.3em' }} />
-            <span className="flex-1">Home</span>
-          </li>
+          <Link href={"/explore"}>
+            <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faHouse} style={{ fontSize: '1.3em' }} />
+              <span className="flex-1">Home</span>
+            </li>
+          </Link>
           <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
             <FontAwesomeIcon icon={faStar} style={{ fontSize: '1.3em' }} />
             <span className="flex-1">Unique Atractions</span>
@@ -85,10 +78,12 @@ export default function NavigationItem() {
               </li>
             </ul>
           )}
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
-            <FontAwesomeIcon icon={faBullhorn} style={{ fontSize: '1.3em' }} />
-            <span className="flex-1">Event</span>
-          </li>
+          <Link href={"/explore/event"} >
+            <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faBullhorn} style={{ fontSize: '1.3em' }} />
+              <span className="flex-1">Event</span>
+            </li>
+          </Link>
           <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
             <FontAwesomeIcon icon={faSquarePollHorizontal} style={{ fontSize: '1.3em' }} />
             <span className="flex-1">Tourism Package</span>
@@ -104,17 +99,21 @@ export default function NavigationItem() {
           </li>
           {/* tambah dashboard nanti yaaaa..... */}
           <li className={`flex rounded-md p-2 cursor-pointer items-center gap-x-4 mb-2`} >
-            <div className="flex flex-1 hover:bg-slate-300 p-2 rounded-lg justify-center">
-              <img className="w-4" src="/icon/instagram.svg" alt="IconInstagram" />
-              <h1 className="pl-2 text-sm font-medium ">Instagram</h1>
-            </div>
-            <div className="flex flex-1 hover:bg-slate-300 p-2 rounded-lg justify-center">
-              <img className="w-4 " src="/icon/tiktok.svg" alt="IconTikTok"/>
-              <h1 className="pl-2 text-sm font-medium ">Tik Tok</h1>
-            </div>
+            <a href="https://www.instagram.com/green_talao_park/" className="flex-1" target="_blank">
+              <div className="flex hover:bg-slate-300 p-2 rounded-lg justify-center">
+                <img className="w-4" src="/icon/instagram.svg" alt="IconInstagram" />
+                <h1 className="pl-2 text-sm font-medium ">Instagram</h1>
+              </div>
+            </a>
+            <a href="https://www.tiktok.com/@greentalaopark009" className="flex-1" target="_blank">
+              <div className="flex hover:bg-slate-300 p-2 rounded-lg justify-center">
+                <img className="w-4 " src="/icon/tiktok.svg" alt="IconTikTok" />
+                <h1 className="pl-2 text-sm font-medium ">Tik Tok</h1>
+              </div>
+            </a>
           </li>
         </ul>
       </div>
-    </div>
+    </>
   )
 }

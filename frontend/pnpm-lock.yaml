@@ -32,6 +32,9 @@ dependencies:
   '@tanstack/react-query-devtools':
     specifier: ^5.14.5
     version: 5.14.5(@tanstack/react-query@5.14.2)(react@18.2.0)
+  '@types/google.maps':
+    specifier: ^3.54.10
+    version: 3.54.10
   '@types/react-modal':
     specifier: ^3.16.3
     version: 3.16.3
@@ -766,6 +769,10 @@ packages:
     dependencies:
       '@tanstack/query-core': 5.14.2
       react: 18.2.0
+    dev: false
+
+  /@types/google.maps@3.54.10:
+    resolution: {integrity: sha512-N6gwM01mKhooXaw+IKbUH7wJcIJCn8U60VoaVvom5EiQjmfgevhQ+0+/r17beXW5j8ad2x+WPr0iyOUodCw4/w==}
     dev: false
 
   /@types/json5@0.0.29:

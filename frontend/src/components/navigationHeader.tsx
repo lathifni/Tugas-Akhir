@@ -28,11 +28,11 @@ export default function NavigationHeader() {
   if (isLoading) return <div>Loading...</div>
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col mt-3 items-center justify-center">
       <motion.div className=''>
         <a href="/" className="flex gap-2">
           <img className="w-8" src="/icon/logo.svg" alt="Icon" />
-          <h1 className="text-base lg:tracking-widest font-medium ">Green Talao Park</h1>
+          <h1 className="text-base lg:tracking-widest font-medium ">Village Tourism</h1>
         </a>
       </motion.div>
       <motion.div

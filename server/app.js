@@ -21,6 +21,8 @@ app.use(cors(corsOptions))
 app.use('/users', router.users);
 app.use('/oauth2', router.oauthGoogle)
 app.use('/auth', router.auth)
+app.use('/gtp', router.gtp)
+app.use('/galleries', router.galeries)
 
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
