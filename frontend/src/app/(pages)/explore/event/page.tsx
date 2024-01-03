@@ -1,12 +1,12 @@
 'use client'
 
 import Map from "@/components/maps/map";
-import { ChevronLeft, ChevronRight, Dot, Eye, Goal, MapPin } from "lucide-react";
+import { Eye, Goal, MapPin } from "lucide-react";
 import { fetchGalleriesGtp } from "../../api/fetchers/galleries";
 import { useQuery } from "@tanstack/react-query";
 import { fetchInfoGtp } from "../../api/fetchers/gtp";
 import { Key, useEffect, useState } from "react";
-import MapCopy from "@/components/maps/map copy";
+import MapEvent from "@/components/maps/mapEvent";
 
 export default function Event() {
   //   const { isError, isSuccess, isLoading, data, error } = useQuery({
@@ -55,8 +55,7 @@ export default function Event() {
             </div>
           </div>
           <div className=" pb-5">
-            {/* <Map /> */}
-            <MapCopy />
+            <MapEvent />
           </div>
         </div>
         <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
@@ -64,7 +63,22 @@ export default function Event() {
             <h1 className="">List Event</h1>
           </div>
           <div className="w-full px-5">
-            <h1>test</h1>
+            <table>
+              {/* <thead>
+                <tr>
+                  <td>#</td>
+                  <td>Name</td>
+                  <td>Action</td>
+                </tr>
+                <tbody>
+                  <tr>
+                  <td>1</td>
+                  <td>test namanya</td>
+                  <td>infonya</td>
+                  </tr>
+                </tbody>
+              </thead> */}
+            </table>
           </div>
         </div>
       </div>

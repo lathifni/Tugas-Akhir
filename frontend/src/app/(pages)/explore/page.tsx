@@ -6,7 +6,7 @@ import { fetchGalleriesGtp } from "../api/fetchers/galleries";
 import { useQuery } from "@tanstack/react-query";
 import { fetchInfoGtp } from "../api/fetchers/gtp";
 import { Key, useEffect, useState } from "react";
-import MapCopy from "@/components/maps/map copy";
+import MapCopy from "@/components/maps/mapEvent";
 
 export default function Explore() {
   //   const { isError, isSuccess, isLoading, data, error } = useQuery({

@@ -23,6 +23,8 @@ app.use('/oauth2', router.oauthGoogle)
 app.use('/auth', router.auth)
 app.use('/gtp', router.gtp)
 app.use('/galleries', router.galeries)
+app.use('/event', router.event)
+app.use('/village', router.village)
 
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
