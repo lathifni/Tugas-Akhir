@@ -8,8 +8,21 @@ import ObjectAroundSection from "./_components/objectAround";
 import { useQuery } from "@tanstack/react-query";
 import { fetchListGeomCulinary } from "../../api/fetchers/culinary";
 import { fetchListGeomWorship } from "../../api/fetchers/worhsip";
+import { fetchListGeomSouvenir } from "../../api/fetchers/souvenir";
+import { fetchListGeomHomestay } from "../../api/fetchers/homestay";
 
 interface UserLocation {
+  lat: number;
+  lng: number;
+}
+
+interface dataListGeom {
+  id: string;
+  name: string;
+  address: string
+  contact_person: string | null;
+  capacity: number | null;
+  status: number | null;
   lat: number;
   lng: number;
 }
@@ -19,10 +32,10 @@ export default function Ulakan() {
   const [objectId, setObjectId] = useState<number | null>(null);
   const [listExploreUlakan, setListExploreUlakan] = useState(true);
   const [typeMap, setTypeMap] = useState('')
-  const [dataTypeMap, setDataTypeMap] = useState('')
+  const [dataTypeMap, setDataTypeMap] = useState<dataListGeom[] | null>(null)
 
   const queryMutiple = () => {
-    const resGeomWorship = useQuery({
+    const resListGeomWorship = useQuery({
       queryKey: ['geomWorship'],
       queryFn: fetchListGeomWorship
     })
@@ -30,12 +43,22 @@ export default function Ulakan() {
       queryKey: ['listGeomCulinary'],
       queryFn: fetchListGeomCulinary,
     })
-    return [resGeomWorship, resListGeomCulinary]
+    const resListGeomSouvenir = useQuery({
+      queryKey: ['geomSouvenir'],
+      queryFn: fetchListGeomSouvenir
+    })
+    const resListGeomHomestay = useQuery({
+      queryKey: ['listGeomHomestay'],
+      queryFn: fetchListGeomHomestay
+    })
+    return [resListGeomWorship, resListGeomCulinary, resListGeomSouvenir, resListGeomHomestay]
   }
 
   const [
     { isLoading: loadingListGeomWorship, data: dataListGeomWorship },
-    { isLoading: loadingListGeomCulinary, data: dataListGeomCulinary }
+    { isLoading: loadingListGeomCulinary, data: dataListGeomCulinary },
+    { isLoading: loadingListGeomSouvenir, data: dataListGeomSouvenir },
+    { isLoading: loadingListGeomHomestay, data: dataListGeomHomestay }
   ] = queryMutiple()  
 
   const [objectAroundState, setObjectAroundState] = useState<any>({
@@ -49,7 +72,8 @@ export default function Ulakan() {
     setTypeMap(type)
     if (type === 'culinary') setDataTypeMap(dataListGeomCulinary)
     else if (type === 'worship') setDataTypeMap(dataListGeomWorship)
-    else console.log('lainnya nihhh');
+    else if (type === 'souvenir') setDataTypeMap(dataListGeomSouvenir)
+    else setDataTypeMap(dataListGeomHomestay)
   };
 
   const handleObjectAroundStateChange = (newState: any) => {
@@ -124,7 +148,7 @@ export default function Ulakan() {
             </div>
           </div>
           <div className=" pb-5">
-            <MapExploreUlakan userLocation={userLocation} goToObjectId={objectId} showMapForType={typeMap} />
+            <MapExploreUlakan userLocation={userLocation} goToObjectId={objectId} showMapForType={typeMap} dataMapforType={dataTypeMap} />
           </div>
         </div>
         {listExploreUlakan ? (

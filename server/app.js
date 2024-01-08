@@ -27,6 +27,8 @@ app.use('/event', router.event)
 app.use('/village', router.village)
 app.use('/culinary', router.culinary)
 app.use('/worship', router.worship)
+app.use('/homestay', router.homestay)
+app.use('/souvenir', router.souvenir)
 
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
