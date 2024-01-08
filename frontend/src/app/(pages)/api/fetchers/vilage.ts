@@ -4,3 +4,8 @@ export const fetchListVillage = async () => {
   const res = await useAxiosAuth.get('/village')
   return res.data.data
 }
+
+export const fetchUlakanVillage = async() => {
+  const res = await useAxiosAuth.get('village/ulakan')
+  return res.data.data
+}

@@ -1,4 +1,5 @@
-export default function EventLayout({
+
+export default function UlakanLayout({
   children,
 }: {
   children: React.ReactNode;

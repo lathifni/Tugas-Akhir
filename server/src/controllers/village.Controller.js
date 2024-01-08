@@ -1,7 +1,11 @@
-const { listVillage } = require("../services/village")
+const { listVillage, getUlakanVillage } = require("../services/village")
 
 const listVillageController = async() => {
   return await listVillage()
 }
 
-module.exports = { listVillageController, }
+const getUlakanVillageController = async() => {
+  return await getUlakanVillage()
+}
+
+module.exports = { listVillageController, getUlakanVillageController, }

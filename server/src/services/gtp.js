@@ -5,4 +5,9 @@ const getInfo = async() => {
   return rows[0]
 }
 
-module.exports = { getInfo, }
+const getGeom = async() => {
+  const [rows] = await promisePool.query(`SELECT ST_AsGeoJSON(geom) AS geom FROM gtp`)
+  return rows
+}
+
+module.exports = { getInfo, getGeom, }

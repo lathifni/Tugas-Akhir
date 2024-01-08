@@ -1,0 +1,149 @@
+//  if (dataListGeomCulinary && Array.isArray(dataListGeomCulinary)) {
+    //   dataListGeomCulinary.forEach((item: { id: string, name: string, address: string, status: number, contact_person: string, lat: GLfloat, lng: GLfloat }) => {
+    //     const { id, name, address, contact_person, lat, lng, status } = item;
+    //     const marker = new google.maps.Marker({
+    //       map: map,
+    //       position: { lat: lat, lng: lng },
+    //       animation: google.maps.Animation.DROP,
+    //       icon: status === 1 ? '/icon/cpgtp.png' : '/icon/culinary.png'
+    //     });
+    //     marker.addListener('click', () => {
+    //       new google.maps.InfoWindow({
+    //         content: `
+    //             <h3>${name}</h3>
+    //             <p>${address}</p>
+    //             <p>${contact_person}</p>
+    //           `
+    //       }).open(map, marker);
+    //     });
+    //     markerArray[id] = marker
+    //   });
+    // }
+
+    // dataListGeomCulinary.forEach((item: { id: string, name: string, address: string, status: number, contact_person: string, lat: GLfloat, lng: GLfloat }) => {
+    //   const { id, name, address, contact_person, lat, lng, status } = item;
+    //   const pos = new google.maps.LatLng(lat, lng)
+    //   const marker = new google.maps.Marker();
+
+    //   const markerOptions = {
+    //     position: pos,
+    //     map: map,
+    //     animation: google.maps.Animation.DROP,
+    //     icon: status === 1 ? '/icon/cpgtp.png' : '/icon/culinary.png'
+    //   }
+    //   marker.setOptions(markerOptions)
+    //   marker.addListener('click', () => {
+    //     infoWindow.close()
+    //     infoWindow.setContent(`
+    //         <h3>${name}</h3>
+    //         <p>${address}</p>
+    //         <p>${contact_person}</p>
+    //         `)
+    //     infoWindow.open(map, marker)
+    //   });
+    //   markerArray[id] = marker
+    // });
+
+    // if (Object.keys(markerArray).length > 0) {
+    //   const bounds = new google.maps.LatLngBounds();
+    //   for (const i in markerArray) {
+    //     const positionArray = markerArray[i].getPosition();
+    //     // console.log(positionArray?.toString());
+
+    //     if (positionArray) { // Periksa apakah position valid
+    //       bounds.extend(positionArray);
+    //     }
+    //   }
+    //   map.fitBounds(bounds);
+    // }
+
+    // if (Object.keys(markerArray).length > 0) {
+
+    //   const bounds = new google.maps.LatLngBounds();
+    //   for (const i in markerArray) {
+    //     const positionArray = markerArray[i].getPosition();
+    //     console.log(positionArray?.toString());
+
+    //     if (positionArray) { // Periksa apakah position valid
+    //       bounds.extend(positionArray);
+    //     }
+    //   }
+    //   console.log('testtttttt');
+    //   map.fitBounds(bounds);
+    // }
+
+    // useEffect(() => {
+  //   if (userLocation !== undefined && userLocation !== null && map !== null) {
+  //     console.log('ini user location useeffect');
+
+  //     const userMarker = new google.maps.Marker({
+  //       map: map,
+  //       position: userLocation,
+  //       animation: google.maps.Animation.DROP,
+  //       // Anda dapat menambahkan ikon khusus atau animasi lain untuk marker pengguna jika Anda inginkan.
+  //     });
+  //     const userWindow = new google.maps.InfoWindow({
+  //       content: 'You are here'
+  //     });
+
+  //     userWindow.setPosition({ lat: userLocation.lat + 0.0008, lng: userLocation.lng });
+  //     userWindow.open(map);
+  //     map.setCenter(userLocation);
+  //     map.setZoom(20)
+  //     console.log(userLocation);
+
+  //   }
+  // }, [userLocation])
+
+  // useEffect(() => {
+  //   if (goToObjectId == 1 && map !== null) {
+  //     console.log('sedang pindahin');
+
+  //   }
+  // }, [goToObjectId]);
+
+  export default function name() {
+    // useEffect(() => {
+    //   if (map !== null && dataListGeomCulinary) {
+    //     dataListGeomCulinary.forEach((item: { id: string, name: string, address: string, status: number, contact_person: string, lat: GLfloat, lng: GLfloat }) => {
+    //       const { id, name, address, contact_person, lat, lng, status } = item;
+    //       const pos = new google.maps.LatLng(lat, lng)
+    //       const marker = new google.maps.Marker();
+  
+    //       const markerOptions = {
+    //         position: pos,
+    //         map: map,
+    //         animation: google.maps.Animation.DROP,
+    //         icon: status === 1 ? '/icon/cpgtp.png' : '/icon/culinary.png'
+    //       }
+    //       marker.setOptions(markerOptions)
+    //       marker.addListener('click', () => {
+    //         new google.maps.InfoWindow({
+    //           content: `
+    //           <h3>${name}</h3>
+    //           <p>${address}</p>
+    //           <p>${contact_person}</p>
+    //           `
+    //         })
+    //       });
+    //       markerArray[id] = marker
+    //     });
+  
+    //     if (Object.keys(markerArray).length > 0) {
+    //       const bounds = new google.maps.LatLngBounds();
+    //       for (const i in markerArray) {
+    //         const positionArray = markerArray[i].getPosition();
+    //         // console.log(positionArray?.toString());
+  
+    //         if (positionArray) { // Periksa apakah position valid
+    //           bounds.extend(positionArray);
+    //         }
+    //       }
+    //       map.fitBounds(bounds);
+    //     }
+    //   }
+    // }, [map, dataListGeomCulinary])
+    return (
+      null
+    )
+  }

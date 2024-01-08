@@ -1,4 +1,4 @@
-const { getInfoController } = require("../controllers/gtpController");
+const { getInfoController, getGeomController } = require("../controllers/gtpController");
 
 const getInfoHandler = async (req, res) => {
   try {
@@ -11,4 +11,14 @@ const getInfoHandler = async (req, res) => {
   }
 };
 
-module.exports = { getInfoHandler, }
+const getGeomHandler = async (req, res) => {
+  try {
+    const geom = await getGeomController()
+
+    return res.status(200).send({ status:'success', data: geom })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { getInfoHandler, getGeomHandler, }

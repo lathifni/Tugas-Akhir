@@ -1,7 +1,11 @@
-const { getInfo } = require("../services/gtp")
+const { getInfo, getGeom } = require("../services/gtp")
 
 const getInfoController = async(payload) => {
   return getInfo()
 }
 
-module.exports = { getInfoController, }
+const getGeomController = async() => {
+  return await getGeom()
+}
+
+module.exports = { getInfoController, getGeomController, }

@@ -1,37 +1,23 @@
 'use client'
 
-import Map from "@/components/maps/map";
 import { Eye, Goal, MapPin } from "lucide-react";
-import { fetchGalleriesGtp } from "../../api/fetchers/galleries";
 import { useQuery } from "@tanstack/react-query";
-import { fetchInfoGtp } from "../../api/fetchers/gtp";
 import { Key, useEffect, useState } from "react";
 import MapEvent from "@/components/maps/mapEvent";
+import { fetchListEvent } from "../../api/fetchers/event";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfo } from "@fortawesome/free-solid-svg-icons";
 
 export default function Event() {
-  //   const { isError, isSuccess, isLoading, data, error } = useQuery({
-  //     queryKey: ['galleriesGtp'],
-  //     queryFn: fetchGalleriesGtp,
-  //  })
-
-  const queryMutiple = () => {
-    const resGalleries = useQuery({
-      queryKey: ['galleriesGtp'],
-      queryFn: fetchGalleriesGtp,
-    })
-    const resInfo = useQuery({
-      queryKey: ['infoGtp'],
-      queryFn: fetchInfoGtp
-    })
-    return [resGalleries, resInfo]
-  }
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const [
-    { isLoading: loadingGalleries, data: dataGalleries },
-    { isLoading: loadingInfo, data: dataInfo }
-  ] = queryMutiple()
+  const [selectedEventId, setSelectedEventId] = useState('');
+  const { isError, isSuccess, isLoading, data, error } = useQuery({
+    queryKey: ['listEvent'],
+    queryFn: fetchListEvent,
+  })
+  const handleShowInfoWindow = (eventId: string) => {
+    setSelectedEventId(eventId);
+    console.log('idnya', selectedEventId);
+  };
 
   return (
     <>
@@ -55,7 +41,7 @@ export default function Event() {
             </div>
           </div>
           <div className=" pb-5">
-            <MapEvent />
+            <MapEvent selectedEventId={selectedEventId} /> 
           </div>
         </div>
         <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
@@ -63,21 +49,27 @@ export default function Event() {
             <h1 className="">List Event</h1>
           </div>
           <div className="w-full px-5">
-            <table>
-              {/* <thead>
+            <table className="w-full mt-5 m-5">
+              <thead>
                 <tr>
                   <td>#</td>
                   <td>Name</td>
                   <td>Action</td>
                 </tr>
-                <tbody>
-                  <tr>
-                  <td>1</td>
-                  <td>test namanya</td>
-                  <td>infonya</td>
+              </thead>
+              <tbody>
+                {data?.map((event: { id:string, name: string }, index:number) => (
+                  <tr key={event.id}>
+                    <td>{index + 1}</td>
+                    <td>{event.name}</td>
+                    <td>
+                      <button className="bg-blue-500 rounded-lg py-1 px-3 hover:bg-blue-600" onClick={() => handleShowInfoWindow(event.id)}>
+                        <FontAwesomeIcon icon={faInfo} style={{ color: 'white' }} />
+                      </button>
+                    </td>
                   </tr>
-                </tbody>
-              </thead> */}
+                ))}
+              </tbody>
             </table>
           </div>
         </div>

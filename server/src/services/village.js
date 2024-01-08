@@ -5,4 +5,9 @@ const listVillage = async() => {
   return rows
 }
 
-module.exports = { listVillage, }
+const getUlakanVillage = async() => {
+  const [rows] = await promisePool.query(`SELECT name, ST_AsGeoJSON(geom) AS geom FROM village WHERE name='Ulakan'`)
+  return rows
+}
+
+module.exports = { listVillage, getUlakanVillage, }

@@ -1,4 +1,5 @@
-export default function EventLayout({
+
+export default function EventIdLayout({
   children,
 }: {
   children: React.ReactNode;

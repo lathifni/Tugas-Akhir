@@ -28,30 +28,38 @@ export default function NavigationItem() {
           </li>
           {subMenuOpenUniqueAttractions && (
             <ul>
-              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                  <FontAwesomeIcon icon={faShip} style={{ fontSize: '1.3em' }} />
-                  <h1 className="">Estuary</h1>
-                </div>
-              </li>
-              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                  <FontAwesomeIcon icon={faBridgeWater} style={{ fontSize: '1.3em' }} />
-                  <h1>Tracking Mangrove</h1>
-                </div>
-              </li>
-              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                  <FontAwesomeIcon icon={faFish} style={{ fontSize: '1.3em' }} />
-                  <h1>Trip Pieh Island</h1>
-                </div>
-              </li>
-              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                  <FontAwesomeIcon icon={faMosque} style={{ fontSize: '1.3em' }} />
-                  <h1>Makan Syeikh Burhanuddin</h1>
-                </div>
-              </li>
+              <Link href={'/explore/estuary'}>
+                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                  <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                    <FontAwesomeIcon icon={faShip} style={{ fontSize: '1.3em' }} />
+                    <h1 className="">Estuary</h1>
+                  </div>
+                </li>
+              </Link>
+              <Link href={'/explore/tracking'}>
+                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                  <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                    <FontAwesomeIcon icon={faBridgeWater} style={{ fontSize: '1.3em' }} />
+                    <h1>Tracking Mangrove</h1>
+                  </div>
+                </li>
+              </Link>
+              <Link href={'/explore/trip'}>
+                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                  <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                    <FontAwesomeIcon icon={faFish} style={{ fontSize: '1.3em' }} />
+                    <h1>Trip Pieh Island</h1>
+                  </div>
+                </li>
+              </Link>
+              <Link href={'/explore/makam'}>
+                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                  <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                    <FontAwesomeIcon icon={faMosque} style={{ fontSize: '1.3em' }} />
+                    <h1>Makan Syeikh Burhanuddin</h1>
+                  </div>
+                </li>
+              </Link>
             </ul>
           )}
           <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
@@ -64,18 +72,22 @@ export default function NavigationItem() {
           </li>
           {subMenuOpenOrdinaryAttractions && (
             <ul>
+              <Link href={'/explore/water'}>
               <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                 <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                   <FontAwesomeIcon icon={faWater} style={{ fontSize: '1.3em' }} />
                   <h1>Water Attraction</h1>
                 </div>
               </li>
+              </Link>
+              <Link href={'/explore/culture'}>
               <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                 <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                   <FontAwesomeIcon icon={faMusic} style={{ fontSize: '1.3em' }} />
                   <h1>Culture Attraction</h1>
                 </div>
               </li>
+              </Link>
             </ul>
           )}
           <Link href={"/explore/event"} >
@@ -84,19 +96,25 @@ export default function NavigationItem() {
               <span className="flex-1">Event</span>
             </li>
           </Link>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
-            <FontAwesomeIcon icon={faSquarePollHorizontal} style={{ fontSize: '1.3em' }} />
-            <span className="flex-1">Tourism Package</span>
-          </li>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
-            <FontAwesomeIcon icon={faBed} />
-            <span className="flex-1">Homestay</span>
-            {/* tambah untuk admin nanti yaaaaa..... */}
-          </li>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
-            <FontAwesomeIcon icon={faMap} style={{ fontSize: '1.3em' }} />
-            <span className="flex-1">Explore Ulakan</span>
-          </li>
+          <Link href={'/explore/tourism'}>
+            <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faSquarePollHorizontal} style={{ fontSize: '1.3em' }} />
+              <span className="flex-1">Tourism Package</span>
+            </li>
+          </Link>
+          <Link href={'/explore/homestay'}>
+            <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faBed} />
+              <span className="flex-1">Homestay</span>
+              {/* tambah untuk admin nanti yaaaaa..... */}
+            </li>
+          </Link>
+          <Link href={'/explore/ulakan'}>
+            <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faMap} style={{ fontSize: '1.3em' }} />
+              <span className="flex-1">Explore Ulakan</span>
+            </li>
+          </Link>
           {/* tambah dashboard nanti yaaaa..... */}
           <li className={`flex rounded-md p-2 cursor-pointer items-center gap-x-4 mb-2`} >
             <a href="https://www.instagram.com/green_talao_park/" className="flex-1" target="_blank">

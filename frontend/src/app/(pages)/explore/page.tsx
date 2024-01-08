@@ -6,7 +6,6 @@ import { fetchGalleriesGtp } from "../api/fetchers/galleries";
 import { useQuery } from "@tanstack/react-query";
 import { fetchInfoGtp } from "../api/fetchers/gtp";
 import { Key, useEffect, useState } from "react";
-import MapCopy from "@/components/maps/mapEvent";
 
 export default function Explore() {
   //   const { isError, isSuccess, isLoading, data, error } = useQuery({
@@ -84,8 +83,7 @@ export default function Explore() {
             </div>
           </div>
           <div className=" pb-5">
-            {/* <Map /> */}
-            <MapCopy />
+            <Map />
           </div>
         </div>
         <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">

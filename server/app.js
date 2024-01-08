@@ -25,6 +25,8 @@ app.use('/gtp', router.gtp)
 app.use('/galleries', router.galeries)
 app.use('/event', router.event)
 app.use('/village', router.village)
+app.use('/culinary', router.culinary)
+app.use('/worship', router.worship)
 
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;

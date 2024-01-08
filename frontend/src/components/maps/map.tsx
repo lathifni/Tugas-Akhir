@@ -25,7 +25,42 @@ export default function Map() {
       const mapOptions: google.maps.MapOptions = {
         center: position,
         zoom: 6,
-        mapId: 'myTA'
+        // mapId: 'myTA'
+        styles: [
+          {
+            "elementType": "labels",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative.land_parcel",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative.neighborhood",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "road",
+            "elementType": "labels",
+            "stylers": [
+              {
+                "visibility": "on"
+              }
+            ]
+          }
+        ]
       }
 
       const map = new Map(mapRef.current as HTMLDivElement, mapOptions)
@@ -129,21 +164,12 @@ export default function Map() {
         map: map,
         position: position,
       })
-
-      // const logoDiv = document.createElement('div')
-      // logoDiv.style.position = 'absolute'
-      // logoDiv.style.top= '10px'
-      // logoDiv.style.left = '10px'
-
-      // const logoImage = new Image()
-      // logoImage.src = pin
-
     }
 
     initMap()
   }, [])
 
   return (
-    <div style={{ height: '700px', width: '950px' }} ref={mapRef} className="text-slate-700"></div>
+    <div style={{ height: '700px' }} ref={mapRef} className="text-slate-700"></div>
   )
 }
