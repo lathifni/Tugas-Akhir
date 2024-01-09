@@ -4,10 +4,10 @@ import { faBed, faCartShopping, faEye, faMosque, faUtensils } from "@fortawesome
 
 interface ExploreUlakanTableSectionProps {
   onSearchAroundClick: () => void;
-  onShowMapClick: (type: string) => void
+  onShowMapClick: (type: string) => void;
 }
 
-export default function ExploreUlakanTableSection({ onSearchAroundClick, onShowMapClick }: ExploreUlakanTableSectionProps) {
+export default function ExploreUlakanTableSection({ onSearchAroundClick, onShowMapClick, }: ExploreUlakanTableSectionProps) {
   return (
     <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
       <div className="text-2xl text-center justify-center">

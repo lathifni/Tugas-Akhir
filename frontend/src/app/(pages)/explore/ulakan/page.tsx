@@ -1,7 +1,7 @@
 'use client'
 
 import { Eye, Goal, MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import MapExploreUlakan from "@/components/maps/mapExploreUlakan";
 import ExploreUlakanTableSection from "./_components/listExploreUlakan";
 import ObjectAroundSection from "./_components/objectAround";
@@ -33,6 +33,8 @@ export default function Ulakan() {
   const [listExploreUlakan, setListExploreUlakan] = useState(true);
   const [typeMap, setTypeMap] = useState('')
   const [dataTypeMap, setDataTypeMap] = useState<dataListGeom[] | null>(null)
+  const [radius, setRadius] = useState(0)
+  const [isManualLocationClicked, setIsManualLocationClicked] = useState(false);
 
   const queryMutiple = () => {
     const resListGeomWorship = useQuery({
@@ -59,7 +61,7 @@ export default function Ulakan() {
     { isLoading: loadingListGeomCulinary, data: dataListGeomCulinary },
     { isLoading: loadingListGeomSouvenir, data: dataListGeomSouvenir },
     { isLoading: loadingListGeomHomestay, data: dataListGeomHomestay }
-  ] = queryMutiple()  
+  ] = queryMutiple()
 
   const [objectAroundState, setObjectAroundState] = useState<any>({
     culinaryPlaces: false,
@@ -76,13 +78,31 @@ export default function Ulakan() {
     else setDataTypeMap(dataListGeomHomestay)
   };
 
+  const handleManualLocationUpdate = () => {
+    const dialogElement = document.getElementById('manualLocationDialog')as HTMLDialogElement;
+    if (dialogElement) dialogElement.showModal();
+  };
+
+  const handleModalOk = () => {
+    const dialogElement = document.getElementById('manualLocationDialog')as HTMLDialogElement;
+    if (dialogElement) {
+      setIsManualLocationClicked(true);
+      dialogElement.close();
+    }
+  };
+
+  const handleModalCancel = () => {
+    const dialogElement = document.getElementById('manualLocationDialog')as HTMLDialogElement;
+    dialogElement.close();
+  }
+
   const handleObjectAroundStateChange = (newState: any) => {
     console.log("New ObjectAround state:", newState);
     setObjectAroundState(newState);
   }
 
   const handleRadiusChange = (value: number) => {
-    console.log("New radius value:", value);
+    setRadius(value)
   }
 
   const handleGoToObjectClick = () => {
@@ -123,6 +143,7 @@ export default function Ulakan() {
 
   const handleSection = () => {
     setListExploreUlakan(!listExploreUlakan);
+    setRadius(0)
     console.log('testt');
   };
 
@@ -138,17 +159,16 @@ export default function Ulakan() {
               <div className="p-2 bg-blue-500 rounded-lg" title="Current Location" onClick={fetchUserLocation}>
                 <Goal className="text-slate-200" />
               </div>
-              <div className="p-2 bg-blue-500 rounded-lg" title="Set Manual Location">
+              <div className="p-2 bg-blue-500 rounded-lg" title="Set Manual Location" onClick={handleManualLocationUpdate}>
                 <MapPin className="text-slate-200" />
               </div>
               <div className="p-2 bg-blue-500 rounded-lg" title="Toggle Legend">
                 <Eye className="text-slate-200" />
               </div>
-              <div className="p-2 bg-blue-500 rounded-lg text-white" title="Toggle Legend" onClick={handleGoToObjectClick}>go to object</div>
             </div>
           </div>
           <div className=" pb-5">
-            <MapExploreUlakan userLocation={userLocation} goToObjectId={objectId} showMapForType={typeMap} dataMapforType={dataTypeMap} />
+            <MapExploreUlakan userLocation={userLocation} goToObjectId={objectId} showMapForType={typeMap} dataMapforType={dataTypeMap} radius={radius} isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation} />
           </div>
         </div>
         {listExploreUlakan ? (
@@ -160,6 +180,19 @@ export default function Ulakan() {
             onStateChange={handleObjectAroundStateChange} />
         )}
       </div>
+      {/* Modal */}
+      <dialog id="manualLocationDialog" className="bg-white p-12 mt-72 rounded-lg shadow-lg">
+        <h2 className="text-xl mb-4 text-center font-bold">Confirmation</h2>
+        <p>Want to set manual location?</p>
+        <div className="mt-4 flex justify-center">
+          <button onClick={handleModalOk} className="bg-blue-500 hover:bg-blue-400 text-white px-4 py-2 rounded mr-2">
+            Yes
+          </button>
+          <button onClick={handleModalCancel} className="bg-gray-200 hover:bg-red-500 hover:text-white text-gray-800 px-4 py-2 rounded">
+            Cancel
+          </button>
+        </div>
+      </dialog>
     </>
   )
 }

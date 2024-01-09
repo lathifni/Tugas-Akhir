@@ -8,11 +8,6 @@ import { fetchInfoGtp } from "../api/fetchers/gtp";
 import { Key, useEffect, useState } from "react";
 
 export default function Explore() {
-  //   const { isError, isSuccess, isLoading, data, error } = useQuery({
-  //     queryKey: ['galleriesGtp'],
-  //     queryFn: fetchGalleriesGtp,
-  //  })
-
   const queryMutiple = () => {
     const resGalleries = useQuery({
       queryKey: ['galleriesGtp'],
@@ -57,9 +52,6 @@ export default function Explore() {
   const goToSlide = (slideIndex: any) => {
     setCurrentIndex(slideIndex);
   };
-
-  // console.log(dataGalleries[currentIndex].url)
-
 
   return (
     <>

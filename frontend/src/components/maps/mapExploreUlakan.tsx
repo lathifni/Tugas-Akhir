@@ -6,6 +6,7 @@ import { Loader } from "@googlemaps/js-api-loader"
 import { useQuery } from "@tanstack/react-query"
 import React, { useEffect } from "react"
 let markerArray: any = {};
+let circleArray: any = []
 
 interface UserLocation {
   lat: number;
@@ -28,6 +29,9 @@ interface MapExploreUlakanProps {
   goToObjectId?: number | null;
   showMapForType: string | null;
   dataMapforType: dataListGeom[] | null
+  radius?: number | null;
+  isManualLocation: boolean ;
+  setUserLocation: React.Dispatch<React.SetStateAction<UserLocation | null>>;
 }
 
 let map: google.maps.Map | null = null;
@@ -41,7 +45,7 @@ const positionGtp = {
   lng: 100.19420485758688
 }
 
-export default function MapExploreUlakan({ userLocation, goToObjectId, showMapForType, dataMapforType }: MapExploreUlakanProps) {
+export default function MapExploreUlakan({ userLocation, goToObjectId, showMapForType, dataMapforType, radius, isManualLocation, setUserLocation }: MapExploreUlakanProps) {
   const queryMutiple = () => {
     const resUlakanVillage = useQuery({
       queryKey: ['ulakanVillage'],
@@ -170,7 +174,7 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
           const { id, name, address, contact_person, status, lat, lng } = item
           const pos = new google.maps.LatLng(lat, lng)
           const marker = new google.maps.Marker();
-  
+
           const markerOptions = {
             position: pos,
             map: map,
@@ -185,7 +189,7 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
               <p>${address}</p>
               <p>${contact_person}</p>
               `
-            }).open(map,marker)
+            }).open(map, marker)
           });
           markerArray[id] = marker
         })
@@ -194,7 +198,7 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
           const { id, name, address, capacity, lat, lng } = item
           const pos = new google.maps.LatLng(lat, lng)
           const marker = new google.maps.Marker();
-  
+
           const markerOptions = {
             position: pos,
             map: map,
@@ -209,7 +213,7 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
               <p>${address}</p>
               <p>${capacity}</p>
               `
-            }).open(map,marker)
+            }).open(map, marker)
           });
           markerArray[id] = marker
         })
@@ -218,7 +222,7 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
           const { id, name, address, contact_person, status, lat, lng } = item
           const pos = new google.maps.LatLng(lat, lng)
           const marker = new google.maps.Marker();
-  
+
           const markerOptions = {
             position: pos,
             map: map,
@@ -233,7 +237,7 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
               <p>${address}</p>
               <p>${contact_person}</p>
               `
-            }).open(map,marker)
+            }).open(map, marker)
           });
           markerArray[id] = marker
         })
@@ -242,7 +246,7 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
           const { id, name, address, contact_person, lat, lng } = item
           const pos = new google.maps.LatLng(lat, lng)
           const marker = new google.maps.Marker();
-  
+
           const markerOptions = {
             position: pos,
             map: map,
@@ -257,12 +261,13 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
               <p>${address}</p>
               <p>${contact_person}</p>
               `
-            }).open(map,marker)
+            }).open(map, marker)
           });
           markerArray[id] = marker
         })
       }
     }
+
     if (Object.keys(markerArray).length > 0) {
       const bounds = new google.maps.LatLngBounds();
       for (const i in markerArray) {
@@ -275,11 +280,56 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
       }
       map.fitBounds(bounds);
     }
+
+    if (isManualLocation) {
+      const manualUserLocation = map.addListener('click', (mapsMouseEvent: any) => {
+        const newLocation = {
+          lat: mapsMouseEvent.latLng.lat(),
+          lng: mapsMouseEvent.latLng.lng()
+        };
+        // Perbarui userLocation dengan lokasi baru
+        setUserLocation(newLocation);
+      })
+    }
+
+    if (userLocation !== null) {
+      const marker = new google.maps.Marker();
+      const markerOptions = {
+        position: userLocation,
+        map: map,
+        animation: google.maps.Animation.DROP,
+      }
+      marker.setOptions(markerOptions)
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<p>You Are Here</p>`
+      });
+    
+      marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+      });
+      if (radius !== null) {
+        const circle = new google.maps.Circle({
+          map: map,
+          radius: radius,  // dalam meter
+          fillColor: '#AA0000',
+          fillOpacity: 0.3,
+          strokeColor: '#FF0000',
+          strokeOpacity: 0.8,
+          strokeWeight: 2
+        });
+        circle.bindTo('center', marker, 'position')
+      }
+      infoWindow.open(map, marker);
+      map.panTo(userLocation);
+
+    }
+    
   };
 
   useEffect(() => {
     initMap(dataUlakanVillage, dataGeomGtp);
-  }, [queryMutiple(), dataMapforType])
+
+  }, [queryMutiple(), dataMapforType, isManualLocation])
 
   return (
     <div style={{ height: '500px' }} ref={mapRef} className="text-slate-700"></div>

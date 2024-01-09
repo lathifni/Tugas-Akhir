@@ -2,7 +2,7 @@
 
 import { Eye, Goal, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Key, useEffect, useState } from "react";
+import { useState } from "react";
 import MapEvent from "@/components/maps/mapEvent";
 import { fetchListEvent } from "../../api/fetchers/event";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -37,7 +37,6 @@ export default function Event() {
               <div className="p-2 bg-blue-500 rounded-lg" title="Toggle Legend">
                 <Eye className="text-slate-200" />
               </div>
-              <div className="p-2 bg-blue-500 rounded-lg text-white" title="Toggle Legend">go to object</div>
             </div>
           </div>
           <div className=" pb-5">
