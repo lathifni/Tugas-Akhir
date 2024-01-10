@@ -5,4 +5,8 @@ const listGeomCulinary = async() => {
   return rows
 }
 
-module.exports = { listGeomCulinary, }
+const listCulinaryByRadius = async() => {
+  return 
+}
+
+module.exports = { listGeomCulinary, listCulinaryByRadius }

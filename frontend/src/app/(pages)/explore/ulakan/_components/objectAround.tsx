@@ -15,7 +15,7 @@ interface Props {
 export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onStateChange }: Props) {
   const [state, setState] = useState({
     culinaryPlaces: false,
-    Homestay: false,
+    homestay: false,
     souvenirPlaces: false,
     worshipPlaces: false
   });
@@ -37,8 +37,8 @@ export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onSt
     if (onStateChange) onStateChange(updatedState); 
   };
 
-  const { culinaryPlaces, Homestay, souvenirPlaces, worshipPlaces } = state;
-  const error = [culinaryPlaces, Homestay, souvenirPlaces, worshipPlaces].filter((v) => v).length === 0
+  const { culinaryPlaces, homestay, souvenirPlaces, worshipPlaces } = state;
+  const error = [culinaryPlaces, homestay, souvenirPlaces, worshipPlaces].filter((v) => v).length === 0
 
   return (
     <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
@@ -62,7 +62,7 @@ export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onSt
             />
             <FormControlLabel
               control={
-                <Checkbox checked={Homestay} onChange={handleChange} name="Homestay" />
+                <Checkbox checked={homestay} onChange={handleChange} name="homestay" />
               }
               label="Homestay"
             />

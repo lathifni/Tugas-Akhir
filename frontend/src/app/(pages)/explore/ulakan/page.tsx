@@ -16,6 +16,13 @@ interface UserLocation {
   lng: number;
 }
 
+interface MapType {
+  culinaryPlaces: boolean;
+  homestay: boolean;
+  souvenirPlaces: boolean;
+  worshipPlaces: boolean;
+}
+
 interface dataListGeom {
   id: string;
   name: string;
@@ -63,9 +70,9 @@ export default function Ulakan() {
     { isLoading: loadingListGeomHomestay, data: dataListGeomHomestay }
   ] = queryMutiple()
 
-  const [objectAroundState, setObjectAroundState] = useState<any>({
+  const [objectAroundState, setObjectAroundState] = useState<MapType>({
     culinaryPlaces: false,
-    Homestay: false,
+    homestay: false,
     souvenirPlaces: false,
     worshipPlaces: false
   });
@@ -97,18 +104,13 @@ export default function Ulakan() {
   }
 
   const handleObjectAroundStateChange = (newState: any) => {
-    console.log("New ObjectAround state:", newState);
+    // console.log("New ObjectAround state:", newState);
     setObjectAroundState(newState);
   }
 
   const handleRadiusChange = (value: number) => {
     setRadius(value)
   }
-
-  const handleGoToObjectClick = () => {
-    setObjectId(1);
-    console.log('test click go to');
-  };
 
   const fetchUserLocation = async (): Promise<void> => {
     try {
@@ -168,7 +170,7 @@ export default function Ulakan() {
             </div>
           </div>
           <div className=" pb-5">
-            <MapExploreUlakan userLocation={userLocation} goToObjectId={objectId} showMapForType={typeMap} dataMapforType={dataTypeMap} radius={radius} isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation} />
+            <MapExploreUlakan userLocation={userLocation} objectAround={objectAroundState} showMapForType={typeMap} dataMapforType={dataTypeMap} radius={radius} isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation} />
           </div>
         </div>
         {listExploreUlakan ? (

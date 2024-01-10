@@ -1,7 +1,11 @@
-const { listGeomCulinary } = require("../services/culinary")
+const { listGeomCulinary, listCulinaryByRadius } = require("../services/culinary")
 
 const listGeomCulinaryController = async() => {
   return await listGeomCulinary()
 }
 
-module.exports = { listGeomCulinaryController, }
+const listCulinaryByRadiusController = async() => {
+  return await listCulinaryByRadius()
+}
+
+module.exports = { listGeomCulinaryController, listCulinaryByRadiusController }

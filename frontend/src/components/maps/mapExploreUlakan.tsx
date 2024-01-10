@@ -1,5 +1,6 @@
 'use client'
 
+import { fetchListCulinaryByRadius } from "@/app/(pages)/api/fetchers/culinary"
 import { fetchGeomGtp } from "@/app/(pages)/api/fetchers/gtp"
 import { fetchUlakanVillage } from "@/app/(pages)/api/fetchers/vilage"
 import { Loader } from "@googlemaps/js-api-loader"
@@ -11,6 +12,13 @@ let circleArray: any = []
 interface UserLocation {
   lat: number;
   lng: number;
+}
+
+interface MapType {
+  culinaryPlaces: boolean;
+  homestay: boolean;
+  souvenirPlaces: boolean;
+  worshipPlaces: boolean;
 }
 
 interface dataListGeom {
@@ -26,10 +34,10 @@ interface dataListGeom {
 
 interface MapExploreUlakanProps {
   userLocation: UserLocation | null;
-  goToObjectId?: number | null;
   showMapForType: string | null;
   dataMapforType: dataListGeom[] | null
   radius?: number | null;
+  objectAround: MapType | null;
   isManualLocation: boolean ;
   setUserLocation: React.Dispatch<React.SetStateAction<UserLocation | null>>;
 }
@@ -45,7 +53,7 @@ const positionGtp = {
   lng: 100.19420485758688
 }
 
-export default function MapExploreUlakan({ userLocation, goToObjectId, showMapForType, dataMapforType, radius, isManualLocation, setUserLocation }: MapExploreUlakanProps) {
+export default function MapExploreUlakan({ userLocation, showMapForType, dataMapforType, radius, isManualLocation, setUserLocation, objectAround }: MapExploreUlakanProps) {
   const queryMutiple = () => {
     const resUlakanVillage = useQuery({
       queryKey: ['ulakanVillage'],
@@ -322,14 +330,29 @@ export default function MapExploreUlakan({ userLocation, goToObjectId, showMapFo
       infoWindow.open(map, marker);
       map.panTo(userLocation);
 
+      if (objectAround) {
+        let payload = { userLocation, radius }
+        console.log(objectAround);
+        
+        if (objectAround.culinaryPlaces === true) {
+          // console.log('di centang nih CP nya');
+          // const resObjectByRadius = useQuery({
+          //   queryKey: ['objectCulinaryPlacesByRadius', payload],
+          //   queryFn: () => fetchListCulinaryByRadius(payload)
+          // })
+          // console.log(resObjectByRadius);
+          
+        }
+      }
     }
+    
     
   };
 
   useEffect(() => {
     initMap(dataUlakanVillage, dataGeomGtp);
 
-  }, [queryMutiple(), dataMapforType, isManualLocation])
+  }, [queryMutiple(), dataMapforType, isManualLocation, objectAround])
 
   return (
     <div style={{ height: '500px' }} ref={mapRef} className="text-slate-700"></div>
