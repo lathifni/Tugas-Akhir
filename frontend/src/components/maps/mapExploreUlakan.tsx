@@ -10,6 +10,7 @@ import { MapContentCulinaryPlaces, MapContentWorshipPlaces, MapContentSouvenirPl
 import ReactDOM from "react-dom"
 import { createRoot } from 'react-dom/client';
 let markerArray: any = {};
+let routeArray: any = []
 
 interface UserLocation {
   lat: number;
@@ -178,26 +179,43 @@ export default function MapExploreUlakan({ userLocation, dataMapforType, radius,
 
     if (dataMapforType !== null) {
       const firstIdData = dataMapforType[0].id
+      const boundToRoute = (start: google.maps.LatLng, end: google.maps.LatLng) => {
+        const bounds = new google.maps.LatLngBounds();
+        bounds.extend(start);
+        bounds.extend(end);
+        map?.fitBounds(bounds);
+      };
       const handleRouteButtonClick = (value: boolean, lat: number, lng: number) => {
-        const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+        if (userLocation) {
+          routeArray.forEach((directionsRenderer: google.maps.DirectionsRenderer) => {
+            directionsRenderer.setMap(null);
+          });
+          routeArray.length = 0;
+          const directionsService = new google.maps.DirectionsService();
 
-        console.log('tessttduluu apakah true?', value);
-        let start, end;
-        start = new google.maps.LatLng(0, 0);
-        end = new google.maps.LatLng(lat, lng)
-        let request = {
-          origin: start,
-          destination: end,
-          travelMode: 'DRIVING'
-        };
-      //   const directionsService.route(request, function(result, status) {
-      //     if (status == 'OK') {
-      //         directionsRenderer.setDirections(result);
-      //         directionsRenderer.setMap(map);
-      //         // routeArray.push(directionsRenderer);
-      //     }
-      // });
-      // boundToRoute(start, end);
+          let start, end;
+          start = new google.maps.LatLng(userLocation.lat, userLocation.lng);
+          end = new google.maps.LatLng(lat, lng)
+
+          const request: google.maps.DirectionsRequest = {
+            origin: start,
+            destination: end,
+            travelMode: google.maps.TravelMode.DRIVING
+          };
+
+          directionsService.route(request, function (
+            result: google.maps.DirectionsResult | null,
+            status: google.maps.DirectionsStatus
+          ) {
+            if (status === 'OK' && result !== null) {
+              const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+              directionsRenderer.setDirections(result);
+              // directionsRenderer.setMap(map);
+              routeArray.push(directionsRenderer);
+            }
+          });
+          boundToRoute(start, end);
+        }
       }
       if (firstIdData.startsWith("CP")) {
         dataMapforType.forEach((item: dataListGeom) => {
