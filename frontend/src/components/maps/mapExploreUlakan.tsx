@@ -210,8 +210,8 @@ export default function MapExploreUlakan({ userLocation, dataMapforType, radius,
             if (status === 'OK' && result !== null) {
               const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
               directionsRenderer.setDirections(result);
-              // directionsRenderer.setMap(map);
               routeArray.push(directionsRenderer);
+              directionsRenderer.setMap(map);
             }
           });
           boundToRoute(start, end);
