@@ -4,8 +4,8 @@ const listGeomCulinaryController = async() => {
   return await listGeomCulinary()
 }
 
-const listCulinaryByRadiusController = async() => {
-  return await listCulinaryByRadius()
+const listCulinaryByRadiusController = async(payload) => {
+  return await listCulinaryByRadius(payload)
 }
 
 module.exports = { listGeomCulinaryController, listCulinaryByRadiusController }

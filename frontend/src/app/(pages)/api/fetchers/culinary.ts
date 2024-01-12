@@ -5,9 +5,7 @@ export const fetchListGeomCulinary = async () => {
   return res.data.data
 }
 
-export const fetchListCulinaryByRadius = async (payload: any) => {
-  const res = await useAxiosAuth.get('/culinary/listByRadius', {
-    params: payload, 
-  })
+export const fetchListCulinaryByRadius = async (lat: number, lng: number, radius: number) => {
+  const res = await useAxiosAuth.get( `/culinary/listByRadius?lat=${lat}&lng=${lng}&radius=${radius}`)
   return res.data.data
 }

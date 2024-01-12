@@ -12,9 +12,9 @@ const listGeomCulinaryHandler = async(req, res) => {
 
 const listCulinaryByRadiusHandler = async(req, res) => {
   try {
-    const list = await listCulinaryByRadiusController(req.body)
+    const list = await listCulinaryByRadiusController(req.query)
 
-    return res.status(200)
+    return res.status(200).send({ status:'success', data:list })
   } catch (error) {
     console.log(error);
   }

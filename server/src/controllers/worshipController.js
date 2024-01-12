@@ -1,7 +1,11 @@
-const { listGeomWorship } = require("../services/worship")
+const { listGeomWorship, listWorshipByRadius } = require("../services/worship")
 
 const listGeomWorshipController = async() => {
   return await listGeomWorship()
 }
 
-module.exports = { listGeomWorshipController, }
+const listWorshipByRadiusController = async(payload) => {
+  return await listWorshipByRadius(payload)
+}
+
+module.exports = { listGeomWorshipController, listWorshipByRadiusController }

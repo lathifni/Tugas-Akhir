@@ -1,7 +1,11 @@
-const { listGeomHomestay } = require("../services/homestay.js")
+const { listGeomHomestay, listHomestayByRadius } = require("../services/homestay.js")
 
 const listGeomHomestayController = async() => {
   return await listGeomHomestay()
 }
 
-module.exports = { listGeomHomestayController, }
+const listHomestayByRadiusController = async(payload) => {
+  return await listHomestayByRadius(payload)
+}
+
+module.exports = { listGeomHomestayController, listHomestayByRadiusController, }

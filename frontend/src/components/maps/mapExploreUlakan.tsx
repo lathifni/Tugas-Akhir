@@ -1,13 +1,15 @@
 'use client'
 
-import { fetchListCulinaryByRadius } from "@/app/(pages)/api/fetchers/culinary"
 import { fetchGeomGtp } from "@/app/(pages)/api/fetchers/gtp"
 import { fetchUlakanVillage } from "@/app/(pages)/api/fetchers/vilage"
 import { Loader } from "@googlemaps/js-api-loader"
 import { useQuery } from "@tanstack/react-query"
 import React, { useEffect } from "react"
+import useAxiosAuth from "../../../libs/useAxiosAuth"
+import { MapContentCulinaryPlaces, MapContentWorshipPlaces, MapContentSouvenirPlaces, MapContentHomestayPlaces } from "./mapHelper"
+import ReactDOM from "react-dom"
+import { createRoot } from 'react-dom/client';
 let markerArray: any = {};
-let circleArray: any = []
 
 interface UserLocation {
   lat: number;
@@ -34,11 +36,10 @@ interface dataListGeom {
 
 interface MapExploreUlakanProps {
   userLocation: UserLocation | null;
-  showMapForType: string | null;
   dataMapforType: dataListGeom[] | null
   radius?: number | null;
   objectAround: MapType | null;
-  isManualLocation: boolean ;
+  isManualLocation: boolean;
   setUserLocation: React.Dispatch<React.SetStateAction<UserLocation | null>>;
 }
 
@@ -53,7 +54,7 @@ const positionGtp = {
   lng: 100.19420485758688
 }
 
-export default function MapExploreUlakan({ userLocation, showMapForType, dataMapforType, radius, isManualLocation, setUserLocation, objectAround }: MapExploreUlakanProps) {
+export default function MapExploreUlakan({ userLocation, dataMapforType, radius, isManualLocation, setUserLocation, objectAround }: MapExploreUlakanProps) {
   const queryMutiple = () => {
     const resUlakanVillage = useQuery({
       queryKey: ['ulakanVillage'],
@@ -177,6 +178,27 @@ export default function MapExploreUlakan({ userLocation, showMapForType, dataMap
 
     if (dataMapforType !== null) {
       const firstIdData = dataMapforType[0].id
+      const handleRouteButtonClick = (value: boolean, lat: number, lng: number) => {
+        const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+
+        console.log('tessttduluu apakah true?', value);
+        let start, end;
+        start = new google.maps.LatLng(0, 0);
+        end = new google.maps.LatLng(lat, lng)
+        let request = {
+          origin: start,
+          destination: end,
+          travelMode: 'DRIVING'
+        };
+      //   const directionsService.route(request, function(result, status) {
+      //     if (status == 'OK') {
+      //         directionsRenderer.setDirections(result);
+      //         directionsRenderer.setMap(map);
+      //         // routeArray.push(directionsRenderer);
+      //     }
+      // });
+      // boundToRoute(start, end);
+      }
       if (firstIdData.startsWith("CP")) {
         dataMapforType.forEach((item: dataListGeom) => {
           const { id, name, address, contact_person, status, lat, lng } = item
@@ -191,12 +213,16 @@ export default function MapExploreUlakan({ userLocation, showMapForType, dataMap
           }
           marker.setOptions(markerOptions)
           marker.addListener('click', () => {
+            marker.setAnimation(google.maps.Animation.BOUNCE)
+            setTimeout(() => {
+              marker.setAnimation(null)
+            }, 1700)
+
+            const container = document.createElement('div');
+            const root = createRoot(container);
+            if (contact_person) root.render(<MapContentCulinaryPlaces name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
             new google.maps.InfoWindow({
-              content: `
-              <h3>${name}</h3>
-              <p>${address}</p>
-              <p>${contact_person}</p>
-              `
+              content: document.body.appendChild(container)
             }).open(map, marker)
           });
           markerArray[id] = marker
@@ -215,12 +241,15 @@ export default function MapExploreUlakan({ userLocation, showMapForType, dataMap
           }
           marker.setOptions(markerOptions)
           marker.addListener('click', () => {
+            marker.setAnimation(google.maps.Animation.BOUNCE)
+            setTimeout(() => {
+              marker.setAnimation(null)
+            }, 1700)
+            const container = document.createElement('div');
+            const root = createRoot(container);
+            if (capacity) root.render(<MapContentWorshipPlaces name={name} address={address} capacity={capacity} />);
             new google.maps.InfoWindow({
-              content: `
-              <h3>${name}</h3>
-              <p>${address}</p>
-              <p>${capacity}</p>
-              `
+              content: document.body.appendChild(container),
             }).open(map, marker)
           });
           markerArray[id] = marker
@@ -239,12 +268,15 @@ export default function MapExploreUlakan({ userLocation, showMapForType, dataMap
           }
           marker.setOptions(markerOptions)
           marker.addListener('click', () => {
+            marker.setAnimation(google.maps.Animation.BOUNCE)
+            setTimeout(() => {
+              marker.setAnimation(null)
+            }, 1700)
+            const container = document.createElement('div');
+            const root = createRoot(container);
+            if (contact_person) root.render(<MapContentSouvenirPlaces name={name} address={address} contact_person={contact_person} />);
             new google.maps.InfoWindow({
-              content: `
-              <h3>${name}</h3>
-              <p>${address}</p>
-              <p>${contact_person}</p>
-              `
+              content: document.body.appendChild(container)
             }).open(map, marker)
           });
           markerArray[id] = marker
@@ -263,12 +295,15 @@ export default function MapExploreUlakan({ userLocation, showMapForType, dataMap
           }
           marker.setOptions(markerOptions)
           marker.addListener('click', () => {
+            marker.setAnimation(google.maps.Animation.BOUNCE)
+            setTimeout(() => {
+              marker.setAnimation(null)
+            }, 1700)
+            const container = document.createElement('div');
+            const root = createRoot(container);
+            if (contact_person) root.render(<MapContentHomestayPlaces name={name} address={address} contact_person={contact_person} />);
             new google.maps.InfoWindow({
-              content: `
-              <h3>${name}</h3>
-              <p>${address}</p>
-              <p>${contact_person}</p>
-              `
+              content: document.body.appendChild(container)
             }).open(map, marker)
           });
           markerArray[id] = marker
@@ -311,7 +346,7 @@ export default function MapExploreUlakan({ userLocation, showMapForType, dataMap
       const infoWindow = new google.maps.InfoWindow({
         content: `<p>You Are Here</p>`
       });
-    
+
       marker.addListener('click', () => {
         infoWindow.open(map, marker);
       });
@@ -330,28 +365,132 @@ export default function MapExploreUlakan({ userLocation, showMapForType, dataMap
       infoWindow.open(map, marker);
       map.panTo(userLocation);
 
-      if (objectAround) {
-        let payload = { userLocation, radius }
-        console.log(objectAround);
-        
+      if (objectAround && radius) {
+        const lat = userLocation.lat
+        const lng = userLocation.lng
         if (objectAround.culinaryPlaces === true) {
-          // console.log('di centang nih CP nya');
-          // const resObjectByRadius = useQuery({
-          //   queryKey: ['objectCulinaryPlacesByRadius', payload],
-          //   queryFn: () => fetchListCulinaryByRadius(payload)
-          // })
-          // console.log(resObjectByRadius);
-          
+          try {
+            const res = await useAxiosAuth.get(`/culinary/listByRadius?lat=${lat}&lng=${lng}&radius=${radius}`)
+            const dataObject = res.data.data
+
+            dataObject.forEach((item: dataListGeom) => {
+              const { id, name, address, contact_person, status, lat, lng } = item
+              const pos = new google.maps.LatLng(lat, lng)
+              const marker = new google.maps.Marker();
+
+              const markerOptions = {
+                position: pos,
+                map: map,
+                animation: google.maps.Animation.DROP,
+                icon: status === 1 ? '/icon/cpgtp.png' : '/icon/culinary.png'
+              }
+              marker.setOptions(markerOptions)
+              marker.addListener('click', () => {
+                new google.maps.InfoWindow({
+                  content: `
+              <h3>${name}</h3>
+              <p>${address}</p>
+              <p>${contact_person}</p>
+              `
+                }).open(map, marker)
+              });
+              markerArray[id] = marker
+            });
+          } catch (error) {
+            console.log(error);
+          }
+
+        }
+        if (objectAround.worshipPlaces === true) {
+          const res = await useAxiosAuth.get(`/worship/listByRadius?lat=${lat}&lng=${lng}&radius=${radius}`)
+          const dataObject = res.data.data
+
+          dataObject.forEach((item: dataListGeom) => {
+            const { id, name, address, capacity, lat, lng } = item
+            const pos = new google.maps.LatLng(lat, lng)
+            const marker = new google.maps.Marker();
+
+            const markerOptions = {
+              position: pos,
+              map: map,
+              animation: google.maps.Animation.DROP,
+              icon: '/icon/worship.png'
+            }
+            marker.setOptions(markerOptions)
+            marker.addListener('click', () => {
+              new google.maps.InfoWindow({
+                content: `
+              <h3>${name}</h3>
+              <p>${address}</p>
+              <p>${capacity}</p>
+              `
+              }).open(map, marker)
+            });
+            markerArray[id] = marker
+          })
+        }
+        if (objectAround.souvenirPlaces === true) {
+          const res = await useAxiosAuth.get(`/souvenir/listByRadius?lat=${lat}&lng=${lng}&radius=${radius}`)
+          const dataObject = res.data.data
+
+          dataObject.forEach((item: dataListGeom) => {
+            const { id, name, address, contact_person, status, lat, lng } = item
+            const pos = new google.maps.LatLng(lat, lng)
+            const marker = new google.maps.Marker();
+
+            const markerOptions = {
+              position: pos,
+              map: map,
+              animation: google.maps.Animation.DROP,
+              icon: '/icon/souvenir.png'
+            }
+            marker.setOptions(markerOptions)
+            marker.addListener('click', () => {
+              new google.maps.InfoWindow({
+                content: `
+                <h3>${name}</h3>
+                <p>${address}</p>
+                <p>${contact_person}</p>
+                `
+              }).open(map, marker)
+            });
+            markerArray[id] = marker
+          })
+        }
+        if (objectAround.homestay === true) {
+          const res = await useAxiosAuth.get(`/homestay/listByRadius?lat=${lat}&lng=${lng}&radius=${radius}`)
+          const dataObject = res.data.data
+
+          dataObject.forEach((item: dataListGeom) => {
+            const { id, name, address, contact_person, lat, lng } = item
+            const pos = new google.maps.LatLng(lat, lng)
+            const marker = new google.maps.Marker();
+
+            const markerOptions = {
+              position: pos,
+              map: map,
+              animation: google.maps.Animation.DROP,
+              icon: '/icon/homestay.png'
+            }
+            marker.setOptions(markerOptions)
+            marker.addListener('click', () => {
+              new google.maps.InfoWindow({
+                content: `
+                <h3>${name}</h3>
+                <p>${address}</p>
+                <p>${contact_person}</p>
+                `
+              }).open(map, marker)
+            });
+            markerArray[id] = marker
+          })
         }
       }
     }
-    
-    
   };
 
   useEffect(() => {
     initMap(dataUlakanVillage, dataGeomGtp);
-
   }, [queryMutiple(), dataMapforType, isManualLocation, objectAround])
 
   return (

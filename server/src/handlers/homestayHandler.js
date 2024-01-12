@@ -1,4 +1,4 @@
-const { listGeomHomestayController } = require("../controllers/homestayController");
+const { listGeomHomestayController, listHomestayByRadiusController } = require("../controllers/homestayController");
 
 const listGeomHomestayHandler = async(req, res) => {
   try {
@@ -10,4 +10,14 @@ const listGeomHomestayHandler = async(req, res) => {
   }
 }
 
-module.exports = { listGeomHomestayHandler, }
+const listHomestayByRadiusHandler = async(req, res) => {
+  try {
+    const list = await listHomestayByRadiusController(req.query)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { listGeomHomestayHandler, listHomestayByRadiusHandler }

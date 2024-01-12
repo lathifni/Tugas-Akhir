@@ -36,9 +36,7 @@ interface dataListGeom {
 
 export default function Ulakan() {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
-  const [objectId, setObjectId] = useState<number | null>(null);
   const [listExploreUlakan, setListExploreUlakan] = useState(true);
-  const [typeMap, setTypeMap] = useState('')
   const [dataTypeMap, setDataTypeMap] = useState<dataListGeom[] | null>(null)
   const [radius, setRadius] = useState(0)
   const [isManualLocationClicked, setIsManualLocationClicked] = useState(false);
@@ -78,7 +76,6 @@ export default function Ulakan() {
   });
 
   const handleShowMapClick = (type: string) => {
-    setTypeMap(type)
     if (type === 'culinary') setDataTypeMap(dataListGeomCulinary)
     else if (type === 'worship') setDataTypeMap(dataListGeomWorship)
     else if (type === 'souvenir') setDataTypeMap(dataListGeomSouvenir)
@@ -104,7 +101,6 @@ export default function Ulakan() {
   }
 
   const handleObjectAroundStateChange = (newState: any) => {
-    // console.log("New ObjectAround state:", newState);
     setObjectAroundState(newState);
   }
 
@@ -145,8 +141,8 @@ export default function Ulakan() {
 
   const handleSection = () => {
     setListExploreUlakan(!listExploreUlakan);
+    setDataTypeMap(null)
     setRadius(0)
-    console.log('testt');
   };
 
   return (
@@ -170,7 +166,7 @@ export default function Ulakan() {
             </div>
           </div>
           <div className=" pb-5">
-            <MapExploreUlakan userLocation={userLocation} objectAround={objectAroundState} showMapForType={typeMap} dataMapforType={dataTypeMap} radius={radius} isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation} />
+            <MapExploreUlakan userLocation={userLocation} objectAround={objectAroundState} dataMapforType={dataTypeMap} radius={radius} isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation} />
           </div>
         </div>
         {listExploreUlakan ? (

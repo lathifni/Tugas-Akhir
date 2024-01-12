@@ -1,4 +1,4 @@
-const { listGeomWorshipController } = require("../controllers/worshipController");
+const { listGeomWorshipController, listWorshipByRadiusController } = require("../controllers/worshipController");
 
 
 const listGeomWorshipHandler = async(req, res) => {
@@ -11,4 +11,14 @@ const listGeomWorshipHandler = async(req, res) => {
   }
 }
 
-module.exports = { listGeomWorshipHandler, }
+const listWorshipByRadiusHandler = async(req, res) => {
+  try {
+    const list = await listWorshipByRadiusController(req.query)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { listGeomWorshipHandler, listWorshipByRadiusHandler, }

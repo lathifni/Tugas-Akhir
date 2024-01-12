@@ -175,13 +175,6 @@ export default function MapEvent({ selectedEventId }: MapEventProps) {
 
   const mapRef = React.useRef<HTMLDivElement>(null)
 
-  // useEffect(() => {
-  //   if (map !== null) {
-  //     google.maps.event.trigger(markers[selectedEventId], 'click')
-  //     map.panTo(markers[selectedEventId].getPosition())
-  //   }
-  // }, [selectedEventId])
-
   useEffect(() => {
     initMap()
   }, [queryMutiple(), selectedEventId])

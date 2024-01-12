@@ -1,4 +1,4 @@
-const { listGeomSouvenirController } = require("../controllers/souvenirController");
+const { listGeomSouvenirController, listSouvenirByRadiusController } = require("../controllers/souvenirController");
 
 const listGeomSouvenirHandler = async(req, res) => {
   try {
@@ -10,4 +10,14 @@ const listGeomSouvenirHandler = async(req, res) => {
   }
 }
 
-module.exports = { listGeomSouvenirHandler, }
+const listSouvenirByRadiusHandler = async(req, res) => {
+  try {
+    const list = await listSouvenirByRadiusController(req.query)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { listGeomSouvenirHandler, listSouvenirByRadiusHandler,  }

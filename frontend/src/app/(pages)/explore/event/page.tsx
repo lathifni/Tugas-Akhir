@@ -16,7 +16,6 @@ export default function Event() {
   })
   const handleShowInfoWindow = (eventId: string) => {
     setSelectedEventId(eventId);
-    console.log('idnya', selectedEventId);
   };
 
   return (
