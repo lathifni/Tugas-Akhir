@@ -41,7 +41,7 @@ export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onSt
   const error = [culinaryPlaces, homestay, souvenirPlaces, worshipPlaces].filter((v) => v).length === 0
 
   return (
-    <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
+    <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
       <div className="text-2xl text-center justify-center">
         <h1 className="">Object Around</h1>
       </div>
@@ -95,7 +95,7 @@ export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onSt
           />
         </div>
       </div>
-      <div className="bg-blue-500 rounded-lg text-white" onClick={onCloseClick} role="button">
+      <div className="bg-blue-500 hover:bg-blue-600 rounded-lg text-white" onClick={onCloseClick} role="button">
         <button className="m-3">Close</button>
       </div>
     </div>

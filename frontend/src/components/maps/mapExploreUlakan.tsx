@@ -4,10 +4,9 @@ import { fetchGeomGtp } from "@/app/(pages)/api/fetchers/gtp"
 import { fetchUlakanVillage } from "@/app/(pages)/api/fetchers/vilage"
 import { Loader } from "@googlemaps/js-api-loader"
 import { useQuery } from "@tanstack/react-query"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import useAxiosAuth from "../../../libs/useAxiosAuth"
 import { MapContentCulinaryPlaces, MapContentWorshipPlaces, MapContentSouvenirPlaces, MapContentHomestayPlaces } from "./mapHelper"
-import ReactDOM from "react-dom"
 import { createRoot } from 'react-dom/client';
 let markerArray: any = {};
 let routeArray: any = []
@@ -42,6 +41,18 @@ interface MapExploreUlakanProps {
   objectAround: MapType | null;
   isManualLocation: boolean;
   setUserLocation: React.Dispatch<React.SetStateAction<UserLocation | null>>;
+  distances: number[];
+  instructions: string[];
+  setDistances: React.Dispatch<React.SetStateAction<number[]>>;
+  setInstructions: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+interface Step {
+  distance?: {
+    value?: number;
+  };
+  instructions?: string;
+  // tambahkan properti lain jika diperlukan
 }
 
 let map: google.maps.Map | null = null;
@@ -55,7 +66,10 @@ const positionGtp = {
   lng: 100.19420485758688
 }
 
-export default function MapExploreUlakan({ userLocation, dataMapforType, radius, isManualLocation, setUserLocation, objectAround }: MapExploreUlakanProps) {
+export default function MapExploreUlakan({
+  userLocation, dataMapforType, radius, isManualLocation, setUserLocation, objectAround, distances, setDistances, instructions, setInstructions
+}: MapExploreUlakanProps) {
+  const [radiuss, setRadiuss] = useState<number>(0)
   const queryMutiple = () => {
     const resUlakanVillage = useQuery({
       queryKey: ['ulakanVillage'],
@@ -72,6 +86,13 @@ export default function MapExploreUlakan({ userLocation, dataMapforType, radius,
     { isLoading: loadingUlakanVillage, data: dataUlakanVillage },
     { isLoading: loadingGeomGtp, data: dataGeomGtp }
   ] = queryMutiple()
+
+  const setDistancesAndInstructions = (myRoute: any) => {
+    const newDistances = myRoute.steps.map((step: Step) => step.distance?.value || 0);
+    const newInstructions = myRoute.steps.map((step: Step) => step.instructions || '');
+    // setDistances(newDistances);
+    // setInstructions(newInstructions);
+  };
 
   const mapRef = React.useRef<HTMLDivElement>(null)
 
@@ -185,7 +206,7 @@ export default function MapExploreUlakan({ userLocation, dataMapforType, radius,
         bounds.extend(end);
         map?.fitBounds(bounds);
       };
-      const handleRouteButtonClick = (value: boolean, lat: number, lng: number) => {
+      const handleRouteButtonClick = (lat: number, lng: number) => {
         if (userLocation) {
           routeArray.forEach((directionsRenderer: google.maps.DirectionsRenderer) => {
             directionsRenderer.setMap(null);
@@ -193,7 +214,7 @@ export default function MapExploreUlakan({ userLocation, dataMapforType, radius,
           routeArray.length = 0;
           const directionsService = new google.maps.DirectionsService();
 
-          let start, end;
+          let start: google.maps.LatLng, end: google.maps.LatLng;
           start = new google.maps.LatLng(userLocation.lat, userLocation.lng);
           end = new google.maps.LatLng(lat, lng)
 
@@ -212,9 +233,12 @@ export default function MapExploreUlakan({ userLocation, dataMapforType, radius,
               directionsRenderer.setDirections(result);
               routeArray.push(directionsRenderer);
               directionsRenderer.setMap(map);
+
+              const myRoute = result.routes[0].legs[0];
+              setDistancesAndInstructions(myRoute);
+              boundToRoute(start, end);
             }
           });
-          boundToRoute(start, end);
         }
       }
       if (firstIdData.startsWith("CP")) {

@@ -9,7 +9,7 @@ interface ExploreUlakanTableSectionProps {
 
 export default function ExploreUlakanTableSection({ onSearchAroundClick, onShowMapClick, }: ExploreUlakanTableSectionProps) {
   return (
-    <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
+    <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
       <div className="text-2xl text-center justify-center">
         <h1 className="">Explore Ulakan</h1>
       </div>
@@ -64,7 +64,7 @@ export default function ExploreUlakanTableSection({ onSearchAroundClick, onShowM
             </tr>
           </tbody>
         </table>
-        <div className="bg-blue-500 rounded-lg text-white p-2 flex" onClick={onSearchAroundClick}>
+        <div role="button" className="bg-blue-500 rounded-lg hover:bg-blue-600 text-white p-2 flex justify-center mx-8" onClick={onSearchAroundClick}>
           <button>Search Around You</button>
         </div>
       </div>

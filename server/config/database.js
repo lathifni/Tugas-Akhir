@@ -10,5 +10,3 @@ const pool = mysql.createPool({
 const promisePool = pool.promise()
 
 module.exports = promisePool
-
-// module.exports = pool

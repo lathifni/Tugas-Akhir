@@ -8,7 +8,7 @@ interface MapContentCulinaryPlacesProps {
   contact_person: string;
   lat: number;
   lng: number;
-  onRouteClick: (value:boolean, latObject:number, lngObject:number) => void;
+  onRouteClick: (latObject:number, lngObject:number) => void;
 }
 
 interface MapContentWorshipPlacesProps {
@@ -31,9 +31,9 @@ interface MapContentHomestayPlacesProps {
 
 
 export const MapContentCulinaryPlaces: React.FC<MapContentCulinaryPlacesProps> = ({ name, address, contact_person, lat, lng, onRouteClick }) => {
-  const routeClickHandler = (value: boolean) => {
+  const routeClickHandler = () => {
     console.log('ini dibagian handler mapHelper');
-    onRouteClick(value, lat, lng)
+    onRouteClick(lat, lng)
   }
   return (
     <div className="p-2">
@@ -41,7 +41,7 @@ export const MapContentCulinaryPlaces: React.FC<MapContentCulinaryPlacesProps> =
       <p className="flex m-1 text-base justify-center"><Pin className="mr-2"/>{address}</p>
       <p className="flex m-1 text-base justify-center"><Contact className="mr-2"/>{contact_person}</p>
       <div className="flex justify-center text-lg">
-        <div role="button" title="route" onClick={() => routeClickHandler(true)} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
+        <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
         <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500"/></div>
       </div>
     </div>

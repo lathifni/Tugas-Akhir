@@ -40,6 +40,8 @@ export default function Ulakan() {
   const [dataTypeMap, setDataTypeMap] = useState<dataListGeom[] | null>(null)
   const [radius, setRadius] = useState(0)
   const [isManualLocationClicked, setIsManualLocationClicked] = useState(false);
+  const [distances, setDistances] = useState<number[]>([]);
+  const [instructions, setInstructions] = useState<string[]>([]);
 
   const queryMutiple = () => {
     const resListGeomWorship = useQuery({
@@ -83,12 +85,12 @@ export default function Ulakan() {
   };
 
   const handleManualLocationUpdate = () => {
-    const dialogElement = document.getElementById('manualLocationDialog')as HTMLDialogElement;
+    const dialogElement = document.getElementById('manualLocationDialog') as HTMLDialogElement;
     if (dialogElement) dialogElement.showModal();
   };
 
   const handleModalOk = () => {
-    const dialogElement = document.getElementById('manualLocationDialog')as HTMLDialogElement;
+    const dialogElement = document.getElementById('manualLocationDialog') as HTMLDialogElement;
     if (dialogElement) {
       setIsManualLocationClicked(true);
       dialogElement.close();
@@ -96,7 +98,7 @@ export default function Ulakan() {
   };
 
   const handleModalCancel = () => {
-    const dialogElement = document.getElementById('manualLocationDialog')as HTMLDialogElement;
+    const dialogElement = document.getElementById('manualLocationDialog') as HTMLDialogElement;
     dialogElement.close();
   }
 
@@ -147,8 +149,8 @@ export default function Ulakan() {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row mt-3">
-        <div className="w-full ml-3 h-full p-2 lg:w-2/3 bg-white rounded-lg">
+      <div className="flex flex-col lg:flex-row m-3">
+        <div className="w-full h-full p-2 mb-3 lg:mb-0 lg:mr-3 lg:w-2/3 bg-white rounded-lg">
           <div className="flex flex-col md:flex-row h-auto ">
             <div className=" flex items-center">
               <h1 className="text-lg font-semibold">Google Maps with Location</h1>
@@ -166,7 +168,11 @@ export default function Ulakan() {
             </div>
           </div>
           <div className=" pb-5">
-            <MapExploreUlakan userLocation={userLocation} objectAround={objectAroundState} dataMapforType={dataTypeMap} radius={radius} isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation} />
+            <MapExploreUlakan userLocation={userLocation} objectAround={objectAroundState}
+              dataMapforType={dataTypeMap} radius={radius}
+              isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation}
+              distances={distances} setDistances={setDistances}
+              instructions={instructions} setInstructions={setInstructions} />
           </div>
         </div>
         {listExploreUlakan ? (
@@ -178,6 +184,29 @@ export default function Ulakan() {
             onStateChange={handleObjectAroundStateChange} />
         )}
       </div>
+      {distances !== null && distances.length !== 0 && (
+        <div className="flex flex-col lg:flex-row mx-3 mt-3 mb-10">
+          <div className="w-full h-full p-2 bg-white rounded-lg">
+            <h1 className="text-center font-semibold text-lg">Directions</h1>
+            <table className="w-full">
+              <thead className="text-center font-medium">
+                <tr>
+                  <th>Distance&nbsp;(m)</th>
+                  <th>Steps</th>
+                </tr>
+              </thead>
+              <tbody>
+                {distances.map((distace, index) => (
+                  <tr key={index}>
+                    <td className="text-center">{distace}</td>
+                    <td dangerouslySetInnerHTML={{ __html: instructions[index] }} />
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
       {/* Modal */}
       <dialog id="manualLocationDialog" className="bg-white p-12 mt-72 rounded-lg shadow-lg">
         <h2 className="text-xl mb-4 text-center font-bold">Confirmation</h2>
