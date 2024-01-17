@@ -19,11 +19,10 @@ interface MapProps {
   goToObject: boolean | false;
   setGoToObject: React.Dispatch<React.SetStateAction<boolean>>;
   showLegend: boolean | false;
-  setShowLegend: React.Dispatch<React.SetStateAction<boolean>>;
 }
 let map: google.maps.Map | null = null;
 
-export default function MapHome({ userLocation, goToObject, setGoToObject, showLegend, setShowLegend }: MapProps) {
+export default function MapHome({ userLocation, goToObject, setGoToObject, showLegend }: MapProps) {
   const mapRef = React.useRef<HTMLDivElement>(null)
   const legendRef = React.useRef<HTMLDivElement>(null);
   const loader = new Loader({

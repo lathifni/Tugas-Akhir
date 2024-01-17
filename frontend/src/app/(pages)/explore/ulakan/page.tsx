@@ -10,6 +10,7 @@ import { fetchListGeomCulinary } from "../../api/fetchers/culinary";
 import { fetchListGeomWorship } from "../../api/fetchers/worhsip";
 import { fetchListGeomSouvenir } from "../../api/fetchers/souvenir";
 import { fetchListGeomHomestay } from "../../api/fetchers/homestay";
+import MapExploreUlakanCopy from "@/components/maps/mapExploreUlakanCopy";
 
 interface UserLocation {
   lat: number;
@@ -168,7 +169,12 @@ export default function Ulakan() {
             </div>
           </div>
           <div className=" pb-5">
-            <MapExploreUlakan userLocation={userLocation} objectAround={objectAroundState}
+          {/* <MapExploreUlakan userLocation={userLocation} objectAround={objectAroundState}
+              dataMapforType={dataTypeMap} radius={radius}
+              isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation}
+              distances={distances} setDistances={setDistances}
+              instructions={instructions} setInstructions={setInstructions} /> */}
+            <MapExploreUlakanCopy userLocation={userLocation} objectAround={objectAroundState}
               dataMapforType={dataTypeMap} radius={radius}
               isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation}
               distances={distances} setDistances={setDistances}

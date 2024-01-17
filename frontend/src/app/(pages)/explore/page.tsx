@@ -118,7 +118,8 @@ export default function Explore() {
           <div className=" pb-5">
             <MapHome userLocation={userLocation} 
             goToObject={goToObject} setGoToObject={setGoToObject} 
-            showLegend={showLegend} setShowLegend={setShowLegend} />
+            showLegend={showLegend} 
+            />
           </div>
         </div>
         <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
