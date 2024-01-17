@@ -9,6 +9,7 @@ const culinary = require('./culinary')
 const worship = require('./worship')
 const homestay = require('./homestay')
 const souvenir = require('./souvenir')
+const kotaKabKec = require('./kotaKabKec')
 
 const router = {}
 
@@ -23,5 +24,6 @@ router.culinary = culinary
 router.worship = worship
 router.homestay = homestay
 router.souvenir = souvenir
+router.kotaKabKec = kotaKabKec
 
 module.exports = router

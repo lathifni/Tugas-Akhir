@@ -1,13 +1,21 @@
 'use client'
 
-import Map from "@/components/maps/map";
+import MapHome from "@/components/maps/mapHome";
 import { ChevronLeft, ChevronRight, Dot, Eye, Goal, MapPin } from "lucide-react";
 import { fetchGalleriesGtp } from "../api/fetchers/galleries";
 import { useQuery } from "@tanstack/react-query";
 import { fetchInfoGtp } from "../api/fetchers/gtp";
 import { Key, useEffect, useState } from "react";
 
+interface UserLocation {
+  lat: number;
+  lng: number;
+}
+
 export default function Explore() {
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [goToObject, setGoToObject] = useState(false)
+  const [showLegend, setShowLegend] = useState(false);
   const queryMutiple = () => {
     const resGalleries = useQuery({
       queryKey: ['galleriesGtp'],
@@ -28,7 +36,6 @@ export default function Explore() {
   ] = queryMutiple()
 
   useEffect(() => {
-    // Fungsi untuk mengganti slide setiap 3000ms
     const interval = setInterval(() => {
       setCurrentIndex(prevIndex => (prevIndex + 1) % dataGalleries.length);
     }, 3000);
@@ -53,29 +60,65 @@ export default function Explore() {
     setCurrentIndex(slideIndex);
   };
 
+  const fetchUserLocation = async (): Promise<void> => {
+    try {
+      const position = await getCurrentPosition();
+      setUserLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+    } catch (error) {
+      console.error("Error getting location:", error);
+    }
+  };
+
+  const getCurrentPosition = (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation is not supported by this browser."));
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve(position);
+        },
+        (error) => {
+          reject(error);
+        }
+      );
+    });
+  };
+
+  const goToObjectHandler = () => {
+    setGoToObject(true)
+  }
+
+  const showLegendHandler = () => {
+    setShowLegend((prev) => !prev); // Toggle nilai showLegend
+  };
+
   return (
     <>
       <div className="flex flex-col lg:flex-row mt-3">
         <div className="w-full ml-3 h-full p-2 lg:w-2/3 bg-white rounded-lg">
-          <div className="flex flex-col md:flex-row h-auto ">
+          <div className="flex flex-col md:flex-row h-auto select-none">
             <div className=" flex items-center">
               <h1 className="text-lg font-semibold">Google Maps with Location</h1>
             </div>
             <div className="flex flex-wrap m-2 gap-5">
-              <div className="p-2 bg-blue-500 rounded-lg" title="Current Location">
+              <div className="p-2 bg-blue-500 rounded-lg hover:bg-blue-600" title="Current Location" role="button" onClick={fetchUserLocation}>
                 <Goal className="text-slate-200" />
               </div>
-              <div className="p-2 bg-blue-500 rounded-lg" title="Set Manual Location">
-                <MapPin className="text-slate-200" />
-              </div>
-              <div className="p-2 bg-blue-500 rounded-lg" title="Toggle Legend">
+              <div className="p-2 bg-blue-500 rounded-lg hover:bg-blue-600" title="Toggle Legend" role="button" onClick={showLegendHandler}>
                 <Eye className="text-slate-200" />
               </div>
-              <div className="p-2 bg-blue-500 rounded-lg text-white" title="Toggle Legend">go to object</div>
+              <div className="p-2 bg-blue-500 rounded-lg hover:bg-blue-600 text-white" title="Toggle Legend" role="button" onClick={goToObjectHandler}>Go to Object</div>
             </div>
           </div>
           <div className=" pb-5">
-            <Map />
+            <MapHome userLocation={userLocation} 
+            goToObject={goToObject} setGoToObject={setGoToObject} 
+            showLegend={showLegend} setShowLegend={setShowLegend} />
           </div>
         </div>
         <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">

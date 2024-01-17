@@ -69,7 +69,6 @@ const positionGtp = {
 export default function MapExploreUlakan({
   userLocation, dataMapforType, radius, isManualLocation, setUserLocation, objectAround, distances, setDistances, instructions, setInstructions
 }: MapExploreUlakanProps) {
-  const [radiuss, setRadiuss] = useState<number>(0)
   const queryMutiple = () => {
     const resUlakanVillage = useQuery({
       queryKey: ['ulakanVillage'],
@@ -88,11 +87,13 @@ export default function MapExploreUlakan({
   ] = queryMutiple()
 
   const setDistancesAndInstructions = (myRoute: any) => {
-    const newDistances = myRoute.steps.map((step: Step) => step.distance?.value || 0);
-    const newInstructions = myRoute.steps.map((step: Step) => step.instructions || '');
-    // setDistances(newDistances);
-    // setInstructions(newInstructions);
+    distances = myRoute.steps.map((step: Step) => step.distance?.value || 0);
+    instructions = myRoute.steps.map((step: Step) => step.instructions || '');
+    // setDistances(distances);
+    // setInstructions(instructions);
   };
+
+ 
 
   const mapRef = React.useRef<HTMLDivElement>(null)
 
@@ -145,12 +146,10 @@ export default function MapExploreUlakan({
 
     if (dataUlakanVillage && Array.isArray(dataUlakanVillage)) {
       dataUlakanVillage.forEach((item: { name: string, geom: string }) => {
-        // const name = item.name
         const geom = JSON.parse(item.geom)
 
         digitasiVillage.addGeoJson({
           type: 'Feature',
-          // properties: { name },
           geometry: geom
         })
 
@@ -164,9 +163,7 @@ export default function MapExploreUlakan({
         digitasiVillage.setMap(map)
       })
       digitasiVillage.addListener('click', function (event: google.maps.Data.MouseEvent) {
-        // const name = event.feature.getProperty('name');
         infoWindow.setContent(`Nagari Ulakan`)
-
         infoWindow.setPosition(event.latLng);
         infoWindow.open(map);
       });
@@ -535,7 +532,15 @@ export default function MapExploreUlakan({
     initMap(dataUlakanVillage, dataGeomGtp);
   }, [queryMutiple(), dataMapforType, isManualLocation, objectAround])
 
+  useEffect(() => {
+    console.log('testt distance useEffect');
+    
+    setDistances(distances);
+    setInstructions(instructions);
+  }, [distances])
   return (
     <div style={{ height: '500px' }} ref={mapRef} className="text-slate-700"></div>
   )
+  
 }
+

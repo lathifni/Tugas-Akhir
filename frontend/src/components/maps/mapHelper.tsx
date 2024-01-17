@@ -1,4 +1,4 @@
-import { faI, faRoad } from "@fortawesome/free-solid-svg-icons";
+import { faI, faRoad, faSpa } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Contact, Pin, User } from "lucide-react";
 
@@ -85,6 +85,58 @@ export const MapContentHomestayPlaces: React.FC<MapContentHomestayPlacesProps> =
       <div className="flex justify-center text-lg">
         <div role="button" title="route" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
         <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500"/></div>
+      </div>
+    </div>
+  )
+}
+
+export const GtpInfoWindow = () => {
+  return (
+    <div className="p-1">
+      <h1 className="font-bold text-center text-lg">Green Talao Park</h1>
+      <p className="flex justify-center m-1"><FontAwesomeIcon icon={faSpa} className="mr-2"/> Tourism Village</p>
+    </div>
+  )
+}
+
+export const Legend = () => {
+  return (
+    <div className="text-xs flex flex-col">
+      <div className="flex items-center">
+        <img src="/icon/bathroom.png" alt="" className="w-4 h-5 mr-2" /><p>Public Bathroom</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/selfie.png" alt="" className="w-4 h-5 mr-2" /><p>Selfie Area</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/souvenir.png" alt="" className="w-4 h-5 mr-2" /><p>Souvenir Place</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/treehouse.png" alt="" className="w-4 h-5 mr-2" /><p>Tree House</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/tower.png" alt="" className="w-4 h-5 mr-2" /><p>Viewing Tower</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/worship.png" alt="" className="w-4 h-5 mr-2" /><p>Worship Place</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/negara.png" alt="" className="w-4 h-4 mr-2" /><p>Negara</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/provinsi.png" alt="" className="w-4 h-4 mr-2" /><p>Provinsi</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/kabkota.png" alt="" className="w-4 h-4 mr-2" /><p>Kota/Kabupaten</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/kecamatan.png" alt="" className="w-4 h-4 mr-2" /><p>Kecamatan</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/nagari.png" alt="" className="w-4 h-4 mr-2" /><p>Nagari</p>
+      </div>
+      <div className="flex items-center mt-2">
+        <img src="/icon/desawisata.png" alt="" className="w-4 h-4 mr-2" /><p>Desa Wista</p>
       </div>
     </div>
   )
