@@ -16,6 +16,8 @@ export default function Explore() {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [goToObject, setGoToObject] = useState(false)
   const [showLegend, setShowLegend] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
   const queryMutiple = () => {
     const resGalleries = useQuery({
       queryKey: ['galleriesGtp'],
@@ -27,8 +29,6 @@ export default function Explore() {
     })
     return [resGalleries, resInfo]
   }
-
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   const [
     { isLoading: loadingGalleries, data: dataGalleries },
