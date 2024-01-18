@@ -25,6 +25,7 @@ let map: google.maps.Map | null = null;
 export default function MapHome({ userLocation, goToObject, setGoToObject, showLegend }: MapProps) {
   const mapRef = React.useRef<HTMLDivElement>(null)
   const legendRef = React.useRef<HTMLDivElement>(null);
+
   const loader = new Loader({
     apiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY as string,
     version: 'weekly'
@@ -51,7 +52,7 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
     queryFn: fetchGeomGtp
   })
 
-  const initMap = async () => {
+  const initMap = async (kotaKabData: any[], kecData: any[], villageData: any[], gtpData: any[]) => {
     const { Map } = await loader.importLibrary('maps')
     window.google = google;
     const mapOptions: google.maps.MapOptions = {
@@ -142,80 +143,88 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
         .catch(error => console.error(error))
     }
 
-    kotaKabData.forEach((item: { id: string, name: string, geom: string }) => {
-      const geom: string = JSON.parse(item.geom)
-      const { id, name } = item
+    if (kotaKabData && Array.isArray(kotaKabData)) {
+      kotaKabData.forEach((item: { id: string, name: string, geom: string }) => {
+        const geom: string = JSON.parse(item.geom)
+        const { id, name } = item
 
-      digitasiKotaKabupaten.addGeoJson({
-        type: 'Feature',
-        properties: { id, name },
-        geometry: geom
-      })
+        digitasiKotaKabupaten.addGeoJson({
+          type: 'Feature',
+          properties: { id, name },
+          geometry: geom
+        })
 
-      digitasiKotaKabupaten.setStyle({
-        fillColor: '#F875AA',
-        strokeWeight: 0.5,
-        strokeColor: '#ffffff',
-        fillOpacity: 0.5,
-        clickable: true
-      })
-      digitasiKotaKabupaten.setMap(map)
-    });
+        digitasiKotaKabupaten.setStyle({
+          fillColor: '#F875AA',
+          strokeWeight: 0.5,
+          strokeColor: '#ffffff',
+          fillOpacity: 0.5,
+          clickable: true
+        })
+        digitasiKotaKabupaten.setMap(map)
+      });
+    }
 
-    kecData.forEach((item: { id: string, name: string, geom: string }) => {
-      const geom: string = JSON.parse(item.geom)
-      const { id, name } = item
+    if (kecData && Array.isArray(kecData)) {
+      kecData.forEach((item: { id: string, name: string, geom: string }) => {
+        const geom: string = JSON.parse(item.geom)
+        const { id, name } = item
 
-      digitasiKecamatan.addGeoJson({
-        type: 'Feature',
-        properties: { id, name },
-        geometry: geom
-      })
-      digitasiKecamatan.setStyle({
-        fillColor: '#F0FF42',
-        strokeWeight: 0.4,
-        strokeColor: '#ffffff',
-        fillOpacity: 0.4,
-        clickable: true
-      })
-      digitasiKecamatan.setMap(map)
-    });
+        digitasiKecamatan.addGeoJson({
+          type: 'Feature',
+          properties: { id, name },
+          geometry: geom
+        })
+        digitasiKecamatan.setStyle({
+          fillColor: '#F0FF42',
+          strokeWeight: 0.4,
+          strokeColor: '#ffffff',
+          fillOpacity: 0.4,
+          clickable: true
+        })
+        digitasiKecamatan.setMap(map)
+      });
+    }
 
-    villageData.forEach((item: { id: string, name: string, geom: string }) => {
-      const geom: string = JSON.parse(item.geom)
-      const { id, name } = item
+    if (villageData && Array.isArray(villageData)) {
+      villageData.forEach((item: { id: string, name: string, geom: string }) => {
+        const geom: string = JSON.parse(item.geom)
+        const { id, name } = item
 
-      digitasiVillage.addGeoJson({
-        type: 'Feature',
-        properties: { id, name },
-        geometry: geom
-      })
-      digitasiVillage.setStyle({
-        fillColor: '#FFC436',
-        strokeWeight: 2,
-        strokeColor: '#ffffff',
-        fillOpacity: 2,
-        clickable: true
-      })
-      digitasiVillage.setMap(map)
-    });
+        digitasiVillage.addGeoJson({
+          type: 'Feature',
+          properties: { id, name },
+          geometry: geom
+        })
+        digitasiVillage.setStyle({
+          fillColor: '#FFC436',
+          strokeWeight: 2,
+          strokeColor: '#ffffff',
+          fillOpacity: 2,
+          clickable: true
+        })
+        digitasiVillage.setMap(map)
+      });
+    }
 
-    gtpData.forEach((item: { geom: string }) => {
-      const geom: string = JSON.parse(item.geom)
+    if (gtpData && Array.isArray(gtpData)) {
+      gtpData.forEach((item: { geom: string }) => {
+        const geom: string = JSON.parse(item.geom)
 
-      digitasiGtp.addGeoJson({
-        type: 'Feature',
-        geometry: geom
-      })
-      digitasiGtp.setStyle({
-        fillColor: '#03C988',
-        strokeWeight: 3,
-        strokeColor: '#ffffff',
-        fillOpacity: 2,
-        clickable: false
-      })
-      digitasiGtp.setMap(map)
-    });
+        digitasiGtp.addGeoJson({
+          type: 'Feature',
+          geometry: geom
+        })
+        digitasiGtp.setStyle({
+          fillColor: '#03C988',
+          strokeWeight: 3,
+          strokeColor: '#ffffff',
+          fillOpacity: 2,
+          clickable: false
+        })
+        digitasiGtp.setMap(map)
+      });
+    }
 
     digitasiNegara.addListener('click', function (event: google.maps.Data.MouseEvent) {
       const name = event.feature.getProperty('name');
@@ -262,20 +271,13 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
     })
     const container = document.createElement('div');
 
-    const gtpInfoWindow = new google.maps.InfoWindow({
-      // content: document.body.appendChild(container)
-    })
+    const gtpInfoWindow = new google.maps.InfoWindow()
     markerGTP.addListener('click', function (event: google.maps.MapMouseEvent) {
       const root = createRoot(container);
       root.render(<GtpInfoWindow />)
       gtpInfoWindow.setContent(container)
       gtpInfoWindow.open(map, markerGTP);
     })
-    // const legendContainer = document.createElement('div');
-    // legendContainer.innerHTML = '<div style="position: absolute; top: 10px; right: 10px; background-color: white; padding: 10px; border: 1px solid #ccc; display: ' + (showLegend ? 'block' : 'none') + ';">Legend Content</div>';
-    // if (legendRef.current) {
-    //   legendRef.current.appendChild(legendContainer);
-    // }
   }
 
   const navigateToObject = () => {
@@ -289,14 +291,11 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
   }
 
   useEffect(() => {
-    if (kotaKabData !== undefined && kecData !== undefined && villageData !== undefined && gtpData !== undefined) {
-      initMap()
-    }
+    initMap(kotaKabData, kecData, villageData, gtpData)
   }, [kotaKabData, kecData, villageData, gtpData])
 
   useEffect(() => {
     if (userLocation !== null && map) {
-      console.log(userLocation, 'di userLocation useEffect');
       const marker = new google.maps.Marker()
       const markerOptions = {
         position: userLocation,
@@ -323,10 +322,9 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
   }, [goToObject])
 
   useEffect(() => {
-    // Update visibilitas legend saat perubahan state showLegend
     setShowLegendVisibility();
   }, [showLegend]);
-  
+
   const setShowLegendVisibility = () => {
     if (legendRef.current) {
       const legendContent = legendRef.current.querySelector('.legend-content') as HTMLElement;
@@ -340,11 +338,10 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
     <div className="relative">
       <div ref={legendRef} className={`absolute bottom-6 left-2 `} style={{ zIndex: 100 }}>
         {showLegend && (
-      <div className="legend-content" style={{ border: '1px solid #ccc', padding: '10px', background: '#fff' }}>
-        {/* Legend content goes here */}
-        <Legend />
-      </div>
-    )}
+          <div className="legend-content" style={{ border: '1px solid #ccc', padding: '10px', background: '#fff' }}>
+            <Legend />
+          </div>
+        )}
       </div>
       <div style={{ height: '700px' }} ref={mapRef} className="text-slate-700"></div>
     </div>

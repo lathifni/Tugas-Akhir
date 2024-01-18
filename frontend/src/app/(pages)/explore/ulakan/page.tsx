@@ -40,6 +40,7 @@ export default function Ulakan() {
   const [listExploreUlakan, setListExploreUlakan] = useState(true);
   const [dataTypeMap, setDataTypeMap] = useState<dataListGeom[] | null>(null)
   const [radius, setRadius] = useState(0)
+  const [showLegend, setShowLegend] = useState(false);
   const [isManualLocationClicked, setIsManualLocationClicked] = useState(false);
   const [distances, setDistances] = useState<number[]>([]);
   const [instructions, setInstructions] = useState<string[]>([]);
@@ -148,22 +149,26 @@ export default function Ulakan() {
     setRadius(0)
   };
 
+  const showLegendHandler = () => {
+    setShowLegend((prev) => !prev); // Toggle nilai showLegend
+  };
+
   return (
     <>
       <div className="flex flex-col lg:flex-row m-3">
         <div className="w-full h-full p-2 mb-3 lg:mb-0 lg:mr-3 lg:w-2/3 bg-white rounded-lg">
-          <div className="flex flex-col md:flex-row h-auto ">
+          <div className="flex flex-col md:flex-row h-auto select-none">
             <div className=" flex items-center">
               <h1 className="text-lg font-semibold">Google Maps with Location</h1>
             </div>
             <div className="flex flex-wrap m-2 gap-5">
-              <div className="p-2 bg-blue-500 rounded-lg" title="Current Location" onClick={fetchUserLocation}>
+              <div className="p-2 bg-blue-500 rounded-lg" role="button" title="Current Location" onClick={fetchUserLocation}>
                 <Goal className="text-slate-200" />
               </div>
-              <div className="p-2 bg-blue-500 rounded-lg" title="Set Manual Location" onClick={handleManualLocationUpdate}>
+              <div className="p-2 bg-blue-500 rounded-lg" role="button" title="Set Manual Location" onClick={handleManualLocationUpdate}>
                 <MapPin className="text-slate-200" />
               </div>
-              <div className="p-2 bg-blue-500 rounded-lg" title="Toggle Legend">
+              <div className="p-2 bg-blue-500 rounded-lg" role="button" title="Toggle Legend" onClick={showLegendHandler}>
                 <Eye className="text-slate-200" />
               </div>
             </div>
@@ -174,11 +179,13 @@ export default function Ulakan() {
               isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation}
               distances={distances} setDistances={setDistances}
               instructions={instructions} setInstructions={setInstructions} /> */}
-            <MapExploreUlakanCopy userLocation={userLocation} objectAround={objectAroundState}
+            <MapExploreUlakanCopy 
+              userLocation={userLocation} objectAround={objectAroundState}
               dataMapforType={dataTypeMap} radius={radius}
-              isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation}
+              isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked} setUserLocation={setUserLocation}
               distances={distances} setDistances={setDistances}
-              instructions={instructions} setInstructions={setInstructions} />
+              instructions={instructions} setInstructions={setInstructions} 
+              showLegend={showLegend} />
           </div>
         </div>
         {listExploreUlakan ? (
