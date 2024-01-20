@@ -18,11 +18,12 @@ export default function NavigationItem() {
               <span className="flex-1">Home</span>
             </li>
           </Link>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} 
+          onClick={() => setSubMenuOpenUniqueAttractions(!subMenuOpenUniqueAttractions)}
+          >
             <FontAwesomeIcon icon={faStar} style={{ fontSize: '1.3em' }} />
             <span className="flex-1">Unique Atractions</span>
             <ChevronDown
-              onClick={() => setSubMenuOpenUniqueAttractions(!subMenuOpenUniqueAttractions)}
               className={`${subMenuOpenUniqueAttractions && 'rotate-180'}`}
             />
           </li>
@@ -62,11 +63,12 @@ export default function NavigationItem() {
               </Link>
             </ul>
           )}
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} 
+          onClick={() => setSubMenuOpenOrdinaryAttractions(!subMenuOpenOrdinaryAttractions)}
+          >
             <FontAwesomeIcon icon={faUniversalAccess} style={{ fontSize: '1.3em' }} />
             <span className="flex-1">Ordinary Attractions</span>
             <ChevronDown
-              onClick={() => setSubMenuOpenOrdinaryAttractions(!subMenuOpenOrdinaryAttractions)}
               className={`${subMenuOpenOrdinaryAttractions && 'rotate-180'}`}
             />
           </li>
@@ -96,7 +98,7 @@ export default function NavigationItem() {
               <span className="flex-1">Event</span>
             </li>
           </Link>
-          <Link href={'/explore/tourism'}>
+          <Link href={'/explore/package'}>
             <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
               <FontAwesomeIcon icon={faSquarePollHorizontal} style={{ fontSize: '1.3em' }} />
               <span className="flex-1">Tourism Package</span>

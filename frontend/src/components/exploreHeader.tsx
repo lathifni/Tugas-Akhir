@@ -10,6 +10,12 @@ export default function ExploreHeader() {
   const { data: session, status, update } = useSession()
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const avatarButtonHandler = () => {
+    console.log('test');
+    
+    setDropdownOpen((prev) => !prev)
+  }
+
   useEffect(() => {
     if (status === 'authenticated') {
       if (session) {
@@ -27,15 +33,15 @@ export default function ExploreHeader() {
   }, [])
 
   return (
-    <div className="flex mt-8 justify-between">
+    <div className="flex mt-1 sm:mt-3 md:mt-5 justify-between z-[99999]">
       <div className="flex items-center">
-        <p className='text-2xl font-semibold text-slate-800'>Green Talao Park</p>
+        <p className='text-2xl font-semibold text-slate-800 ml-10'>Green Talao Park</p>
       </div>
       {!isLoading && (
-        <div className='relative'>
+        <div className='relative '>
           {session && (
-            <div className='w-12 h-12 rounded-lg bg-white mr-5 flex items-center justify-center'
-              onClick={() => setDropdownOpen(!dropdownOpen)}
+            <div className='w-12 h-12 rounded-lg bg-white mr-1 sm:mr-3 md:mr-5 flex items-center justify-center' role='button'
+              onClick={avatarButtonHandler}
               // onMouseLeave={() => { if (dropdownOpen) setDropdownOpen(false)} }
             >
               <Avatar className='justify-center text-center' />

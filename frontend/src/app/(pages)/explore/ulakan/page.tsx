@@ -155,11 +155,11 @@ export default function Ulakan() {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row m-3">
-        <div className="w-full h-full p-2 mb-3 lg:mb-0 lg:mr-3 lg:w-2/3 bg-white rounded-lg">
-          <div className="flex flex-col md:flex-row h-auto select-none">
+      <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
+        <div className="w-full h-full px-1 py-1 mb-3 lg:p-0 lg:mb-0 lg:mr-3 sm:py-3 lg:w-2/3 bg-white rounded-lg">
+          <div className="flex flex-col ml-10 sm:m-1 md:flex-row h-auto select-none">
             <div className=" flex items-center">
-              <h1 className="text-lg font-semibold">Google Maps with Location</h1>
+              <h1 className="text-lg font-semibold md:ml-3">Google Maps with Location</h1>
             </div>
             <div className="flex flex-wrap m-2 gap-5">
               <div className="p-2 bg-blue-500 rounded-lg" role="button" title="Current Location" onClick={fetchUserLocation}>
@@ -173,7 +173,7 @@ export default function Ulakan() {
               </div>
             </div>
           </div>
-          <div className=" pb-5">
+          <div className="pb-5 md:mx-3">
           {/* <MapExploreUlakan userLocation={userLocation} objectAround={objectAroundState}
               dataMapforType={dataTypeMap} radius={radius}
               isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation}
@@ -198,7 +198,7 @@ export default function Ulakan() {
         )}
       </div>
       {distances !== null && distances.length !== 0 && (
-        <div className="flex flex-col lg:flex-row mx-3 mt-3 mb-10">
+        <div className="flex flex-col lg:flex-row mx-1 sm:mx-3 lg:mx-5 mt-3 mb-10">
           <div className="w-full h-full p-2 bg-white rounded-lg">
             <h1 className="text-center font-semibold text-lg">Directions</h1>
             <table className="w-full">

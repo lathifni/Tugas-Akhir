@@ -343,7 +343,7 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
           </div>
         )}
       </div>
-      <div style={{ height: '700px' }} ref={mapRef} className="text-slate-700"></div>
+      <div ref={mapRef} className="text-slate-700 h-[500px] md:h-[700px] rounded-lg"></div>
     </div>
   )
 }

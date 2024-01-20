@@ -8,8 +8,6 @@ import React, { useEffect, useRef } from "react"
 import useAxiosAuth from "../../../libs/useAxiosAuth"
 import { MapContentCulinaryPlaces, MapContentWorshipPlaces, MapContentSouvenirPlaces, MapContentHomestayPlaces, Legend } from "./mapHelper"
 import { createRoot } from 'react-dom/client';
-let markerArray: any = {};
-let routeArray: any = []
 
 interface UserLocation {
   lat: number;
@@ -61,11 +59,12 @@ const loader = new Loader({
   apiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY as string,
   version: 'weekly'
 })
-
 const positionGtp = {
   lat: -0.7102134517843606,
   lng: 100.19420485758688
 }
+let markerArray: any = {};
+let routeArray: any = [];
 
 export default function MapExploreUlakanCopy({
   userLocation, dataMapforType, radius, isManualLocation, setIsManualLocation, setUserLocation, objectAround, distances, setDistances, instructions, setInstructions, showLegend
@@ -177,7 +176,6 @@ export default function MapExploreUlakanCopy({
       })
       digitasiGtp.addListener('click', function (event: google.maps.Data.MouseEvent) {
         infoWindow.setContent(`Green Talao Park`)
-
         infoWindow.setPosition(event.latLng);
         infoWindow.open(map);
       });
@@ -193,8 +191,6 @@ export default function MapExploreUlakanCopy({
 
   const handleRouteButtonClick = (lat: number, lng: number) => {
     if (userLocation) {
-      console.log(userLocation);
-
       routeArray.forEach((directionsRenderer: google.maps.DirectionsRenderer) => {
         directionsRenderer.setMap(null);
       });
@@ -204,7 +200,8 @@ export default function MapExploreUlakanCopy({
       let start: google.maps.LatLng, end: google.maps.LatLng;
       start = new google.maps.LatLng(userLocation.lat, userLocation.lng);
       end = new google.maps.LatLng(lat, lng)
-
+      console.log(end, 'nilai end nihhh');
+      
       const request: google.maps.DirectionsRequest = {
         origin: start,
         destination: end,
@@ -263,7 +260,7 @@ export default function MapExploreUlakanCopy({
 
       const container = document.createElement('div');
       const root = createRoot(container);
-      if (contact_person) root.render(<MapContentCulinaryPlaces name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
+      if (contact_person) root.render(<MapContentCulinaryPlaces id={id} name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container)
       }).open(map, marker)
@@ -290,7 +287,7 @@ export default function MapExploreUlakanCopy({
       }, 1700)
       const container = document.createElement('div');
       const root = createRoot(container);
-      if (capacity) root.render(<MapContentWorshipPlaces name={name} address={address} capacity={capacity} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
+      if (capacity) root.render(<MapContentWorshipPlaces id={id} name={name} address={address} capacity={capacity} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container),
       }).open(map, marker)
@@ -317,7 +314,7 @@ export default function MapExploreUlakanCopy({
       }, 1700)
       const container = document.createElement('div');
       const root = createRoot(container);
-      if (contact_person) root.render(<MapContentSouvenirPlaces name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
+      if (contact_person) root.render(<MapContentSouvenirPlaces id={id} name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container)
       }).open(map, marker)
@@ -344,7 +341,7 @@ export default function MapExploreUlakanCopy({
       }, 1700)
       const container = document.createElement('div');
       const root = createRoot(container);
-      if (contact_person) root.render(<MapContentHomestayPlaces name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
+      if (contact_person) root.render(<MapContentHomestayPlaces id={id} name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container)
       }).open(map, marker)
@@ -439,7 +436,10 @@ export default function MapExploreUlakanCopy({
         lat: mapsMouseEvent.latLng.lat(),
         lng: mapsMouseEvent.latLng.lng()
       };
-      setUserLocation(newLocation);
+      setUserLocation({
+        lat: newLocation.lat,
+        lng:newLocation.lng
+      });
       console.log(newLocation);
       console.log(userLocation);
 
@@ -536,7 +536,7 @@ export default function MapExploreUlakanCopy({
           </div>
         )}
       </div>
-      <div style={{ height: '700px' }} ref={mapRef} className="text-slate-700"></div>
+      <div ref={mapRef} className="text-slate-700 h-[500px] md:h-[700px] rounded-lg"></div>
     </div>
   )
 }

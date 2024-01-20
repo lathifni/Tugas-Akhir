@@ -1,3 +1,5 @@
+import Footer from "@/components/footer";
+
 export default function EventLayout({
   children,
 }: {
@@ -7,6 +9,7 @@ export default function EventLayout({
     <div className="h-full flex">
       <main className="flex-1 h-full overflow-y-auto bg-slate-200">
         {children}
+        <Footer/>
       </main>
     </div>
   )

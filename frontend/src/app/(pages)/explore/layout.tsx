@@ -1,6 +1,7 @@
 'use client'
 
 import ExploreHeader from "@/components/exploreHeader";
+import Footer from "@/components/footer";
 import NavigationTest from "@/components/navigation";
 import SideBar from "@/components/sideBar";
 

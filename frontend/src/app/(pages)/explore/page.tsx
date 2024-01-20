@@ -6,6 +6,7 @@ import { fetchGalleriesGtp } from "../api/fetchers/galleries";
 import { useQuery } from "@tanstack/react-query";
 import { fetchInfoGtp } from "../api/fetchers/gtp";
 import { Key, useEffect, useState } from "react";
+import Footer from "@/components/footer";
 
 interface UserLocation {
   lat: number;
@@ -99,11 +100,11 @@ export default function Explore() {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row mt-3">
-        <div className="w-full ml-3 h-full p-2 lg:w-2/3 bg-white rounded-lg">
-          <div className="flex flex-col md:flex-row h-auto select-none">
+      <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
+        <div className="w-full h-full px-1 py-3 mb-3 lg:p-0 lg:mb-0 lg:mr-3 lg:w-2/3 bg-white rounded-lg">
+          <div className="flex flex-col ml-10 sm:m-1 md:flex-row h-auto select-none">
             <div className=" flex items-center">
-              <h1 className="text-lg font-semibold">Google Maps with Location</h1>
+              <h1 className="text-lg font-semibold md:ml-3">Google Maps with Location</h1>
             </div>
             <div className="flex flex-wrap m-2 gap-5">
               <div className="p-2 bg-blue-500 rounded-lg hover:bg-blue-600" title="Current Location" role="button" onClick={fetchUserLocation}>
@@ -115,14 +116,14 @@ export default function Explore() {
               <div className="p-2 bg-blue-500 rounded-lg hover:bg-blue-600 text-white" title="Toggle Legend" role="button" onClick={goToObjectHandler}>Go to Object</div>
             </div>
           </div>
-          <div className=" pb-5">
+          <div className="pb-5 md:mx-3">
             <MapHome userLocation={userLocation} 
             goToObject={goToObject} setGoToObject={setGoToObject} 
             showLegend={showLegend} 
             />
           </div>
         </div>
-        <div className="mx-3 py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
+        <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
           <div className="text-2xl text-center justify-center">
             <h1 className="">GTP Ulakan</h1>
           </div>
@@ -192,6 +193,7 @@ export default function Explore() {
           </div>
         </div>
       </div>
+      <Footer/>
     </>
   )
 }

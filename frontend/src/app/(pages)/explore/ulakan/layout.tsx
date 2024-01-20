@@ -1,3 +1,4 @@
+import Footer from "@/components/footer";
 
 export default function UlakanLayout({
   children,
@@ -6,8 +7,9 @@ export default function UlakanLayout({
 }) {
   return (
     <div className="h-full flex">
-      <main className="flex-1 h-full overflow-y-auto bg-slate-200">
+      <main className="flex-1 h-full overflow-y-visible bg-slate-200">
         {children}
+        <Footer/>
       </main>
     </div>
   )
