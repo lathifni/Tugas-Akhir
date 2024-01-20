@@ -57,7 +57,7 @@ export default function NavigationItem() {
                 <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                   <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                     <FontAwesomeIcon icon={faMosque} style={{ fontSize: '1.3em' }} />
-                    <h1>Makan Syeikh Burhanuddin</h1>
+                    <h1>Makam Syeikh Burhanuddin</h1>
                   </div>
                 </li>
               </Link>
