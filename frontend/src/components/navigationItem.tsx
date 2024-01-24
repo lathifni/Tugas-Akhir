@@ -30,7 +30,7 @@ export default function NavigationItem() {
           {subMenuOpenUniqueAttractions && (
             <ul>
               <Link href={'/explore/estuary'}>
-                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
                   <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                     <FontAwesomeIcon icon={faShip} style={{ fontSize: '1.3em' }} />
                     <h1 className="">Estuary</h1>
@@ -38,7 +38,7 @@ export default function NavigationItem() {
                 </li>
               </Link>
               <Link href={'/explore/tracking'}>
-                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
                   <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                     <FontAwesomeIcon icon={faBridgeWater} style={{ fontSize: '1.3em' }} />
                     <h1>Tracking Mangrove</h1>
@@ -46,7 +46,7 @@ export default function NavigationItem() {
                 </li>
               </Link>
               <Link href={'/explore/trip'}>
-                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
                   <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                     <FontAwesomeIcon icon={faFish} style={{ fontSize: '1.3em' }} />
                     <h1>Trip Pieh Island</h1>
@@ -54,7 +54,7 @@ export default function NavigationItem() {
                 </li>
               </Link>
               <Link href={'/explore/makam'}>
-                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
                   <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                     <FontAwesomeIcon icon={faMosque} style={{ fontSize: '1.3em' }} />
                     <h1>Makam Syeikh Burhanuddin</h1>
@@ -75,7 +75,7 @@ export default function NavigationItem() {
           {subMenuOpenOrdinaryAttractions && (
             <ul>
               <Link href={'/explore/water'}>
-              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
                 <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                   <FontAwesomeIcon icon={faWater} style={{ fontSize: '1.3em' }} />
                   <h1>Water Attraction</h1>
@@ -83,8 +83,8 @@ export default function NavigationItem() {
               </li>
               </Link>
               <Link href={'/explore/culture'}>
-              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
+              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
+                <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 ">
                   <FontAwesomeIcon icon={faMusic} style={{ fontSize: '1.3em' }} />
                   <h1>Culture Attraction</h1>
                 </div>

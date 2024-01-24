@@ -35,7 +35,7 @@ export default function ExploreHeader() {
   return (
     <div className="flex mt-1 sm:mt-3 md:mt-5 justify-between z-[99999]">
       <div className="flex items-center">
-        <p className='text-2xl font-semibold text-slate-800 ml-10'>Green Talao Park</p>
+        <p className='text-3xl font-bold text-slate-800 ml-10'>Green Talao Park</p>
       </div>
       {!isLoading && (
         <div className='relative '>

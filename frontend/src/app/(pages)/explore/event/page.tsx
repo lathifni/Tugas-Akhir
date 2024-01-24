@@ -110,13 +110,13 @@ export default function Event() {
           </div>
         </div>
         <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
-          <div className="text-2xl text-center justify-center">
+          <div className="text-2xl text-center justify-center font-bold">
             <h1 className="">List Event</h1>
           </div>
           <div className="w-full px-5">
             <table className="w-full mt-5 m-5">
               <thead>
-                <tr className="border-b border-gray-300 font-semibold text-lg">
+                <tr className="border-b border-gray-300 font-semibold text-xl">
                   <td className="py-3">#</td>
                   <td className="py-3">Name</td>
                   <td className="py-3">Action</td>
@@ -124,7 +124,7 @@ export default function Event() {
               </thead>
               <tbody>
                 {data?.map((event: { id:string, name: string }, index:number) => (
-                  <tr key={event.id} className="border-b border-gray-300">
+                  <tr key={event.id} className="border-b border-gray-300 text-lg">
                     <td className="py-4">{index + 1}</td>
                     <td className="py-4">{event.name}</td>
                     <td className="py-4">

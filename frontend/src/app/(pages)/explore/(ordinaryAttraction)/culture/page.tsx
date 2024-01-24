@@ -1,37 +1,37 @@
 'use client'
 
-import MapHomestay from "@/components/maps/mapHomestay"
-import { faInfo } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { Eye, Goal, MapPin } from "lucide-react"
-import { useState } from "react"
-import { fetchListGeomHomestay } from "../../api/fetchers/homestay"
-import { useQuery } from "@tanstack/react-query"
+import { fetchGeomEstuary, fetchListGeomCulture, fetchListGeomWater } from "@/app/(pages)/api/fetchers/attraction";
+import MapAttraction from "@/components/maps/mapAttraction"
+import MapOrdinaryAttraction from "@/components/maps/mapOrdinaryAttraction";
+import { faImage, faInfo } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useQuery } from "@tanstack/react-query";
+import { Goal, MapPin, Eye } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface UserLocation {
   lat: number;
   lng: number;
 }
 
-export default function Homestay() {
-  const [selectedHomestayId, setSelectedHomestayId] = useState('');
+export default function Culture() {
+  const [selectedWaterId, setSelectedWaterId] = useState('');
   const [showLegend, setShowLegend] = useState(false);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [isManualLocationClicked, setIsManualLocationClicked] = useState(false);
-  const [distances, setDistances] = useState<number[]>([]);
-  const [instructions, setInstructions] = useState<string[]>([]);
+  const [video_url, setVideo_url] = useState<string | null>(null)
 
-  const { isError, isSuccess, isLoading, data, error } = useQuery({
-    queryKey: ['listGeomHomestay'],
-    queryFn: fetchListGeomHomestay
+  const { data: data, isLoading: loadingListaGeomCulture } = useQuery({
+    queryKey: ['listGeomCulture'],
+    queryFn: fetchListGeomCulture
   })
 
   const showLegendHandler = () => {
     setShowLegend((prev) => !prev); // Toggle nilai showLegend
   };
 
-  const handleShowInfoWindow = (eventId: string) => {
-    setSelectedHomestayId(eventId);
+  const handleShowInfoWindow = (id: string) => {
+    setSelectedWaterId(id);
   };
 
   const fetchUserLocation = async (): Promise<void> => {
@@ -65,24 +65,6 @@ export default function Homestay() {
     });
   };
 
-  const handleManualLocationUpdate = () => {
-    const dialogElement = document.getElementById('manualLocationDialog') as HTMLDialogElement;
-    if (dialogElement) dialogElement.showModal();
-  };
-
-  const handleModalOk = () => {
-    const dialogElement = document.getElementById('manualLocationDialog') as HTMLDialogElement;
-    if (dialogElement) {
-      setIsManualLocationClicked(true);
-      dialogElement.close();
-    }
-  };
-
-  const handleModalCancel = () => {
-    const dialogElement = document.getElementById('manualLocationDialog') as HTMLDialogElement;
-    dialogElement.close();
-  }
-
   return (
     <>
       <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
@@ -95,19 +77,18 @@ export default function Homestay() {
               <div className="p-2 bg-blue-500 rounded-lg" role="button" title="Current Location" onClick={fetchUserLocation}>
                 <Goal className="text-slate-200" />
               </div>
-              <div className="p-2 bg-blue-500 rounded-lg" role="button" title="Set Manual Location" onClick={handleManualLocationUpdate}>
+              {/* <div className="p-2 bg-blue-500 rounded-lg" role="button" title="Set Manual Location" onClick={handleManualLocationUpdate}>
                 <MapPin className="text-slate-200" />
-              </div>
+              </div> */}
               <div className="p-2 bg-blue-500 rounded-lg" role="button" title="Toggle Legend" onClick={showLegendHandler}>
                 <Eye className="text-slate-200" />
               </div>
             </div>
           </div>
           <div className="pb-5 md:mx-3">
-            <MapHomestay isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
-              setUserLocation={setUserLocation} showLegend={showLegend}
-              distances={distances} setDistances={setDistances}
-              instructions={instructions} setInstructions={setInstructions} userLocation={userLocation} selectedHomestayId={selectedHomestayId} />
+            <MapOrdinaryAttraction isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
+            setUserLocation={setUserLocation} showLegend={showLegend}
+            userLocation={userLocation} selectedId={selectedWaterId} />
           </div>
         </div>
         <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
@@ -140,42 +121,6 @@ export default function Homestay() {
           </div>
         </div>
       </div>
-      {distances !== null && distances.length !== 0 && (
-        <div className="flex flex-col lg:flex-row mx-1 sm:mx-3 lg:mx-5 mt-3 mb-10">
-          <div className="w-full h-full p-2 bg-white rounded-lg">
-            <h1 className="text-center font-semibold text-lg">Directions</h1>
-            <table className="w-full">
-              <thead className="text-center font-medium">
-                <tr>
-                  <th>Distance&nbsp;(m)</th>
-                  <th>Steps</th>
-                </tr>
-              </thead>
-              <tbody>
-                {distances.map((distace, index) => (
-                  <tr key={index}>
-                    <td className="text-center">{distace}</td>
-                    <td dangerouslySetInnerHTML={{ __html: instructions[index] }} />
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-      {/* Modal */}
-      <dialog id="manualLocationDialog" className="bg-white p-12 mt-72 rounded-lg shadow-lg">
-        <h2 className="text-xl mb-4 text-center font-bold">Confirmation</h2>
-        <p>Want to set manual location?</p>
-        <div className="mt-4 flex justify-center">
-          <button onClick={handleModalOk} className="bg-blue-500 hover:bg-blue-400 text-white px-4 py-2 rounded mr-2">
-            Yes
-          </button>
-          <button onClick={handleModalCancel} className="bg-gray-200 hover:bg-red-500 hover:text-white text-gray-800 px-4 py-2 rounded">
-            Cancel
-          </button>
-        </div>
-      </dialog>
     </>
   )
 }
