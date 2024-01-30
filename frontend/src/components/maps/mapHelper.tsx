@@ -1,4 +1,4 @@
-import { faCompass, faI, faMagnifyingGlass, faMoneyBill1Wave, faRoad, faSpa } from "@fortawesome/free-solid-svg-icons";
+import { faCompass, faI, faMagnifyingGlass, faMapLocationDot, faMoneyBill1Wave, faRoad, faSpa } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Contact, Pin, User } from "lucide-react";
 
@@ -54,6 +54,14 @@ interface MapWaterContentProps {
   name: string;
   type: string;
   price: number;
+}
+
+interface MapAttractionContentProps {
+  id: string;
+  name: string;
+  type: string;
+  price: number;
+  explore: number
 }
 
 export const MapContentCulinaryPlaces: React.FC<MapContentCulinaryPlacesProps> = ({ id, name, address, contact_person, lat, lng, onRouteClick }) => {
@@ -215,4 +223,20 @@ export const MapContentWater: React.FC<MapWaterContentProps> = ({ id, name, type
       </div>
     </div>
   )
+}
+
+export const MapContentAttraction: React.FC<MapAttractionContentProps> = ({ id, name, type, price, explore }) => {
+  if (explore == 0) {
+    const addressHref = `/explore/attractions/${id}`
+    return (
+      <div className="p-1">
+        <p className="text-lg font-semibold p-1 text-center">{name}</p>
+        <p className="text-sm text-center p-1"><FontAwesomeIcon icon={faSpa} className="mr-1" /> {type}</p>
+        <p className="text-sm text-center p-1"><FontAwesomeIcon icon={faMoneyBill1Wave} className="mr-1" />{price}</p>
+        <div className="text-center mt-2 border-solid border-2 p-2 m-1 border-blue-500 rounded-lg ">
+          <a href={addressHref} title="Info" target="_blank"> <FontAwesomeIcon icon={faMapLocationDot} className="text-blue-500 text-base" /></a>
+        </div>
+      </div>
+    )
+  }
 }

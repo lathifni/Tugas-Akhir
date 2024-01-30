@@ -5,10 +5,10 @@ import { useQuery } from "@tanstack/react-query"
 import React, { useEffect, useRef } from "react"
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { createRoot } from 'react-dom/client';
-import { Legend } from "./mapHelper";
+import { Legend, MapContentAttraction } from "./mapHelper";
 import { fetchGeomGtp } from "@/app/(pages)/api/fetchers/gtp";
 import { fetchListGeomHomestay } from "@/app/(pages)/api/fetchers/homestay";
-import { fetchGeomEstuary, fetchGeomMakam, fetchGeomTracking, fetchGeomTrip } from "@/app/(pages)/api/fetchers/attraction";
+import { fetchGeomEstuary, fetchGeomMakam, fetchGeomTracking, fetchGeomTrip, fetchListGeomAttractions } from "@/app/(pages)/api/fetchers/attraction";
 
 interface UserLocation {
   lat: number;
@@ -21,7 +21,8 @@ interface MapAttractionProps {
   isManualLocation: boolean;
   setIsManualLocation: React.Dispatch<React.SetStateAction<boolean>>;
   showLegend: boolean | false;
-  eventId: string;
+  detailEventId: string | null;
+  selectedAttractionId: string;
 }
 
 let map: google.maps.Map | null = null;
@@ -36,7 +37,7 @@ const position = {
 let markerArray: any = {};
 let routeArray: any = [];
 
-export default function mapAttraction({ eventId, userLocation, setUserLocation, isManualLocation, setIsManualLocation, showLegend }:MapAttractionProps) {
+export default function MapAttraction({ detailEventId, selectedAttractionId, userLocation, setUserLocation, isManualLocation, setIsManualLocation, showLegend }: MapAttractionProps) {
   const mapRef = React.useRef<HTMLDivElement>(null)
   let locationMarkerRef = useRef<google.maps.Marker | null>(null);
   let infoWindowLocMarkerRef = useRef<google.maps.InfoWindow | null>(null);
@@ -44,30 +45,24 @@ export default function mapAttraction({ eventId, userLocation, setUserLocation, 
   const legendRef = React.useRef<HTMLDivElement>(null);
   let dataAttarctionForMap: any
 
-  if (eventId === 'A0001') {
-    const { data: dataGeomTracking, isLoading: loadingListaGeomHomestay } = useQuery({
-      queryKey: ['geomTracking'],
-      queryFn: fetchGeomTracking
+  if (detailEventId === null) {
+    const { data: data, isLoading: loadingGeomAttractions } = useQuery({
+      queryKey: ['listGeomAttraction'],
+      queryFn: fetchListGeomAttractions
     })
-    dataAttarctionForMap = dataGeomTracking
-  } else if (eventId === 'A0004') {
-    const { data: dataGeomEstuary, isLoading: loadingListaGeomHomestay } = useQuery({
-      queryKey: ['geomEstuary'],
-      queryFn: fetchGeomEstuary
+    dataAttarctionForMap = data
+    console.log(dataAttarctionForMap);
+  } else {
+    const { data: data, isLoading: loadingGeomAttractions } = useQuery({
+      queryKey: ['listGeomAttraction'],
+      queryFn: fetchListGeomAttractions,
+      select: (data) =>
+        data?.filter((item: { id: string, name: string, type: string, price: number, description: string, lat: number, lng: number, geom: string }) => item.id === detailEventId),
     })
-    dataAttarctionForMap = dataGeomEstuary
-  } else if (eventId === 'A0005') {
-    const { data: dataGeomTrip, isLoading: loadingListaGeomHomestay } = useQuery({
-      queryKey: ['geomTrip'],
-      queryFn: fetchGeomTrip
-    })
-    dataAttarctionForMap = dataGeomTrip
-  } else if (eventId === 'A0006') {
-    const { data: dataGeomMakam, isLoading: loadingListaGeomHomestay } = useQuery({
-      queryKey: ['geomMakam'],
-      queryFn: fetchGeomMakam
-    })
-    dataAttarctionForMap = dataGeomMakam
+    dataAttarctionForMap = data
+    console.log(dataAttarctionForMap);
+    console.log(detailEventId);
+    
   }
 
   const { data: dataGeomGtp, isLoading: loadingGeomGtp } = useQuery({
@@ -150,37 +145,37 @@ export default function mapAttraction({ eventId, userLocation, setUserLocation, 
         const { id, name, type, price, lat, lng } = item
         const geom: string = JSON.parse(item.geom)
         console.log(geom);
-        
+
         const markerOptions = {
           map: map,
           position: { lat, lng },
           title: name,
           animation: google.maps.Animation.DROP,
-          icon: '/icon/tracking.png',
+          icon: '/icon/attraction.png',
         }
         marker.setOptions(markerOptions)
 
         markerRefs.current[id] = marker
-        // marker.addListener('click', () => {
-        //   marker.setAnimation(google.maps.Animation.BOUNCE)
-        //   setTimeout(() => {
-        //     marker.setAnimation(null)
-        //   }, 1700)
-        //   const container = document.createElement('div');
-        //   const root = createRoot(container);
-        //   root.render(<MapContentHomestayPlaces id={id} name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />)
-        //   infoWindow.open(map, marker);
-        //   new google.maps.InfoWindow({
-        //     content: document.body.appendChild(container)
-        //   }).open(map, marker)
-        // });
+        marker.addListener('click', () => {
+          marker.setAnimation(google.maps.Animation.BOUNCE)
+          setTimeout(() => {
+            marker.setAnimation(null)
+          }, 1700)
+          const container = document.createElement('div');
+          const root = createRoot(container);
+          root.render(<MapContentAttraction id={id} name={name} type={type} price={price} explore={0} />)
+          // infoWindow.open(map, marker);
+          new google.maps.InfoWindow({
+            content: document.body.appendChild(container)
+          }).open(map, marker)
+        });
         markerArray[id] = marker
         digitasiEstuary.addGeoJson({
           type: 'Feature',
           geometry: geom
         })
         digitasiEstuary.setStyle({
-          fillColor: '#FF0000',
+          fillColor: '#ffffff',
           strokeWeight: 0.8,
           strokeColor: '#FF0000',
           fillOpacity: 0.35,
@@ -224,7 +219,7 @@ export default function mapAttraction({ eventId, userLocation, setUserLocation, 
         // Check if feature and feature.getGeometry() are not null or undefined
         if (feature !== null && typeof feature.getGeometry === 'function') {
           const geometry = feature.getGeometry();
-          
+
           // Ensure that forEachLatLng exists on geometry
           if (geometry && typeof geometry.forEachLatLng === 'function') {
             geometry.forEachLatLng(latLng => {
@@ -251,6 +246,72 @@ export default function mapAttraction({ eventId, userLocation, setUserLocation, 
   useEffect(() => {
     setShowLegendVisibility();
   }, [showLegend]);
+
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      if (userLocation !== null && map) {
+        // console.log(isManualLocation, 'di userLocation');
+        setIsManualLocation(false)
+        if (locationMarkerRef.current !== null) locationMarkerRef.current.setMap(null);
+        const newMarkerLocation = new google.maps.Marker();
+        const markerOptions = {
+          position: userLocation,
+          map: map,
+          animation: google.maps.Animation.DROP,
+        }
+        newMarkerLocation.setOptions(markerOptions)
+
+        infoWindowLocMarkerRef.current = new google.maps.InfoWindow({
+          content: `<p>You Are Here</p>`
+        });
+        newMarkerLocation.addListener('click', () => {
+          infoWindowLocMarkerRef.current?.open(map, newMarkerLocation);
+        });
+        locationMarkerRef.current = newMarkerLocation
+        infoWindowLocMarkerRef.current?.open(map, locationMarkerRef.current)
+      }
+    }
+    fetchUserLocation()
+  }, [userLocation])
+
+  useEffect(() => {
+    // console.log(isManualLocation, 'di isManualLocation');
+    let clickListener: google.maps.MapsEventListener | null = null;
+    const handleMapClick = (mapsMouseEvent: any) => {
+      const newLocation = {
+        lat: mapsMouseEvent.latLng.lat(),
+        lng: mapsMouseEvent.latLng.lng()
+      };
+      setUserLocation(newLocation);
+      console.log(newLocation);
+      console.log(userLocation);
+
+      if (clickListener) {
+        clickListener.remove();
+        clickListener = null;
+      }
+    };
+    if (isManualLocation === true && map) clickListener = map.addListener('click', handleMapClick);
+
+    return () => {
+      if (clickListener) {
+        clickListener.remove();
+      }
+    };
+  }, [isManualLocation])
+
+  useEffect(() => {
+    const selectedMarker = markerRefs.current[selectedAttractionId];
+
+    if (map && selectedMarker !== null && selectedMarker !== undefined) {
+      const markerPosition = selectedMarker.getPosition();
+
+      if (markerPosition !== null && markerPosition !== undefined) {
+        google.maps.event.trigger(selectedMarker, 'click');
+        map.panTo(markerPosition);
+      }
+    }
+  }, [selectedAttractionId])
 
   return (
     <div className="relative">

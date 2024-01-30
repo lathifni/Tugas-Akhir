@@ -43,7 +43,10 @@ export const options: NextAuthOptions = {
    ],
    callbacks: {
       async jwt({ token, user, account, profile }) {
+         console.log(account);
+         
          if (account?.provider == 'google' && profile) {
+            console.log('testttttt');
             const requestLogin = await fetch(
                'http://localhost:3000/oauth2/google/frontend',
                {

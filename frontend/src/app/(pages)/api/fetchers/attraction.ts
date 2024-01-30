@@ -1,5 +1,10 @@
 import useAxiosAuth from "../../../../../libs/useAxiosAuth"
 
+export const fetchListGeomAttractions = async() => {
+  const res = await useAxiosAuth.get('/attraction/geom')
+  return res.data.data
+}
+
 export const fetchGeomEstuary = async () => {
   const res = await useAxiosAuth.get('/attraction/estuary')
   return res.data.data

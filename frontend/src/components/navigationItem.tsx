@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { faBed, faBridgeWater, faBullhorn, faFish, faHouse, faMap, faMosque, faMusic, faShip, faSquarePollHorizontal, faStar, faUniversalAccess, faWater } from '@fortawesome/free-solid-svg-icons'
+import { faBed, faBridgeWater, faBullhorn, faFish, faHouse, faList, faList12, faListAlt, faMap, faMosque, faMusic, faShip, faSquarePollHorizontal, faStar, faUniversalAccess, faWater } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
@@ -22,18 +22,18 @@ export default function NavigationItem() {
           onClick={() => setSubMenuOpenUniqueAttractions(!subMenuOpenUniqueAttractions)}
           >
             <FontAwesomeIcon icon={faStar} style={{ fontSize: '1.3em' }} />
-            <span className="flex-1">Unique Atractions</span>
+            <span className="flex-1">Atractions</span>
             <ChevronDown
               className={`${subMenuOpenUniqueAttractions && 'rotate-180'}`}
             />
           </li>
           {subMenuOpenUniqueAttractions && (
             <ul>
-              <Link href={'/explore/estuary'}>
+              <Link href={'/explore/attractions'}>
                 <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
                   <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                    <FontAwesomeIcon icon={faShip} style={{ fontSize: '1.3em' }} />
-                    <h1 className="">Estuary</h1>
+                    <FontAwesomeIcon icon={faList} style={{ fontSize: '1.3em' }} />
+                    <h1 className="">List</h1>
                   </div>
                 </li>
               </Link>
@@ -41,7 +41,7 @@ export default function NavigationItem() {
                 <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
                   <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                     <FontAwesomeIcon icon={faBridgeWater} style={{ fontSize: '1.3em' }} />
-                    <h1>Tracking Mangrove</h1>
+                    <h1>Nearby</h1>
                   </div>
                 </li>
               </Link>
@@ -53,17 +53,17 @@ export default function NavigationItem() {
                   </div>
                 </li>
               </Link>
-              <Link href={'/explore/makam'}>
+              {/* <Link href={'/explore/makam'}>
                 <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
                   <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
                     <FontAwesomeIcon icon={faMosque} style={{ fontSize: '1.3em' }} />
                     <h1>Makam Syeikh Burhanuddin</h1>
                   </div>
                 </li>
-              </Link>
+              </Link> */}
             </ul>
           )}
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} 
+          {/* <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} 
           onClick={() => setSubMenuOpenOrdinaryAttractions(!subMenuOpenOrdinaryAttractions)}
           >
             <FontAwesomeIcon icon={faUniversalAccess} style={{ fontSize: '1.3em' }} />
@@ -91,7 +91,7 @@ export default function NavigationItem() {
               </li>
               </Link>
             </ul>
-          )}
+          )} */}
           <Link href={"/explore/event"} >
             <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
               <FontAwesomeIcon icon={faBullhorn} style={{ fontSize: '1.3em' }} />

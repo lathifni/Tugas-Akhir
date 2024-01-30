@@ -1,4 +1,14 @@
-const { estuaryGeomAttractionController, trackingGeomAttractionController, tripGeomAttractionController, makamGeomAttractionController, waterListGeomAttractionController, cultureListGeomAttractionController } = require("../controllers/attractionController");
+const { estuaryGeomAttractionController, trackingGeomAttractionController, tripGeomAttractionController, makamGeomAttractionController, waterListGeomAttractionController, cultureListGeomAttractionController, listGeomAttractionController } = require("../controllers/attractionController");
+
+const listGeomAttractionHandler = async(req, res) => {
+  try {
+    const geom = await listGeomAttractionController()
+
+    return res.status(200).send({ status:'success', data:geom })
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 const estuaryGeomAttractionHandler = async(req, res) => {
   try {
@@ -60,5 +70,5 @@ const cultureListGeomAttractionHandler = async(req, res) => {
   }
 }
 
-module.exports = { estuaryGeomAttractionHandler, trackingGeomAttractionHandler, tripGeomAttractionHandler, makamGeomAttractionHandler,
+module.exports = { listGeomAttractionHandler, estuaryGeomAttractionHandler, trackingGeomAttractionHandler, tripGeomAttractionHandler, makamGeomAttractionHandler,
 waterListGeomAttractionHandler, cultureListGeomAttractionHandler, }

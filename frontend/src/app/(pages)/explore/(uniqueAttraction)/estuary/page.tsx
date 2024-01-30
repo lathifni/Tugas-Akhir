@@ -7,14 +7,23 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import { Goal, MapPin, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
+import FaciltyTrack from "../_components/facilityTrack";
 
 interface UserLocation {
   lat: number;
   lng: number;
 }
 
+interface MapType {
+  culinaryPlaces: boolean;
+  gazebo: boolean;
+  souvenirPlaces: boolean;
+  worshipPlaces: boolean;
+}
+
 export default function Estuary() {
   const [selectedEstuaryId, setSelectedEstuaryId] = useState('');
+  const [attractionDescription, setAttractionDescription] = useState(true)
   const [showLegend, setShowLegend] = useState(false);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [isManualLocationClicked, setIsManualLocationClicked] = useState(false);
@@ -24,6 +33,13 @@ export default function Estuary() {
     queryKey: ['geomEstuary'],
     queryFn: fetchGeomEstuary
   })
+
+  const [objectAroundState, setObjectAroundState] = useState<MapType>({
+    culinaryPlaces: false,
+    gazebo: false,
+    souvenirPlaces: false,
+    worshipPlaces: false
+  });
 
   const showLegendHandler = () => {
     setShowLegend((prev) => !prev); // Toggle nilai showLegend
@@ -60,6 +76,16 @@ export default function Estuary() {
     });
   };
 
+
+  const handleSection = () => {
+    setAttractionDescription(!attractionDescription);
+    // setDataTypeMap(null)
+  };
+
+  const handleFacilityAlongStateChange = (newState: any) => {
+    setObjectAroundState(newState);
+  }
+
   return (
     <>
       <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
@@ -81,39 +107,44 @@ export default function Estuary() {
             </div>
           </div>
           <div className="pb-5 md:mx-3">
-            { dataGeomEstuary && (
-            <MapAttraction isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
-              setUserLocation={setUserLocation} showLegend={showLegend}
-              userLocation={userLocation} eventId={dataGeomEstuary[0].id} />
+            {dataGeomEstuary && (
+              <MapAttraction isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
+                setUserLocation={setUserLocation} showLegend={showLegend}
+                userLocation={userLocation} eventId={dataGeomEstuary[0].id} />
             )}
           </div>
         </div>
-        {dataGeomEstuary && (
-          <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
-            <div className="text-2xl text-center justify-center font-bold">
-              <h1 className="">{dataGeomEstuary[0].name}</h1>
-            </div>
-            <div className="w-full px-5">
-              <div>
-                <p dangerouslySetInnerHTML={{ __html: dataGeomEstuary[0].description.replace(/(?:\r\n|\r|\n)/g, '<br>') }} />
-                <br />
-                <p>Price: {dataGeomEstuary[0].price}</p>
-                <p>Payment category: Group</p>
-                <br />
+        {attractionDescription ? (
+          dataGeomEstuary && (
+            <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
+              <div className="text-2xl text-center justify-center font-bold">
+                <h1 className="">{dataGeomEstuary[0].name}</h1>
+              </div>
+              <div className="w-full px-5">
+                <div>
+                  <p dangerouslySetInnerHTML={{ __html: dataGeomEstuary[0].description.replace(/(?:\r\n|\r|\n)/g, '<br>') }} />
+                  <br />
+                  <p>Price: {dataGeomEstuary[0].price}</p>
+                  <p>Payment category: Group</p>
+                  <br />
+                </div>
+              </div>
+              <div className="w-full  p-1 text-center text-blue-500 ">
+                <button className="w-[95%] py-1 mb-3 border-solid border-2 border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white">
+                  <FontAwesomeIcon icon={faImage} className="mr-2" />Open Gallery
+                </button>
+                <button className="w-[95%] py-1 mb-3 border-solid border-2 border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white">
+                  <FontAwesomeIcon icon={faImage} className="mr-2" />Play Video
+                </button>
+                <button onClick={handleSection}
+                  className="w-[95%] py-1 mb-3 border-solid border-2 border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white">
+                  <FontAwesomeIcon icon={faImage} className="mr-2" />More Info
+                </button>
               </div>
             </div>
-            <div className="w-full  p-1 text-center text-blue-500 ">
-              <button className="w-[95%] py-1 mb-3 border-solid border-2 border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white">
-                <FontAwesomeIcon icon={faImage} className="mr-2"/>Open Gallery
-              </button>
-              <button className="w-[95%] py-1 mb-3 border-solid border-2 border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white">
-                <FontAwesomeIcon icon={faImage} className="mr-2"/>Play Video
-              </button>
-              <button className="w-[95%] py-1 mb-3 border-solid border-2 border-blue-500 rounded-lg hover:bg-blue-500 hover:text-white">
-                <FontAwesomeIcon icon={faImage} className="mr-2"/>More Info
-              </button>
-            </div>
-          </div>
+          )
+        ) : (
+          <FaciltyTrack onCloseClick={handleSection} onStateChange={handleFacilityAlongStateChange} />
         )}
       </div>
     </>

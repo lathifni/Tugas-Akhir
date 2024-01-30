@@ -1,5 +1,10 @@
 const promisePool = require("../../config/database")
 
+const listGeomAttractions = async() => {
+  const [rows] = await promisePool.query("SELECT id,name,type,price,description,video_url,ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng, ST_AsGeoJSON(geom) AS geom FROM attraction")
+  return rows
+}
+
 const estuaryGeomAttraction = async() => {
   const [rows] = await promisePool.query("SELECT id,name,type,price,description,video_url,ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng, ST_AsGeoJSON(geom) AS geom FROM attraction WHERE id='A0004'")
   return rows
@@ -30,4 +35,4 @@ const cultureListGeomAttraction = async() => {
   return rows
 }
 
-module.exports = { estuaryGeomAttraction, makamGeomAttraction, tripGeomAttraction, trackingGeomAttraction, waterListGeomAttraction, cultureListGeomAttraction }
+module.exports = { listGeomAttractions, estuaryGeomAttraction, makamGeomAttraction, tripGeomAttraction, trackingGeomAttraction, waterListGeomAttraction, cultureListGeomAttraction }

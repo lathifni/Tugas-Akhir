@@ -6,7 +6,7 @@ import { Legend, MapContentHomestayPlaces, MapContentWater } from "./mapHelper";
 import { createRoot } from 'react-dom/client';
 import { fetchGeomGtp } from "@/app/(pages)/api/fetchers/gtp";
 import { useQuery } from "@tanstack/react-query";
-import { fetchListGeomWater } from "@/app/(pages)/api/fetchers/attraction";
+import { fetchListGeomCulture, fetchListGeomWater } from "@/app/(pages)/api/fetchers/attraction";
 
 interface UserLocation {
   lat: number;
@@ -20,6 +20,7 @@ interface MapOrdinaryAttractionProps {
   setIsManualLocation: React.Dispatch<React.SetStateAction<boolean>>;
   showLegend: boolean | false;
   selectedId: string;
+  type: string
 }
 
 let map: google.maps.Map | null = null;
@@ -33,21 +34,32 @@ const position = {
 }
 let markerArray: any = {};
 
-export default function MapOrdinaryAttraction({ selectedId, userLocation, setUserLocation, isManualLocation, setIsManualLocation, showLegend }: MapOrdinaryAttractionProps) {
+export default function MapOrdinaryAttraction({ selectedId, userLocation, setUserLocation, isManualLocation, setIsManualLocation, showLegend, type }: MapOrdinaryAttractionProps) {
   const mapRef = React.useRef<HTMLDivElement>(null);
   const legendRef = React.useRef<HTMLDivElement>(null);
   let locationMarkerRef = useRef<google.maps.Marker | null>(null);
   let infoWindowLocMarkerRef = useRef<google.maps.InfoWindow | null>(null);
   let markerRefs = useRef<{ [id: string]: google.maps.Marker | null }>({});
+  let dataAttarctionForMap: any
 
   const { data: dataGeomGtp, isLoading: loadingGeomGtp } = useQuery({
     queryKey: ['geomGtp'],
     queryFn: fetchGeomGtp
   })
-  const { data: dataListGeomWater, isLoading: loadingListaGeomHomestay } = useQuery({
-    queryKey: ['listGeomWater'],
-    queryFn: fetchListGeomWater
-  })
+
+  if (type === 'water') {
+    const { data: dataListGeomWater, isLoading: loadingListaGeomHWater } = useQuery({
+      queryKey: ['listGeomWater'],
+      queryFn: fetchListGeomWater
+    })
+    dataAttarctionForMap = dataListGeomWater
+  } else if (type === 'culture') {
+    const { data: dataListGeomCulture, isLoading: loadingListGeomCulture } = useQuery({
+      queryKey: ['listGeomCulture'],
+      queryFn: fetchListGeomCulture
+    })
+    dataAttarctionForMap = dataListGeomCulture
+  }
 
   const initMap = async (dataListGeomWater: any[], dataGeomGtp: any[]) => {
     const { Map } = await loader.importLibrary('maps')
@@ -119,6 +131,9 @@ export default function MapOrdinaryAttraction({ selectedId, userLocation, setUse
       })
     }
     if (dataListGeomWater && Array.isArray(dataListGeomWater)) {
+      let icon: string
+      if (type === 'water') icon = 'talao'
+      else if (type === 'culture') icon = 'music'
       dataListGeomWater.forEach((item: { id: string, name: string, price:number, type: string, lat: number, lng: number, geom: string }) => {
         const marker = new google.maps.Marker()
         const { id, name, type, price, lat, lng } = item
@@ -128,7 +143,7 @@ export default function MapOrdinaryAttraction({ selectedId, userLocation, setUse
           position: { lat, lng },
           title: name,
           animation: google.maps.Animation.DROP,
-          icon: '/icon/talao.png',
+          icon: `/icon/${icon}.png`,
         }
         marker.setOptions(markerOptions)
 
@@ -202,8 +217,8 @@ export default function MapOrdinaryAttraction({ selectedId, userLocation, setUse
   };
 
   useEffect(() => {
-    initMap(dataListGeomWater, dataGeomGtp)
-  }, [dataListGeomWater, dataGeomGtp, userLocation])
+    initMap(dataAttarctionForMap, dataGeomGtp)
+  }, [dataAttarctionForMap, dataGeomGtp, userLocation])
 
   useEffect(() => {
     setShowLegendVisibility();

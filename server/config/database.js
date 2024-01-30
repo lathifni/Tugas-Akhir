@@ -4,7 +4,7 @@ const pool = mysql.createPool({
   host                : 'localhost',
   user                : 'root',
   password            : '',
-  database            : 'new_gis_gtp',
+  database            : 'gis_gtp',
 })
 
 const promisePool = pool.promise()

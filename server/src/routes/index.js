@@ -11,6 +11,7 @@ const homestay = require('./homestay')
 const souvenir = require('./souvenir')
 const kotaKabKec = require('./kotaKabKec')
 const attraction = require('./attraction')
+const package = require('./package')
 
 const router = {}
 
@@ -27,5 +28,6 @@ router.homestay = homestay
 router.souvenir = souvenir
 router.kotaKabKec = kotaKabKec
 router.attraction = attraction
+router.package = package
 
 module.exports = router

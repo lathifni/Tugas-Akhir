@@ -88,12 +88,12 @@ export default function Culture() {
           <div className="pb-5 md:mx-3">
             <MapOrdinaryAttraction isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
             setUserLocation={setUserLocation} showLegend={showLegend}
-            userLocation={userLocation} selectedId={selectedWaterId} />
+            userLocation={userLocation} selectedId={selectedWaterId} type={'culture'}/>
           </div>
         </div>
         <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
           <div className="text-2xl text-center justify-center font-bold">
-            <h1 className="">List Homestay</h1>
+            <h1 className="">Culture Attractions</h1>
           </div>
           <div className="w-full px-5">
             <table className="w-full mt-5 m-5">
