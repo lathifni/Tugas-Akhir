@@ -11,6 +11,15 @@ export default function Package() {
     queryFn: fetchListAllBasePackage
   })
 
+  const rupiah = (number: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0
+    }).format(number);
+  }
+
   if (isLoading) return <p>Loading ...</p>
   if (data) {
     return (
@@ -18,31 +27,36 @@ export default function Package() {
         <div className="w-full h-full p-5 mb-3 bg-white rounded-lg">
           <h1 className="text-xl font-semibold text-center">List Package</h1>
           <div className="flex flex-col items-center sm:items-start">
-            <div className="w-fit p-2  bg-blue-500 hover:bg-blue-600 text-white rounded-lg" role="button">
+            <div className="w-fit p-2  bg-blue-500 hover:bg-blue-600 text-white rounded-lg mb-7" role="button">
               <FontAwesomeIcon icon={faPlus} /> Costum New Package
             </div>
             <div className="w-full">
-              {data.map((item: { id:string, name: string, type_id: string, price: number, description: string, video_url: string, min_capacity: number }, index: number) => (
-                <div key={index}>
-                  <p className="text-lg font-semibold">{item.name}</p>
-                  <p className="bg-green-500 w-fit p-1 rounded-lg text-white">{item.type_id}</p>
-                  <p>Rp{item.price}</p>
-                  <p>Capacity: {item.min_capacity} people</p>
-                  <p>
-                    {item.description.slice(0, 140)}...
-                    <a href={`/explore/package/${item.id}`} className="text-blue-500 hover:text-blue-800">Read more</a>
-                  </p>
-                  <div className="text-blue-500 mb-5">
-                    <a href={`/explore/package/${item.id}`}>
-                      <button className="p-2 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-blue-800">
-                        <FontAwesomeIcon icon={faCircleInfo} /> More Info
-                      </button>
-                    </a>
-                    <a href={`/explore/package/${item.id}`}>
-                      <button className="p-2 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-blue-800">
-                        <FontAwesomeIcon icon={faSquarePlus} /> Extend
-                      </button>
-                    </a>
+              {data.map((item: { id: string, name: string, type_name: string, price: number, description: string, video_url: string, min_capacity: number }, index: number) => (
+                <div key={index} className="flex flex-col lg:flex-row items-center mb-5">
+                  <div className="mr-4 w-60 lg:w-96 xl:w-64">
+                    <img src="/photos/package/15.JPG" alt="foto" />
+                  </div>
+                  <div className="lg:w-4/6 mx-5 lg:mx-3">
+                    <p className="text-lg font-semibold">{item.name}</p>
+                    <p className="bg-green-500 w-fit p-1 rounded-lg text-white">{item.type_name}</p>
+                    <p>{rupiah(item.price)}</p>
+                    <p>Capacity: {item.min_capacity} people</p>
+                    <p>
+                      {item.description.slice(0, 140)}...
+                      <a href={`/explore/package/${item.id}`} className="text-blue-500 hover:text-blue-800">Read more</a>
+                    </p>
+                    <div className="text-blue-500 lg:mt-2">
+                      <a href={`/explore/package/${item.id}`}>
+                        <button className="p-2 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-blue-800">
+                          <FontAwesomeIcon icon={faCircleInfo} /> More Info
+                        </button>
+                      </a>
+                      <a href={`/explore/package/${item.id}`}>
+                        <button className="p-2 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-blue-800">
+                          <FontAwesomeIcon icon={faSquarePlus} /> Extend
+                        </button>
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))}
