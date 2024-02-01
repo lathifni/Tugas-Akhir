@@ -7,8 +7,7 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import { createRoot } from 'react-dom/client';
 import { Legend, MapContentAttraction } from "./mapHelper";
 import { fetchGeomGtp } from "@/app/(pages)/api/fetchers/gtp";
-import { fetchListGeomHomestay } from "@/app/(pages)/api/fetchers/homestay";
-import { fetchGeomEstuary, fetchGeomMakam, fetchGeomTracking, fetchGeomTrip, fetchListGeomAttractions } from "@/app/(pages)/api/fetchers/attraction";
+import { fetchListGeomAttractions } from "@/app/(pages)/api/fetchers/attraction";
 
 interface UserLocation {
   lat: number;
