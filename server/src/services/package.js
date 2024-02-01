@@ -7,7 +7,7 @@ const getListAllBasePackage = async () => {
   return rows;
 };
 
-const getPackageById = async(params) => {
+const getPackageById = async (params) => {
   const [rows] = await promisePool.query(
     `SELECT P.name,P.min_capacity,P.contact_person,P.price,P.description,PT.type_name FROM package as P JOIN package_type AS PT ON P.type_id = PT.id WHERE P.id='${params.id}'`
   );
@@ -22,15 +22,15 @@ const getListAllServicePackageById = async (params) => {
   return rows;
 };
 
-const getAverageRatingPackageById = async(params) => {
+const getAverageRatingPackageById = async (params) => {
   const [rows] = await promisePool.query(
     `SELECT ROUND(AVG(rating), 1)  AS average_rating FROM reservation
     WHERE package_id = '${params.id}' AND rating > 0;`
   );
-  return rows; 
+  return rows;
 }
 
-const getPackageActivityById = async(params) => {
+const getPackageActivityById = async (params) => {
   const [rows] = await promisePool.query(
     `SELECT DP.*, COALESCE(event.name, culinary_place.name, worship_place.name, attraction.name, facility.name, homestay.name, 'Unknown Activity') AS activity_name
   FROM detail_package AS DP
@@ -40,11 +40,27 @@ const getPackageActivityById = async(params) => {
   LEFT JOIN attraction ON DP.activity_type = 'A' AND DP.object_id = attraction.id
   LEFT JOIN facility ON DP.activity_type = 'FC' AND DP.object_id = facility.id
   LEFT JOIN homestay ON DP.activity_type = 'HO' AND DP.object_id = homestay.id
-  WHERE package_id = '${params.id}'
-  `
+  WHERE package_id = '${params.id}'`
   );
-  return rows; 
+  return rows;
 }
 
+const getListAllGalleryPackageById = async (params) => {
+  const [rows] = await promisePool.query(
+    `SELECT url FROM gallery_package WHERE package_id='${params.id}'`
+  );
+  return rows;
+}
 
-module.exports = { getListAllBasePackage, getPackageById, getListAllServicePackageById, getAverageRatingPackageById, getPackageActivityById, };
+const getListAllReviewPackageById = async (params) => {
+  const [rows] = await promisePool.query(
+    `SELECT R.rating, R.review, COALESCE(U.username, U.fullname) AS username_or_fullname FROM 
+    reservation AS R JOIN users AS U ON R.user_id = U.id WHERE R.package_id = '${params.id}' AND R.rating > 0`
+  );
+  return rows;
+}
+
+module.exports = {
+  getListAllBasePackage, getPackageById, getListAllServicePackageById, getAverageRatingPackageById, getPackageActivityById, getListAllGalleryPackageById,
+  getListAllReviewPackageById,
+};

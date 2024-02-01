@@ -20,7 +20,17 @@ export const fetchAverageRatingPackageById = async(id:string) => {
   return res.data.data
 }
 
-export const fetchPackageActivityById =async (id:string) => {
+export const fetchPackageActivityById = async (id:string) => {
   const res = await useAxiosAuth.get(`/package/listPackageActivityById/${id}`)
+  return res.data.data
+}
+
+export const fetchListAllGalleryPackageById = async (id:string) => {
+  const res = await useAxiosAuth.get(`/package/listAllGalleryPackageById/${id}`)
+  return res.data.data
+}
+
+export const fetchListAllReviewPackageById =async (id:string) => {
+  const res = await useAxiosAuth.get(`/package/listAllReviewPackageById/${id}`)
   return res.data.data
 }

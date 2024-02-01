@@ -259,7 +259,7 @@ export default function MapExploreUlakan({
 
             const container = document.createElement('div');
             const root = createRoot(container);
-            if (contact_person) root.render(<MapContentCulinaryPlaces name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
+            if (contact_person) root.render(<MapContentCulinaryPlaces name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} id={id} />);
             new google.maps.InfoWindow({
               content: document.body.appendChild(container)
             }).open(map, marker)
@@ -286,7 +286,7 @@ export default function MapExploreUlakan({
             }, 1700)
             const container = document.createElement('div');
             const root = createRoot(container);
-            if (capacity) root.render(<MapContentWorshipPlaces name={name} address={address} capacity={capacity} />);
+            if (capacity) root.render(<MapContentWorshipPlaces name={name} address={address} capacity={capacity} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} id={id}/>);
             new google.maps.InfoWindow({
               content: document.body.appendChild(container),
             }).open(map, marker)
@@ -313,7 +313,7 @@ export default function MapExploreUlakan({
             }, 1700)
             const container = document.createElement('div');
             const root = createRoot(container);
-            if (contact_person) root.render(<MapContentSouvenirPlaces name={name} address={address} contact_person={contact_person} />);
+            if (contact_person) root.render(<MapContentSouvenirPlaces name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} id={id}/>);
             new google.maps.InfoWindow({
               content: document.body.appendChild(container)
             }).open(map, marker)
@@ -340,7 +340,7 @@ export default function MapExploreUlakan({
             }, 1700)
             const container = document.createElement('div');
             const root = createRoot(container);
-            if (contact_person) root.render(<MapContentHomestayPlaces name={name} address={address} contact_person={contact_person} />);
+            if (contact_person) root.render(<MapContentHomestayPlaces name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} id={id}/>);
             new google.maps.InfoWindow({
               content: document.body.appendChild(container)
             }).open(map, marker)

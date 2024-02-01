@@ -1,4 +1,4 @@
-const { getAllBasePackageController, getListAllServicePackageByIdController, getPackageByIdController, getAverageRatingPackageByIdController, getListPackageActivityByIdController } = require("../controllers/packageController");
+const { getAllBasePackageController, getListAllServicePackageByIdController, getPackageByIdController, getAverageRatingPackageByIdController, getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController } = require("../controllers/packageController");
 
 const getAllBasePackageHandler = async(req, res) => {
   try {
@@ -50,5 +50,25 @@ const getListPackageActivityByIdHandler = async(req, res) => {
   }
 }
 
+const getListAllGalleryPackageByIdHandler = async(req, res) => {
+  try {
+    const list = await getListAllGalleryPackageByIdController(req.params)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const getListAllReviewPackageByIdHandler = async(req, res) => {
+  try {
+    const list = await getListAllReviewPackageByIdController(req.params)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = { getAllBasePackageHandler, getPackageByIdHandler, getListAllServicePackageByIdHandler, getAverageRatingPackageByIdHandler,
-getListPackageActivityByIdHandler, }
+getListPackageActivityByIdHandler, getListAllGalleryPackageByIdHandler, getListAllReviewPackageByIdHandler, }
