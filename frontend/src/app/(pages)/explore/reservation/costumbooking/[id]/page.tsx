@@ -11,8 +11,9 @@ import { useEffect, useState } from "react";
 import { addDays, format } from 'date-fns';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Modal, Backdrop, Fade, Button } from '@mui/material';
+import { Modal } from '@mui/material';
 import axios from "axios";
+import snapMidtrans from "@/hooks/snapMidtrans";
 // import { postReservationTransaction } from "@/app/(pages)/api/fetchers/reservation";
 
 export default function CostumbookingIdPage({ params }: any) {
@@ -24,6 +25,8 @@ export default function CostumbookingIdPage({ params }: any) {
   const [dateCheckOut, setDateCheckOut] = useState('')
   const [isOpen, setIsopen] = useState(false)
   const [handleClose, setHandleClose] = useState(false)
+  const [token, setToken] = useState('')
+  const [snap, setSnap] = useState<any>(null)
 
   const { data: dataPackageById, isLoading: loadingPackageById } = useQuery({
     queryKey: ['PackageById', params.id],
@@ -62,7 +65,7 @@ export default function CostumbookingIdPage({ params }: any) {
     try {
       const data = {
         name: 'user',
-        order_id: 'barangtest123',
+        order_id: 'barangtest1234',
         total: 100100
       }
       const config = {
@@ -71,12 +74,63 @@ export default function CostumbookingIdPage({ params }: any) {
         }
       }
       const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
-      console.log(res.data);
       
+      if (res && res.status === 200) {
+        console.log('di dalam res responsenya nih');
+        setToken(res.data.token)
+        
+        // const { snapEmbed } = snapMidtrans()
+        // snapEmbed(token, 'snap-container', {
+        //   onSuccess: function (result: any) {
+        //     console.log('success', result);
+        //     // action.onSuccess(result)
+        // },
+        // onPending: function (result: any) {
+        //     console.log('pending', result);
+        //     // action.onPending(result)
+        // },
+        // onClose: function () {
+        //     // action.onClose()
+            
+        // }
+        // })
+      }
     } catch (error) {
       console.log(error);
     }
   }
+
+  useEffect(() => {
+    if (token) {
+      window.snap.pay(token, {
+        onSuccess: (result: any) => {
+          console.log(result, 'di onSuccess');
+          setToken('')
+        },
+        onPending: (result: any) => {
+          console.log(result, 'di onPending');
+          setToken('')
+        }
+      })
+    }
+  }, [token])
+
+  useEffect(() => {
+    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js'; 
+    const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
+    const script = document.createElement('script')
+    script.src = midtransScriptUrl
+    if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
+
+    script.onload = () => {
+        setSnap(window.snap)
+    }
+    document.body.appendChild(script)
+
+    return () => {
+        document.body.removeChild(script)
+    }
+}, [])
 
   const readGuideButtonHandler = () => {
     setIsopen(true)
@@ -164,6 +218,7 @@ export default function CostumbookingIdPage({ params }: any) {
           </div>
           <div>
             <h2 className="font-medium text-lg">Booking</h2>
+            <div id="snap-container"></div>
             <div className="relative w-fit ml-5">
               <p>Check-in</p>
               {/* <Datetime value={new Date()} className="appearance-none shadow border rounded-lg w-fit py-1 px-2" /> */}

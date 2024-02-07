@@ -6,7 +6,7 @@ import { Rating } from "@mui/material"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown, faCartPlus, faCirclePlay, faRoad } from "@fortawesome/free-solid-svg-icons";
 import MapPackage from "@/components/maps/mapPackage";
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import Link from "next/link";
 
 interface UserLocation {
@@ -282,7 +282,7 @@ export default function PackageIdPage({ params }: any) {
             />
           </div>
           <div className="relative w-full sm:px-20 md:px-10 lg:px-44 xl:px-5">
-            {Array.from(new Set<number>(dataPackageActivityById.map((activity: { day: number }) => activity.day))).map((day: number, index: number) => (
+            {dataPackageActivityById && Array.from(new Set<number>(dataPackageActivityById.map((activity: { day: number }) => activity.day))).map((day: number, index: number) => (
               <div key={index} className="m-1 bg-blue-500 text-white rounded-lg w-fit ml-5 ">
                 <button
                   className="p-2 py-1 hover:bg-blue-800 rounded-lg"
