@@ -1,25 +1,61 @@
+'use client'
+
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
-import { faBed, faBridgeWater, faBullhorn, faFish, faHouse, faList, faList12, faListAlt, faMap, faMosque, faMusic, faShip, faSquarePollHorizontal, faStar, faUniversalAccess, faWater } from '@fortawesome/free-solid-svg-icons'
+import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react";
+import { faBed, faBook, faBridgeWater, faBullhorn, faFish, faHouse, faList, faMap, faSquarePollHorizontal, faStar, faUserPen } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
 export default function NavigationItem() {
   const [subMenuOpenUniqueAttractions, setSubMenuOpenUniqueAttractions] = useState(false);
-  const [subMenuOpenOrdinaryAttractions, setSubMenuOpenOrdinaryAttractions] = useState(false);
+  const { data: session, update, status } = useSession()
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      if (session) {
+        setIsLoading(false);
+      }
+    }
+  }, [update, status, session])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 4200);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
       <div className={`relative duration-500 select-none text-slate-700`} >
         <ul className="pt-6 px-3 font-medium text-base">
+          {session?.user.role === 'admin' && (
+            <Link href={'/explore/dashboard'}>
+              <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+                <FontAwesomeIcon icon={faUserPen} style={{ fontSize: '1.3em' }} />
+              </li>
+              <span className="flex-1">Dashboard</span>
+            </Link>
+          )}
           <Link href={"/explore"}>
             <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
               <FontAwesomeIcon icon={faHouse} style={{ fontSize: '1.3em' }} />
               <span className="flex-1">Home</span>
             </li>
           </Link>
-          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} 
-          onClick={() => setSubMenuOpenUniqueAttractions(!subMenuOpenUniqueAttractions)}
+          {session?.user.role === 'customer' && (
+            <Link href={'/explore/reservation'}>
+              <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+                <FontAwesomeIcon icon={faBook} style={{ fontSize: '1.3em' }} />
+                <span className="flex-1">Reservation</span>
+              </li>
+            </Link>
+          )}
+          <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`}
+            onClick={() => setSubMenuOpenUniqueAttractions(!subMenuOpenUniqueAttractions)}
           >
             <FontAwesomeIcon icon={faStar} style={{ fontSize: '1.3em' }} />
             <span className="flex-1">Atractions</span>
@@ -53,45 +89,8 @@ export default function NavigationItem() {
                   </div>
                 </li>
               </Link>
-              {/* <Link href={'/explore/makam'}>
-                <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
-                  <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                    <FontAwesomeIcon icon={faMosque} style={{ fontSize: '1.3em' }} />
-                    <h1>Makam Syeikh Burhanuddin</h1>
-                  </div>
-                </li>
-              </Link> */}
             </ul>
           )}
-          {/* <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} 
-          onClick={() => setSubMenuOpenOrdinaryAttractions(!subMenuOpenOrdinaryAttractions)}
-          >
-            <FontAwesomeIcon icon={faUniversalAccess} style={{ fontSize: '1.3em' }} />
-            <span className="flex-1">Ordinary Attractions</span>
-            <ChevronDown
-              className={`${subMenuOpenOrdinaryAttractions && 'rotate-180'}`}
-            />
-          </li>
-          {subMenuOpenOrdinaryAttractions && (
-            <ul>
-              <Link href={'/explore/water'}>
-              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
-                <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                  <FontAwesomeIcon icon={faWater} style={{ fontSize: '1.3em' }} />
-                  <h1>Water Attraction</h1>
-                </div>
-              </li>
-              </Link>
-              <Link href={'/explore/culture'}>
-              <li className="flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
-                <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 ">
-                  <FontAwesomeIcon icon={faMusic} style={{ fontSize: '1.3em' }} />
-                  <h1>Culture Attraction</h1>
-                </div>
-              </li>
-              </Link>
-            </ul>
-          )} */}
           <Link href={"/explore/event"} >
             <li className={`flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
               <FontAwesomeIcon icon={faBullhorn} style={{ fontSize: '1.3em' }} />

@@ -24,7 +24,7 @@ export default function NavigationHeader() {
 
     return () => clearTimeout(timer);
   }, []);
-
+  
   if (isLoading) return <div>Loading...</div>
 
   return (

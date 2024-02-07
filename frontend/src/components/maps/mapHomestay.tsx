@@ -214,11 +214,7 @@ export default function MapHomestay({ selectedHomestayId, userLocation, setUserL
   };
 
   const handleRouteButtonClick = (lat: number, lng: number) => {
-    console.log(lat, lng, 'di bagian handleRouteButton');
-
-    console.log(userLocation, 'masuk nihh');
     if (userLocation) {
-
       routeArray.forEach((directionsRenderer: google.maps.DirectionsRenderer) => {
         directionsRenderer.setMap(null);
       });

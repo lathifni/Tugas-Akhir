@@ -93,8 +93,6 @@ export default function MapExploreUlakan({
     // setInstructions(instructions);
   };
 
- 
-
   const mapRef = React.useRef<HTMLDivElement>(null)
 
   const initMap = async (dataUlakanVillage: any[], dataGeomGtp: any[]) => {
@@ -533,11 +531,10 @@ export default function MapExploreUlakan({
   }, [queryMutiple(), dataMapforType, isManualLocation, objectAround])
 
   useEffect(() => {
-    console.log('testt distance useEffect');
-    
     setDistances(distances);
     setInstructions(instructions);
   }, [distances])
+  
   return (
     <div style={{ height: '500px' }} ref={mapRef} className="text-slate-700"></div>
   )

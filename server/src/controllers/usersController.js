@@ -16,8 +16,4 @@ const registerUserController = async (payload) => {
     return await createDataUser(params)
 }
 
-const check = async (payload) => {
-
-}
-
 module.exports = { registerUserController,  }

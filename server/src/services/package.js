@@ -9,10 +9,11 @@ const getListAllBasePackage = async () => {
 
 const getPackageById = async (params) => {
   const [rows] = await promisePool.query(
-    `SELECT P.name,P.min_capacity,P.contact_person,P.price,P.description,PT.type_name FROM package as P JOIN package_type AS PT ON P.type_id = PT.id WHERE P.id='${params.id}'`
+    `SELECT P.name,P.min_capacity,P.contact_person,P.price,P.description,PT.type_name,MAX(PD.day) AS max_day FROM package as P JOIN package_type AS PT ON P.type_id = PT.id 
+    JOIN package_day AS PD ON P.id=PD.package_id WHERE P.id='${params.id}'`
   );
   return rows;
-}
+};
 
 const getListAllServicePackageById = async (params) => {
   const [rows] = await promisePool.query(
@@ -28,29 +29,30 @@ const getAverageRatingPackageById = async (params) => {
     WHERE package_id = '${params.id}' AND rating > 0;`
   );
   return rows;
-}
+};
 
 const getPackageActivityById = async (params) => {
+  const COALESCE_NAME = `COALESCE(event.name, culinary_place.name, worship_place.name, attraction.name, facility.name, homestay.name, 'Unknown Activity') AS activity_name`;
+  const COALESCE_LAT = `COALESCE(ST_Y(ST_Centroid(event.geom)), ST_Y(ST_Centroid(culinary_place.geom)), ST_Y(ST_Centroid(worship_place.geom)), ST_Y(ST_Centroid(attraction.geom)), ST_Y(ST_Centroid(facility.geom)), ST_Y(ST_Centroid(homestay.geom)), NULL) AS activity_lat`;
+  const COALESCE_LNG = `COALESCE(ST_X(ST_Centroid(event.geom)), ST_X(ST_Centroid(culinary_place.geom)), ST_X(ST_Centroid(worship_place.geom)), ST_X(ST_Centroid(attraction.geom)), ST_X(ST_Centroid(facility.geom)), ST_X(ST_Centroid(homestay.geom)), NULL) AS activity_lng`;
   const [rows] = await promisePool.query(
-    `SELECT DP.*, COALESCE(event.name, culinary_place.name, worship_place.name, attraction.name, facility.name, homestay.name, 'Unknown Activity') AS activity_name
-  FROM detail_package AS DP
-  LEFT JOIN event ON DP.activity_type = 'EV' AND DP.object_id = event.id
-  LEFT JOIN culinary_place ON DP.activity_type = 'CP' AND DP.object_id = culinary_place.id
-  LEFT JOIN worship_place ON DP.activity_type = 'WO' AND DP.object_id = worship_place.id
-  LEFT JOIN attraction ON DP.activity_type = 'A' AND DP.object_id = attraction.id
-  LEFT JOIN facility ON DP.activity_type = 'FC' AND DP.object_id = facility.id
-  LEFT JOIN homestay ON DP.activity_type = 'HO' AND DP.object_id = homestay.id
-  WHERE package_id = '${params.id}'`
+    `SELECT DP.*, ${COALESCE_NAME} ,${COALESCE_LAT}, ${COALESCE_LNG} FROM detail_package AS DP
+      LEFT JOIN event ON DP.activity_type = 'EV' AND DP.object_id = event.id
+      LEFT JOIN culinary_place ON DP.activity_type = 'CP' AND DP.object_id = culinary_place.id
+      LEFT JOIN worship_place ON DP.activity_type = 'WO' AND DP.object_id = worship_place.id
+      LEFT JOIN attraction ON DP.activity_type = 'A' AND DP.object_id = attraction.id
+      LEFT JOIN facility ON DP.activity_type = 'FC' AND DP.object_id = facility.id
+      LEFT JOIN homestay ON DP.activity_type = 'HO' AND DP.object_id = homestay.id WHERE package_id = '${params.id}'`
   );
   return rows;
-}
+};
 
 const getListAllGalleryPackageById = async (params) => {
   const [rows] = await promisePool.query(
     `SELECT url FROM gallery_package WHERE package_id='${params.id}'`
   );
   return rows;
-}
+};
 
 const getListAllReviewPackageById = async (params) => {
   const [rows] = await promisePool.query(
@@ -58,9 +60,14 @@ const getListAllReviewPackageById = async (params) => {
     reservation AS R JOIN users AS U ON R.user_id = U.id WHERE R.package_id = '${params.id}' AND R.rating > 0`
   );
   return rows;
-}
+};
 
 module.exports = {
-  getListAllBasePackage, getPackageById, getListAllServicePackageById, getAverageRatingPackageById, getPackageActivityById, getListAllGalleryPackageById,
+  getListAllBasePackage,
+  getPackageById,
+  getListAllServicePackageById,
+  getAverageRatingPackageById,
+  getPackageActivityById,
+  getListAllGalleryPackageById,
   getListAllReviewPackageById,
 };

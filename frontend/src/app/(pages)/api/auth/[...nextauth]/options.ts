@@ -43,10 +43,7 @@ export const options: NextAuthOptions = {
    ],
    callbacks: {
       async jwt({ token, user, account, profile }) {
-         console.log(account);
-         
          if (account?.provider == 'google' && profile) {
-            console.log('testttttt');
             const requestLogin = await fetch(
                'http://localhost:3000/oauth2/google/frontend',
                {
@@ -57,6 +54,7 @@ export const options: NextAuthOptions = {
                   }),
                }
             );
+            
             const responseDataLogin = await requestLogin.json()
             
             token = Object.assign(
@@ -65,6 +63,7 @@ export const options: NextAuthOptions = {
                { accessToken: responseDataLogin.accessToken },
                { refreshToken: responseDataLogin.refreshToken },
                { user_image: responseDataLogin.user_image },
+               { role: responseDataLogin.role}
             );
          }
          return { ...token, ...user};

@@ -9,7 +9,8 @@ const createDataUser = async (params) => {
   const sql = `INSERT IGNORE INTO users (email,username,fullname,password_hash) VALUES ('${email}','${username}','${fullname}','${hashPassword}')`
   const [rows] = await promisePool.query(sql)
   if (rows.affectedRows == 0) return false
-  return true
+  createAuthGroupsUser(rows.insertId)
+  return rows[0]
 }
 
 const createDataUserByGoogleOAuth = async (params) => {
@@ -17,7 +18,12 @@ const createDataUserByGoogleOAuth = async (params) => {
   const sql = `INSERT IGNORE INTO users (email,fullname,password_hash,user_image,google) VALUES ('${email}','${fullname}','0','${user_image}',${google})`
   const [rows] = await promisePool.query(sql)
   if (rows.affectedRows == 0) return false
+  createAuthGroupsUser(rows.insertId)
   return true
+}
+
+const createAuthGroupsUser = async(params) => {
+  await promisePool.query(`INSERT INTO auth_groups_users (group_id,user_id) VALUES (2,${params})`)
 }
 
 const checkAvailablelUsername = async (params) => {
@@ -49,7 +55,7 @@ const getUserByUsernameOrEmail = async (params) => {
 }
 
 const getUserByEmailAndGoogle = async (params) => {
-  const sql = `SELECT id,google,user_image FROM users WHERE email='${params.email}' AND google=1`
+  const sql = `SELECT U.id,U.google,U.user_image,AG.role FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE U.email='${params.email}' AND U.google=1 `
   const [rows] = await promisePool.query(sql)
   if (rows[0] == undefined) return false
   return rows[0]

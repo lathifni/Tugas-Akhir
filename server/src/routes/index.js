@@ -12,6 +12,7 @@ const souvenir = require('./souvenir')
 const kotaKabKec = require('./kotaKabKec')
 const attraction = require('./attraction')
 const package = require('./package')
+const reservation = require('./reservation')
 
 const router = {}
 
@@ -29,5 +30,6 @@ router.souvenir = souvenir
 router.kotaKabKec = kotaKabKec
 router.attraction = attraction
 router.package = package
+router.reservation = reservation
 
 module.exports = router

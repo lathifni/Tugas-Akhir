@@ -58,7 +58,8 @@ const signInGoogle = async (req, res) => {
         google: signIn.google,
         user_image: signIn.user_image,
         name: signIn.name,
-        refreshToken: signIn.refreshToken
+        refreshToken: signIn.refreshToken,
+        role: signIn.role
     })
 }
 
