@@ -1,6 +1,5 @@
-import Footer from "@/components/footer";
 
-export default function ExtendLayout({
+export default function PackageCustomIdLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -9,7 +8,6 @@ export default function ExtendLayout({
     <div className="h-full flex">
       <main className="flex-1 h-full overflow-y-visible bg-slate-200">
         {children}
-        <Footer/>
       </main>
     </div>
   )
