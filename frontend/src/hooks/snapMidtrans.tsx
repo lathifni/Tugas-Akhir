@@ -6,19 +6,19 @@ declare global {
     }
 }
 
-const useSnap = () => {
+const snapMidtrans = () => {
     const [snap, setSnap] = useState<any>(null)
 
     useEffect(() => {
         const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js'; 
-        const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
+        const myMidtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY
         const script = document.createElement('script')
         script.src = midtransScriptUrl
         if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
 
-        script.onload = () => {
-            setSnap(window.snap)
-        }
+        // script.onload = () => {
+        //     setSnap(window.snap)
+        // }
         document.body.appendChild(script)
 
         return () => {
@@ -27,25 +27,21 @@ const useSnap = () => {
     }, [])
 
     const snapEmbed = (snap_token:string, embedId:string, 
-        action: {
-        onSuccess: (result: any) => void,
-        onPending: (result: any) => void,
-        onClose: () => void
-    }) => {
+        action:any ) => {
         if (snap) {
             snap.embed(snap_token, {
                 embedId,
                 onSuccess: function (result: any) {
                     console.log('success', result);
-                    action.onSuccess(result)
+                    // action.onSuccess(result)
                 },
                 onPending: function (result: any) {
                     console.log('pending', result);
-                    action.onPending(result)
+                    // action.onPending(result)
                 },
+                onError: function(result: any){console.log('error');console.log(result);},
                 onClose: function () {
-                    action.onClose()
-                    
+                    console.log('close');
                 }
             })
         }
@@ -54,4 +50,4 @@ const useSnap = () => {
     return { snapEmbed }
 }
 
-export default useSnap;
+export default snapMidtrans;

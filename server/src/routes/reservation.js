@@ -1,8 +1,8 @@
 var express = require('express');
-const { postReservation } = require('../handlers/reservationHandler');
+const { createReservationHandler } = require('../handlers/reservationHandler');
 
 var router = express.Router();
 
-router.post('/process-transaction', postReservation)
+router.post('/process-transaction', createReservationHandler)
 
 module.exports = router;

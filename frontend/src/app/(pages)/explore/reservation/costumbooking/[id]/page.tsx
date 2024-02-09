@@ -26,7 +26,9 @@ export default function CostumbookingIdPage({ params }: any) {
   const [isOpen, setIsopen] = useState(false)
   const [handleClose, setHandleClose] = useState(false)
   const [token, setToken] = useState('')
-  const [snap, setSnap] = useState<any>(null)
+  const [snapShow, setSnapShow] = useState(false)
+
+  // const { snapEmbed } = snapMidtrans()
 
   const { data: dataPackageById, isLoading: loadingPackageById } = useQuery({
     queryKey: ['PackageById', params.id],
@@ -56,7 +58,7 @@ export default function CostumbookingIdPage({ params }: any) {
     setDateCheckOut(formattedDate)
   }
 
-  const saveReservationButtonHandler = async() => {
+  const saveReservationButtonHandler = async () => {
 
     if (!readCheck) {
       console.log('tsetststs');
@@ -65,7 +67,7 @@ export default function CostumbookingIdPage({ params }: any) {
     try {
       const data = {
         name: 'user',
-        order_id: 'barangtest1234',
+        order_id: 'barangtest111000000',
         total: 100100
       }
       const config = {
@@ -74,63 +76,111 @@ export default function CostumbookingIdPage({ params }: any) {
         }
       }
       const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
+      console.log(res.data);
       
-      if (res && res.status === 200) {
-        console.log('di dalam res responsenya nih');
+
+      if (res.status == 201) {
         setToken(res.data.token)
         
-        // const { snapEmbed } = snapMidtrans()
-        // snapEmbed(token, 'snap-container', {
-        //   onSuccess: function (result: any) {
-        //     console.log('success', result);
-        //     // action.onSuccess(result)
-        // },
-        // onPending: function (result: any) {
-        //     console.log('pending', result);
-        //     // action.onPending(result)
-        // },
-        // onClose: function () {
-        //     // action.onClose()
-            
-        // }
-        // })
       }
+      // setToken('1fda8b50-6513-4606-adb6-f509f62a774b')
+      // window.snap.pay('0cd5ef8f-b177-4226-a8a7-5be71cc0933c', {
+      //   onSuccess: (result: any) => {
+      //     console.log(result, 'di onSuccess');
+      //     setToken('')
+      //   },
+      //   onPending: (result: any) => {
+      //     console.log(JSON.stringify(result), 'di onPending');
+      //     // localStorage.setItem('pembayaran',JSON.stringify(result))
+      //     setToken('')
+      //     window.snap.hide()
+      //   },
+      //   onError: (error: any) => {
+      //     console.log(error);
+          
+      //   },
+      //   onClose: () => {
+      //     console.log('di close Anda belum menyelesaikan pembayaran');
+          
+      //   }
+      // })
+
+      // if (res && res.status === 200) {
+      //   console.log('di dalam res responsenya nih');
+      //   setToken(res.data.token)
+
+      // const { snapEmbed } = snapMidtrans()
+      // snapEmbed(token, 'snap-container', {
+      //   onSuccess: function (result: any) {
+      //     console.log('success', result);
+      //     // action.onSuccess(result)
+      // },
+      // onPending: function (result: any) {
+      //     console.log('pending', result);
+      //     // action.onPending(result)
+      // },
+      // onClose: function () {
+      //     // action.onClose()
+
+      // }
+      // })
+      // }
     } catch (error) {
       console.log(error);
     }
   }
 
-  useEffect(() => {
-    if (token) {
-      window.snap.pay(token, {
-        onSuccess: (result: any) => {
-          console.log(result, 'di onSuccess');
-          setToken('')
-        },
-        onPending: (result: any) => {
-          console.log(result, 'di onPending');
-          setToken('')
-        }
-      })
-    }
-  }, [token])
+    useEffect(() => {
+      if (token) {
+        window.snap.pay(token, {
+          onSuccess: (result: any) => {
+            console.log(result, 'di onSuccess');
+            setToken('')
+          },
+          onPending: (result: any) => {
+            console.log(JSON.stringify(result), 'di onPending');
+            setToken('')
+          },
+          onError: (error: any) => {
+            console.log(error);
+            
+          },
+          onClose: () => {
+            console.log('di close Anda belum menyelesaikan pembayaran');
+            
+          }
+        })
+      }
+    }, [token])
+
+    useEffect(() => {
+      const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js'; 
+      const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
+      const script = document.createElement('script')
+      script.src = midtransScriptUrl
+      if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
+
+      document.body.appendChild(script)
+
+      return () => {
+          document.body.removeChild(script)
+      }
+  }, [])
 
   useEffect(() => {
-    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js'; 
-    const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
-    const script = document.createElement('script')
-    script.src = midtransScriptUrl
-    if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
+    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
+    let scriptTag = document.createElement('script');
+    scriptTag.src = midtransScriptUrl;
+    const myMidtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
+    console.log(myMidtransClientKey);
 
-    script.onload = () => {
-        setSnap(window.snap)
-    }
-    document.body.appendChild(script)
+    scriptTag.setAttribute('data-client-key', process.env.MIDTRANS_CLIENT_KEY!);
+    document.body.appendChild(scriptTag);
 
     return () => {
-        document.body.removeChild(script)
+      document.body.removeChild(scriptTag);
     }
-}, [])
+  }, []);
 
   const readGuideButtonHandler = () => {
     setIsopen(true)
@@ -190,7 +240,7 @@ export default function CostumbookingIdPage({ params }: any) {
           </div>
           <Modal
             open={isOpen}
-            // onClose={handleClose}
+          // onClose={handleClose}
           >
             <div className="w-fit h-fit ">
               <Typography id="modal-modal-title" variant="h6" component="h2">
@@ -200,7 +250,7 @@ export default function CostumbookingIdPage({ params }: any) {
                 Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
               </Typography>
             </div>
-           
+
           </Modal>
           <div className="italic select-none">
             <FormControlLabel control={
@@ -218,7 +268,9 @@ export default function CostumbookingIdPage({ params }: any) {
           </div>
           <div>
             <h2 className="font-medium text-lg">Booking</h2>
-            <div id="snap-container"></div>
+            {snapShow && (
+              <div id="snap-container"></div>
+            )}
             <div className="relative w-fit ml-5">
               <p>Check-in</p>
               {/* <Datetime value={new Date()} className="appearance-none shadow border rounded-lg w-fit py-1 px-2" /> */}
