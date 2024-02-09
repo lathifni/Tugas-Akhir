@@ -46,6 +46,12 @@ export default function NavigationItem() {
               <span className="flex-1">Home</span>
             </li>
           </Link>
+          <Link href={'/explore/ulakan'}>
+            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faMap} style={{ fontSize: '1.3em' }} />
+              <span className="flex-1">Explore Ulakan</span>
+            </li>
+          </Link>
           {session?.user.role === 'customer' && (
             <Link href={'/explore/reservation'}>
               <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
@@ -54,49 +60,6 @@ export default function NavigationItem() {
               </li>
             </Link>
           )}
-          <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`}
-            onClick={() => setSubMenuOpenUniqueAttractions(!subMenuOpenUniqueAttractions)}
-          >
-            <FontAwesomeIcon icon={faStar} style={{ fontSize: '1.3em' }} />
-            <span className="flex-1">Atractions</span>
-            <ChevronDown
-              className={`${subMenuOpenUniqueAttractions && 'rotate-180'}`}
-            />
-          </li>
-          {subMenuOpenUniqueAttractions && (
-            <ul>
-              <Link href={'/explore/attractions'}>
-                <li className="transition ease-in-out duration-500 flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
-                  <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                    <FontAwesomeIcon icon={faList} style={{ fontSize: '1.3em' }} />
-                    <h1 className="">List</h1>
-                  </div>
-                </li>
-              </Link>
-              <Link href={'/explore/tracking'}>
-                <li className="transition ease-in-out duration-500 flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
-                  <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                    <FontAwesomeIcon icon={faBridgeWater} style={{ fontSize: '1.3em' }} />
-                    <h1>Nearby</h1>
-                  </div>
-                </li>
-              </Link>
-              <Link href={'/explore/trip'}>
-                <li className="transition ease-in-out duration-500 flex rounded-md mx-8 cursor-pointer hover:bg-slate-200 items-center gap-x-4 hover:indent-2">
-                  <div className="flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4">
-                    <FontAwesomeIcon icon={faFish} style={{ fontSize: '1.3em' }} />
-                    <h1>Trip Pieh Island</h1>
-                  </div>
-                </li>
-              </Link>
-            </ul>
-          )}
-          <Link href={"/explore/event"} >
-            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
-              <FontAwesomeIcon icon={faBullhorn} style={{ fontSize: '1.3em' }} />
-              <span className="flex-1">Event</span>
-            </li>
-          </Link>
           <Link href={'/explore/package'}>
             <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
               <FontAwesomeIcon icon={faSquarePollHorizontal} style={{ fontSize: '1.3em' }} />
@@ -107,16 +70,8 @@ export default function NavigationItem() {
             <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
               <FontAwesomeIcon icon={faBed} />
               <span className="flex-1">Homestay</span>
-              {/* tambah untuk admin nanti yaaaaa..... */}
             </li>
           </Link>
-          <Link href={'/explore/ulakan'}>
-            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-slate-200 items-center gap-x-4 mb-2`} >
-              <FontAwesomeIcon icon={faMap} style={{ fontSize: '1.3em' }} />
-              <span className="flex-1">Explore Ulakan</span>
-            </li>
-          </Link>
-          {/* tambah dashboard nanti yaaaa..... */}
           <li className={`flex rounded-md p-2 cursor-pointer items-center gap-x-4 mb-2`} >
             <a href="https://www.instagram.com/green_talao_park/" className="flex-1" target="_blank">
               <div className="transition ease-in-out duration-500 flex hover:bg-slate-300 p-2 rounded-lg justify-center">
