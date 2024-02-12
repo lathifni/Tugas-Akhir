@@ -109,6 +109,7 @@ const signInGoogleController = async (payload) => {
     
         const user = await getUserByEmailAndGoogle({email})
         const { id,user_image, role } = user
+        console.log(id, 'ini id usernya ');
         const accessToken = jwt.sign({ id,email,google,user_image }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' })
         const refreshToken = jwt.sign({ id,email,google,user_image }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d'})
         await storeRefreshToken({ refreshToken, email, google:1 })

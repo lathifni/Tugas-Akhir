@@ -1,3 +1,5 @@
+const { getListReservationByUserId } = require("../services/reservation");
+
 const createReservationController = async (params) => {
   console.log(params);
   const authString = btoa(`${process.env.MIDTRANS_SERVER_KEY}:`);
@@ -32,6 +34,10 @@ const createReservationController = async (params) => {
   return response
 };
 
+const getListReservationByUserIdController = async(params) => {
+  return await getListReservationByUserId(params)
+}
+
 module.exports = {
-  createReservationController,
+  createReservationController, getListReservationByUserIdController
 };

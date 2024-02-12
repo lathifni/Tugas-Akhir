@@ -4,6 +4,7 @@ import Avatar from '@mui/material/Avatar'
 import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { useEffect, useState } from 'react'
+import { MoonLoader } from 'react-spinners'
 
 export default function NavigationHeader() {
   const { data: session, update, status } = useSession()
@@ -24,8 +25,15 @@ export default function NavigationHeader() {
 
     return () => clearTimeout(timer);
   }, []);
-  
-  if (isLoading) return <div>Loading...</div>
+
+  if (isLoading) return (
+    <div className="flex flex-col mt-3 items-center justify-center">
+      <h1 className="text-base lg:tracking-widest font-medium">Village Tourism</h1>
+      <br />
+      <MoonLoader color="#36d7b7" speedMultiplier={3} size={75} />
+      <p className='mt-4'>Loading ...</p>
+    </div>
+  )
 
   return (
     <div className="flex flex-col mt-3 items-center justify-center">

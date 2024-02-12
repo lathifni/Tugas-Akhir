@@ -101,6 +101,11 @@ export default function Home() {
                             <a href="/explore" className="absolute py-3 px-5 me-5 text-white rounded-sm bg-blue-500 hover:bg-green-400">
                                 Explore
                             </a>
+                            {/* <Link href="/explore">
+                                <a className="absolute py-3 px-5 me-5 text-white rounded-sm bg-blue-500 hover:bg-green-400">
+                                    Explore
+                                </a>
+                            </Link> */}
                             <button onClick={openModal}>
                                 <PlayCircle className='ml-32 text-5xl animate-pulse animate h-14 w-14 bg-blue-500 rounded-full text-white' />
                             </button>

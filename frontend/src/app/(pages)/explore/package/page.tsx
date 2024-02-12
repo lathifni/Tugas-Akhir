@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { fetchListAllBasePackage } from "../../api/fetchers/package"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCircleInfo, faPlus, faSquarePlus } from "@fortawesome/free-solid-svg-icons"
+import Link from "next/link"
 
 export default function Package() {
   const { isError, isSuccess, isLoading, data, error } = useQuery({
@@ -28,7 +29,9 @@ export default function Package() {
           <h1 className="text-xl font-semibold text-center">List Package</h1>
           <div className="flex flex-col items-center sm:items-start">
             <div className="w-fit p-2  bg-blue-500 hover:bg-blue-600 text-white rounded-lg mb-7" role="button">
-              <FontAwesomeIcon icon={faPlus} /> Costum New Package
+              <Link href={`/explore/package/custom`}>
+                <FontAwesomeIcon icon={faPlus} /> Custom New Package
+              </Link>
             </div>
             <div className="w-full">
               {data.map((item: { id: string, name: string, type_name: string, price: number, description: string, video_url: string, min_capacity: number }, index: number) => (
@@ -46,16 +49,16 @@ export default function Package() {
                       <a href={`/explore/package/${item.id}`} className="text-blue-500 hover:text-blue-800">Read more</a>
                     </p>
                     <div className="text-blue-500 lg:mt-2">
-                      <a href={`/explore/package/${item.id}`}>
+                      <Link href={`/explore/package/${item.id}`}>
                         <button className="p-2 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-blue-800">
                           <FontAwesomeIcon icon={faCircleInfo} /> More Info
                         </button>
-                      </a>
-                      <a href={`/explore/package/${item.id}`}>
+                      </Link>
+                      <Link href={`/explore/package/${item.id}/extend`}>
                         <button className="p-2 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-blue-800">
                           <FontAwesomeIcon icon={faSquarePlus} /> Extend
                         </button>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>

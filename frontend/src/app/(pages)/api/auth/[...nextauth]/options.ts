@@ -63,7 +63,8 @@ export const options: NextAuthOptions = {
                { accessToken: responseDataLogin.accessToken },
                { refreshToken: responseDataLogin.refreshToken },
                { user_image: responseDataLogin.user_image },
-               { role: responseDataLogin.role}
+               { role: responseDataLogin.role },
+               { user_id: responseDataLogin.user_id }
             );
          }
          return { ...token, ...user};

@@ -49,10 +49,11 @@ const logoutGoogleHandler = async (req, res) => {
 const signInGoogle = async (req, res) => {
     const payload = req.body.profile
     const signIn = await signInGoogleController(payload)
+    console.log(signIn.id, 'ini idnya');
 
     return res.status(200).send({
         status:'success', 
-        id: signIn.id,
+        user_id: signIn.id,
         accessToken: signIn.accessToken,
         email: signIn.email,
         google: signIn.google,

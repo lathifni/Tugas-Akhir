@@ -166,7 +166,7 @@ export default function PackageIdPage({ params }: any) {
           <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
             <h1 className="text-center text-xl font-semibold">Package Information</h1>
             {dataPackageActivityById && (
-              <Link href={`/explore/reservation/costumbooking/${dataPackageActivityById[0].package_id}`}>
+              <Link href={`/explore/package/${dataPackageActivityById[0].package_id}/booking`}>
                 <div className="absolute right-1 sm:right-5 px-3 py-1 bg-green-500 rounded-lg text-white hover:bg-green-700" role="button">
                   <FontAwesomeIcon icon={faCartPlus} /> Booking
                 </div>

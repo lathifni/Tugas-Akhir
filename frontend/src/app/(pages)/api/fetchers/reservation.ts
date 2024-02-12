@@ -9,3 +9,8 @@ export const postReservationTransaction = async() => {
   const res = await useAxiosAuth.post('/reservation/process-transaction', data)
   return res.data.data
 }
+
+export const fetchListReservationByUserId = async(id:string) => {
+  const res = await useAxiosAuth.get(`/reservation/${id}` )
+  return res.data.data
+}
