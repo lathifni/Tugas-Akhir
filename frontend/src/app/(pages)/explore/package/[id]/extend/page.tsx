@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react"
 import { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons"
-import { types } from "util"
 
 interface PackageActivity {
   package_id: string;
@@ -82,6 +81,7 @@ export default function ExtendIdPage({ params }: any) {
   };
 
   const handleAddActivities = (days: number) => {
+    const randomNumber = Math.floor(Math.random() * 100) + 1
     let maxActivities: number = 0;
     packageActivities.forEach(activities => {
       if (activities.day === days) {
@@ -98,7 +98,7 @@ export default function ExtendIdPage({ params }: any) {
       description: 'description',
       day: days,
       activity_type: 'EV',
-      activity_name: 'name test dulu',
+      activity_name: `name test dulu ${randomNumber}`,
       activity_lng: '0',
       activity_lat: '000',
       activity: newActivity.toString(),
@@ -107,21 +107,46 @@ export default function ExtendIdPage({ params }: any) {
     setPackageActivities([...packageActivities, ...newActivities]);
   }
 
-  const handleRemoveActivites = (activityId: string) => {
-    const updatedActivities = packageActivities.filter(activity => activity.activity !== activityId);
-    // Setel ulang state packageActivities dengan array yang telah diperbarui
+  const handleRemoveActivites = (activityId: string, dayIndex:number) => {
+    console.log(packageActivities);
+    
+    const activitiesForDay = packageActivities.filter(activity => activity.day == dayIndex);
+
+    // Hapus aktivitas dengan activityId dari array aktivitas yang terkait dengan hari yang dipilih
+    const updatedActivitiesForDay = activitiesForDay.filter(activity => activity.activity != activityId);
+
+    // Susun ulang urutan aktivitas di hari yang dipilih
+    updatedActivitiesForDay.forEach((activity, index) => {
+        activity.activity = String(index + 1);
+    });
+
+    // Perbarui state packageActivities dengan array yang telah diperbarui
+    let updatedActivities = packageActivities.filter(activity => activity.day != dayIndex)
+                                                .concat(updatedActivitiesForDay);
+
+    // Perbarui nomor urutan aktivitas secara berurutan dari 1 hingga N
+    updatedActivitiesForDay.forEach((activity, index) => {
+        activity.activity = String(index + 1);
+    });
+
+    // Gabungkan kembali aktivitas di hari lain dengan aktivitas yang telah diupdate untuk hari yang dipilih
+    updatedActivities = packageActivities.filter(activity => activity.day != dayIndex)
+                                                .concat(updatedActivitiesForDay);
+
+    // Perbarui state packageActivities dengan array yang telah diperbarui
     setPackageActivities(updatedActivities);
   }
 
 
   const handleAddService = () => {
+    const id = Math.floor(Math.random() * 500) + 1
     const newDay = maxDay + 1
     setMaxDay(newDay)
     // Set initial activities for the new day, or leave it empty if desired
     const newService = [{
       category: 1,
-      id: "S12",
-      name: "Guide",
+      id: `${id}`,
+      name: `Test ${id}`,
       package_id: "P0014",
       price: 100000,
       service_package_id: "S01",
@@ -130,22 +155,44 @@ export default function ExtendIdPage({ params }: any) {
     }];
     console.log(newService);
 
-    setPackageService([...packageService, ...newService]);
+    // setPackageService([...packageService, ...newService]);
+    const isIdExist = packageService.some(service => service.id === `${id}`);
+
+    // Jika id belum ada, tambahkan data layanan baru
+    if (!isIdExist) {
+      setPackageService([...packageService, ...newService]);
+        console.log("Service added successfully!");
+    } else {
+        console.log("ID already exists, cannot add service!");
+    }
   };
 
   const handleRemoveService = (id: string) => {
     console.log(id);
+    const updatedServices = [...packageService];
 
+    // Temukan indeks layanan yang sesuai dengan id
+    const index = updatedServices.findIndex(service => service.id === id);
+
+    // Jika id ditemukan, hapus layanan dari array
+    if (index !== -1) {
+        updatedServices.splice(index, 1); // Menghapus elemen pada indeks tertentu
+        console.log("Service with id", id, "removed successfully!");
+        setPackageService(updatedServices); // Perbarui state packageService
+    } else {
+        console.log("Service with id", id, "not found!");
+    }
   }
 
   const handleAddNonService = () => {
+    const id = Math.floor(Math.random() * 500) + 1
     const newDay = maxDay + 1
     setMaxDay(newDay)
     // Set initial activities for the new day, or leave it empty if desired
     const newNonService = [{
       category: 1,
-      id: "S11",
-      name: "Guide",
+      id: `${id}`,
+      name: `Test ${id}`,
       package_id: "P0014",
       price: 100000,
       service_package_id: "S01",
@@ -154,13 +201,17 @@ export default function ExtendIdPage({ params }: any) {
     }];
     console.log(newNonService);
 
-    setPackageService([...packageService, ...newNonService]);
+    // setPackageService([...packageService, ...newNonService]);
+    const isIdExist = packageService.some(service => service.id === `${id}`);
+
+    // Jika id belum ada, tambahkan data layanan baru
+    if (!isIdExist) {
+      setPackageService([...packageService, ...newNonService]);
+        console.log("Service added successfully!");
+    } else {
+        console.log("ID already exists, cannot add service!");
+    }
   };
-
-  const handleRemoveNonService = (id: string) => {
-    console.log(id);
-
-  }
 
   useEffect(() => {
     if (dataPackageActivityById && dataPackageById && dataListAllServicePackageById) {
@@ -181,8 +232,6 @@ export default function ExtendIdPage({ params }: any) {
   }, [dataPackageActivityById, dataPackageById, dataListAllServicePackageById]);
 
   if (dataPackageActivityById && dataListAllServicePackageById && dataPackageById && session) {
-    console.log(dataListAllServicePackageById);
-
     const currentTime = new Date();
     const formattedDate = currentTime.toISOString().slice(0, 19).replace('T', ' ');
     const extendPackageName = `${dataPackageById[0].name} extend by ${session.user.name} at ${formattedDate}`
@@ -272,7 +321,7 @@ export default function ExtendIdPage({ params }: any) {
                                   {activity.canDelete == 1 ? (
                                     <td className="flex justify-center items-center">
                                       <button className="border-solid border-2 border-red-500 rounded-lg text-red-500 px-2 py-1 hover:text-white hover:bg-red-500"
-                                        onClick={() => handleRemoveActivites(activity.activity)}>
+                                        onClick={() => handleRemoveActivites(activity.activity, dayIndex + 1)}>
                                         <FontAwesomeIcon icon={faXmark} />
                                       </button>
                                     </td>
@@ -351,7 +400,7 @@ export default function ExtendIdPage({ params }: any) {
                             {service.canDelete == 1 ? (
                               <td className="flex justify-center items-center">
                                 <button className="border-solid border-2 border-red-500 rounded-lg text-red-500 px-2 py-1 hover:text-white hover:bg-red-500"
-                                  onClick={() => handleRemoveNonService(service.id)}>
+                                  onClick={() => handleRemoveService(service.id)}>
                                   <FontAwesomeIcon icon={faXmark} />
                                 </button>
                               </td>
