@@ -80,7 +80,7 @@ export default function NavigationTest() {
     <>
       <aside
         ref={sideBarRef}
-        className='w-0 group/sidebar h-full bg-secondary overflow-y-auto relative flex lg:w-72 lg:block flex-col z-[99999] transition-all ease-in-out duration-300 md:border-solid md:border-4 md: border-blue-300 rounded-lg'
+        className='w-0 group/sidebar h-full bg-secondary overflow-y-auto relative flex lg:w-72 lg:block flex-col z-[99999] transition-all ease-in-out duration-300 bg-blue-500'
       >
         <div
           onClick={collapse}
@@ -100,7 +100,7 @@ export default function NavigationTest() {
 
       <div
         ref={navBarRef}
-        className='absolute top-0 z-[99998] left-0 w-full md:hidden '
+        className='absolute top-0 z-[99998] left-0 w-full md:hidden bg-blue-600'
       >
         <nav className="flex bg-transparent px-3 py-2 w-full">
           <MenuIcon onClick={resetWidth} role="button" className="h-8 w-8" /> 

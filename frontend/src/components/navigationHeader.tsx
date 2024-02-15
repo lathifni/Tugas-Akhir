@@ -27,8 +27,8 @@ export default function NavigationHeader() {
   }, []);
 
   if (isLoading) return (
-    <div className="flex flex-col mt-3 items-center justify-center">
-      <h1 className="text-base lg:tracking-widest font-medium">Village Tourism</h1>
+    <div className="flex flex-col mt-3 items-center justify-center text-white">
+      <h1 className="text-2xl lg:tracking-widest font-medium">Village Tourism</h1>
       <br />
       <MoonLoader color="#36d7b7" speedMultiplier={3} size={75} />
       <p className='mt-4'>Loading ...</p>
@@ -36,11 +36,11 @@ export default function NavigationHeader() {
   )
 
   return (
-    <div className="flex flex-col mt-3 items-center justify-center">
+    <div className="flex flex-col mt-3 items-center justify-center text-white">
       <motion.div className=''>
         <a href="/" className="flex gap-2">
           <img className="w-8" src="/icon/logo.svg" alt="Icon" />
-          <h1 className="text-base lg:tracking-widest font-medium ">Village Tourism</h1>
+          <h1 className="text-2xl lg:tracking-widest font-medium ">Village Tourism</h1>
         </a>
       </motion.div>
       <motion.div

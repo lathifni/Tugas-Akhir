@@ -1,4 +1,4 @@
-const { getListAllBasePackage, getListAllServicePackageById, getPackageById, getAverageRatingPackageById, getPackageActivityById, getListAllGalleryPackageById, getListAllReviewPackageById } = require("../services/package")
+const { getListAllBasePackage, getListAllServicePackageById, getPackageById, getAverageRatingPackageById, getPackageActivityById, getListAllGalleryPackageById, getListAllReviewPackageById, getListDayPackageById, getListAllServicePackage } = require("../services/package")
 
 const getAllBasePackageController = async() => {
   return await getListAllBasePackage()
@@ -30,5 +30,13 @@ const getListAllReviewPackageByIdController = async(params) => {
   return await getListAllReviewPackageById(params)
 }
 
+const getListDayPackageByIdController = async(params) => {
+  return await getListDayPackageById(params)
+}
+
+const getListAllServicePackageController = async() => {
+  return await getListAllServicePackage()
+}
+
 module.exports = { getAllBasePackageController, getPackageByIdController, getListAllServicePackageByIdController, getAverageRatingPackageByIdController,
-getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController }
+getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController,getListDayPackageByIdController, getListAllServicePackageController }

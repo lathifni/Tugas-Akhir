@@ -30,7 +30,17 @@ export const fetchListAllGalleryPackageById = async (id:string) => {
   return res.data.data
 }
 
-export const fetchListAllReviewPackageById =async (id:string) => {
+export const fetchListAllReviewPackageById = async (id:string) => {
   const res = await useAxiosAuth.get(`/package/listAllReviewPackageById/${id}`)
+  return res.data.data
+}
+
+export const fetchListDayPackageById = async(id:string) => {
+  const res = await useAxiosAuth.get(`/package/listDayPackageById/${id}`)
+  return res.data.data
+}
+
+export const fetchListAllService = async() => {
+  const res = await useAxiosAuth.get(`/package/listAllServicePackage`)
   return res.data.data
 }

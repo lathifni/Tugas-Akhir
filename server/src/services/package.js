@@ -33,10 +33,12 @@ const getAverageRatingPackageById = async (params) => {
 
 const getPackageActivityById = async (params) => {
   const COALESCE_NAME = `COALESCE(event.name, culinary_place.name, worship_place.name, attraction.name, facility.name, homestay.name, 'Unknown Activity') AS activity_name`;
+  const COALESCE_PRICE =`COALESCE(event.price, worship_place.price, attraction.price, facility.price, 0) AS price`
+  const COALESCE_CATEGORY = `COALESCE(event.category, attraction.category, facility.category, 'Shopping not include') AS category`
   const COALESCE_LAT = `COALESCE(ST_Y(ST_Centroid(event.geom)), ST_Y(ST_Centroid(culinary_place.geom)), ST_Y(ST_Centroid(worship_place.geom)), ST_Y(ST_Centroid(attraction.geom)), ST_Y(ST_Centroid(facility.geom)), ST_Y(ST_Centroid(homestay.geom)), NULL) AS activity_lat`;
   const COALESCE_LNG = `COALESCE(ST_X(ST_Centroid(event.geom)), ST_X(ST_Centroid(culinary_place.geom)), ST_X(ST_Centroid(worship_place.geom)), ST_X(ST_Centroid(attraction.geom)), ST_X(ST_Centroid(facility.geom)), ST_X(ST_Centroid(homestay.geom)), NULL) AS activity_lng`;
   const [rows] = await promisePool.query(
-    `SELECT DP.*, ${COALESCE_NAME} ,${COALESCE_LAT}, ${COALESCE_LNG} FROM detail_package AS DP
+    `SELECT DP.*, ${COALESCE_NAME}, ${COALESCE_PRICE}, ${COALESCE_CATEGORY} ,${COALESCE_LAT}, ${COALESCE_LNG} FROM detail_package AS DP
       LEFT JOIN event ON DP.activity_type = 'EV' AND DP.object_id = event.id
       LEFT JOIN culinary_place ON DP.activity_type = 'CP' AND DP.object_id = culinary_place.id
       LEFT JOIN worship_place ON DP.activity_type = 'WO' AND DP.object_id = worship_place.id
@@ -62,6 +64,20 @@ const getListAllReviewPackageById = async (params) => {
   return rows;
 };
 
+const getListDayPackageById = async(params) => {
+  const [rows] = await promisePool.query(
+    `SELECT * FROM package_day WHERE package_id='${params.id}'`
+  );
+  return rows;
+}
+
+const getListAllServicePackage = async() => {
+  const [rows] = await promisePool.query(
+    `SELECT * FROM service_package`
+  );
+  return rows;
+}
+
 module.exports = {
   getListAllBasePackage,
   getPackageById,
@@ -70,4 +86,6 @@ module.exports = {
   getPackageActivityById,
   getListAllGalleryPackageById,
   getListAllReviewPackageById,
+  getListDayPackageById,
+  getListAllServicePackage,
 };
