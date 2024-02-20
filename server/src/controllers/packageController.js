@@ -1,42 +1,121 @@
-const { getListAllBasePackage, getListAllServicePackageById, getPackageById, getAverageRatingPackageById, getPackageActivityById, getListAllGalleryPackageById, getListAllReviewPackageById, getListDayPackageById, getListAllServicePackage } = require("../services/package")
+const {
+  getListAllBasePackage,
+  getListAllServicePackageById,
+  getPackageById,
+  getAverageRatingPackageById,
+  getPackageActivityById,
+  getListAllGalleryPackageById,
+  getListAllReviewPackageById,
+  getListDayPackageById,
+  getListAllServicePackage,
+  getLatestIdPackage,
+  createExtendBooking,
+  createPackageDay,
+  createPackageActivites,
+  createPackageService,
+} = require("../services/package");
 
-const getAllBasePackageController = async() => {
-  return await getListAllBasePackage()
-}
+const getAllBasePackageController = async () => {
+  return await getListAllBasePackage();
+};
 
-const getPackageByIdController = async(params) => {
-  return await getPackageById(params)
-}
+const getPackageByIdController = async (params) => {
+  return await getPackageById(params);
+};
 
-const getListAllServicePackageByIdController = async(params) => {
-  return await getListAllServicePackageById(params)
-}
+const getListAllServicePackageByIdController = async (params) => {
+  return await getListAllServicePackageById(params);
+};
 
-const getAverageRatingPackageByIdController = async(params) => {
+const getAverageRatingPackageByIdController = async (params) => {
   // return await getAverageRatingPackageById(params)
-  const data =  await getAverageRatingPackageById(params)
-  const averageRating = data[0].average_rating !== null ? data[0].average_rating : 0;
-  return averageRating
-}
-const getListPackageActivityByIdController = async(params) => {
-  return await getPackageActivityById(params)
-}
+  const data = await getAverageRatingPackageById(params);
+  const averageRating =
+    data[0].average_rating !== null ? data[0].average_rating : 0;
+  return averageRating;
+};
+const getListPackageActivityByIdController = async (params) => {
+  return await getPackageActivityById(params);
+};
 
-const getListAllGalleryPackageByIdController = async(params) => {
-  return await getListAllGalleryPackageById(params)
-}
+const getListAllGalleryPackageByIdController = async (params) => {
+  return await getListAllGalleryPackageById(params);
+};
 
-const getListAllReviewPackageByIdController = async(params) => {
-  return await getListAllReviewPackageById(params)
-}
+const getListAllReviewPackageByIdController = async (params) => {
+  return await getListAllReviewPackageById(params);
+};
 
-const getListDayPackageByIdController = async(params) => {
-  return await getListDayPackageById(params)
-}
+const getListDayPackageByIdController = async (params) => {
+  return await getListDayPackageById(params);
+};
 
-const getListAllServicePackageController = async() => {
-  return await getListAllServicePackage()
-}
+const getListAllServicePackageController = async () => {
+  return await getListAllServicePackage();
+};
 
-module.exports = { getAllBasePackageController, getPackageByIdController, getListAllServicePackageByIdController, getAverageRatingPackageByIdController,
-getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController,getListDayPackageByIdController, getListAllServicePackageController }
+const createExtendBookingController = async (params) => {
+  const { packageDay, packageActivities, packageService, dataPackageById} = params
+  const latestIdPackage = await getLatestIdPackage();
+  let lastIdNumber = latestIdPackage.lastIdNumber
+
+  const generateId = () => {
+    lastIdNumber++;
+    const idNumberString = lastIdNumber.toString().padStart(4, "0");
+    return `P${idNumberString}`;
+  };
+  const newId = generateId();
+  const newPackage = {
+    id: newId,
+    name: dataPackageById[0].name,
+    type_id: dataPackageById[0].type_id,
+    min_capacity: dataPackageById[0].min_capacity,
+    price: dataPackageById[0].price,
+    contact_person: dataPackageById[0].contact_person,
+    description: dataPackageById[0].description,
+    custom: 1,
+  }
+
+  await createExtendBooking(newPackage)
+
+  for (const dayData of packageDay) {
+        dayData.package_id = `${newId}`;
+        await createPackageDay(dayData);
+  }
+
+  for (const activities of packageActivities) {
+    const newActivites = {
+      package_id: newId,
+      day: activities.day,
+      activity: activities.activity,
+      activity_type: activities.activity_type,
+      object_id: activities.object_id,
+      description: activities.description
+    }
+    await createPackageActivites(newActivites)
+  }
+  console.log(packageService);
+
+  for (const service of packageService) {
+    const newService = {
+      package_id: newId,
+      service_package_id: service.service_package_id,
+      status: service.status
+    }
+    await createPackageService(newService)
+  }
+  return newId
+};
+
+module.exports = {
+  getAllBasePackageController,
+  getPackageByIdController,
+  getListAllServicePackageByIdController,
+  getAverageRatingPackageByIdController,
+  getListPackageActivityByIdController,
+  getListAllGalleryPackageByIdController,
+  getListAllReviewPackageByIdController,
+  getListDayPackageByIdController,
+  getListAllServicePackageController,
+  createExtendBookingController,
+}

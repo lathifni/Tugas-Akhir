@@ -1,4 +1,4 @@
-const { getListReservationByUserId } = require("../services/reservation");
+const { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId } = require("../services/reservation");
 
 const createReservationController = async (params) => {
   console.log(params);
@@ -9,17 +9,29 @@ const createReservationController = async (params) => {
 
   const paramter = {
     transaction_details: {
-      order_id: currentDate,
-      gross_amount: params.total,
+      order_id: 'DP002',
+      // gross_amount: params.total,
+      gross_amount: 800000
     },
     customer_details: {
       first_name: params.name,
-      // email: req.body.email,
+      email: params.email,
     },
-    // usage_limit:  1,
-    // expiry: {
-
-    // }
+    usage_limit:  1,
+    expiry: {
+      duration: 1,
+      unit: 'days'
+    },
+    item_details: [{
+      id: 'P0090',
+      name: 'Family and Community Gathering',
+      price: 1000000,
+      quantity: 1
+    },{
+      name: 'down payment',
+      price: -200000,
+      quantity: 1
+    }]
   };
 
   const response = await fetch(`${process.env.MIDTRANS_APP_URL}`, {
@@ -38,6 +50,18 @@ const getListReservationByUserIdController = async(params) => {
   return await getListReservationByUserId(params)
 }
 
+const getReservationByIdController = async(params) => {
+  const listService = await getServiceByReservationId(params)
+  const listActivity = await getActivityByReservationId(params)
+  const dataReservation = await getReservationById(params)
+
+  return {
+    reservation: dataReservation[0],
+    service: listService,
+    activity: listActivity
+  }
+}
+
 module.exports = {
-  createReservationController, getListReservationByUserIdController
+  createReservationController, getListReservationByUserIdController, getReservationByIdController,
 };

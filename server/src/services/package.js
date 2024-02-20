@@ -9,7 +9,7 @@ const getListAllBasePackage = async () => {
 
 const getPackageById = async (params) => {
   const [rows] = await promisePool.query(
-    `SELECT P.name,P.min_capacity,P.contact_person,P.price,P.description,PT.type_name,MAX(PD.day) AS max_day FROM package as P JOIN package_type AS PT ON P.type_id = PT.id 
+    `SELECT P.name,P.type_id,P.min_capacity,P.contact_person,P.price,P.description,PT.type_name, MAX(CAST(PD.day AS UNSIGNED)) AS max_day  FROM package as P JOIN package_type AS PT ON P.type_id = PT.id 
     JOIN package_day AS PD ON P.id=PD.package_id WHERE P.id='${params.id}'`
   );
   return rows;
@@ -78,6 +78,46 @@ const getListAllServicePackage = async() => {
   return rows;
 }
 
+const getLatestIdPackage = async() => {
+  const [rows] = await promisePool.query(`SELECT MAX(CAST(SUBSTRING(id, 2) AS UNSIGNED)) AS lastIdNumber FROM package`);
+  return rows[0];
+}
+
+const createExtendBooking = async(params) => {
+  const [rows] = await promisePool.query(
+    `INSERT INTO package (id,name,type_id,min_capacity,price,contact_person,description,custom) 
+    VALUES ('${params.id}','${params.name}','${params.type_id}','${params.min_capacity}','${params.price}','${params.contact_person}',"${params.description}",'${params.custom}')`
+  );
+  return rows;
+}
+
+const createPackageDay = async(params) => {
+  console.log(params);
+  const [rows] = await promisePool.query(
+    `INSERT INTO package_day (package_id,day,description) 
+    VALUES ('${params.package_id}','${params.day}',"${params.description}")`
+  );
+  return rows;
+}
+
+const createPackageActivites = async(params) => {
+  console.log(params);
+  const [rows] = await promisePool.query(
+    `INSERT INTO detail_package (package_id,day,activity,activity_type,object_id,description) 
+    VALUES ('${params.package_id}','${params.day}','${params.activity}','${params.activity_type}','${params.object_id}',"${params.description}")`
+  );
+  return rows;
+}
+
+const createPackageService = async(params) => {
+  console.log(params);
+  const [rows] = await promisePool.query(
+    `INSERT INTO detail_service_package (package_id,service_package_id,status) 
+    VALUES ('${params.package_id}','${params.service_package_id}',"${params.status}")`
+  );
+  return rows;
+}
+
 module.exports = {
   getListAllBasePackage,
   getPackageById,
@@ -88,4 +128,9 @@ module.exports = {
   getListAllReviewPackageById,
   getListDayPackageById,
   getListAllServicePackage,
+  getLatestIdPackage,
+  createExtendBooking,
+  createPackageDay,
+  createPackageActivites,
+  createPackageService,
 };

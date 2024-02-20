@@ -14,3 +14,8 @@ export const fetchListReservationByUserId = async(id:string) => {
   const res = await useAxiosAuth.get(`/reservation/${id}` )
   return res.data.data
 }
+
+export const fetchReservationById = async(id:string) => {
+  const res = await useAxiosAuth.get(`/reservation/reservationById/${id}` )
+  return res.data.data
+}

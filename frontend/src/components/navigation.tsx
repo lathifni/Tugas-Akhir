@@ -100,7 +100,7 @@ export default function NavigationTest() {
 
       <div
         ref={navBarRef}
-        className='absolute top-0 z-[99998] left-0 w-full md:hidden bg-blue-600'
+        className='absolute top-0 z-[99998] left-0 w-full md:hidden'
       >
         <nav className="flex bg-transparent px-3 py-2 w-full">
           <MenuIcon onClick={resetWidth} role="button" className="h-8 w-8" /> 

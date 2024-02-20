@@ -52,7 +52,7 @@ export default function NavigationHeader() {
           borderRadius: "100%"
         }}
       >
-        <Avatar alt='test' src={session ? `${session?.user.user_image}` : 'photos/talao.png'} sx={{ width: 100, height: 100 }} />
+        <Avatar  alt='test' src={session ? `${session?.user.user_image}` : 'photos/talao.png'} sx={{ width: 100, height: 100 }} />
       </motion.div>
       <motion.div
         whileHover={{ scale: 1.05, rotate: 1 }}

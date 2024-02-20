@@ -44,3 +44,9 @@ export const fetchListAllService = async() => {
   const res = await useAxiosAuth.get(`/package/listAllServicePackage`)
   return res.data.data
 }
+
+export const createExtendBooking = async(packageDay:object, packageActivities:object, packageService:object): Promise<any> => {
+  console.log(packageDay, 'ini bagian day');
+  console.log(packageActivities, 'ini bagian activities');
+  console.log(packageService, 'ini bagian service'); 
+}

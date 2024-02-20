@@ -1,4 +1,4 @@
-const { getAllBasePackageController, getListAllServicePackageByIdController, getPackageByIdController, getAverageRatingPackageByIdController, getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController, getListDayPackageByIdController, getListAllServicePackageController } = require("../controllers/packageController");
+const { getAllBasePackageController, getListAllServicePackageByIdController, getPackageByIdController, getAverageRatingPackageByIdController, getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController, getListDayPackageByIdController, getListAllServicePackageController, getLatestIdPackageController, createExtendBookingControoler, createExtendBookingController } = require("../controllers/packageController");
 
 const getAllBasePackageHandler = async(req, res) => {
   try {
@@ -90,6 +90,26 @@ const getListAllServicePackageHandler = async(req, res) => {
   }
 }
 
+const getLatestIdPackageHandler = async(req, res) => {
+  try {
+    const data = await getLatestIdPackageController()
+    
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const createExtendBookingHandler = async(req, res) => {
+  try {
+    const resId = await createExtendBookingController(req.body)
+
+    return res.status(201).send({ status:'success', data:resId })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = { getAllBasePackageHandler, getPackageByIdHandler, getListAllServicePackageByIdHandler, getAverageRatingPackageByIdHandler,
 getListPackageActivityByIdHandler, getListAllGalleryPackageByIdHandler, getListAllReviewPackageByIdHandler, getListDayPackageByIdHandler, 
-getListAllServicePackageHandler, }
+getListAllServicePackageHandler, getLatestIdPackageHandler, createExtendBookingHandler, }

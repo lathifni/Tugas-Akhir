@@ -1,14 +1,17 @@
 'use client'
 
-import { fetchListAllService, fetchListAllServicePackageById, fetchListDayPackageById, fetchPackageActivityById, fetchPackageById } from "@/app/(pages)/api/fetchers/package"
-import { useQuery } from "@tanstack/react-query"
+import { createExtendBooking, fetchListAllService, fetchListAllServicePackageById, fetchListDayPackageById, fetchPackageActivityById, fetchPackageById } from "@/app/(pages)/api/fetchers/package"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { ClipLoader } from "react-spinners"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons"
+import { faCartPlus, faCheck, faPencil, faPlus, faXmark } from "@fortawesome/free-solid-svg-icons"
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Select, TextField } from "@mui/material"
 import { fetchListAllObject } from "@/app/(pages)/api/fetchers/gtp"
+import Link from "next/link"
+import useAxiosAuth from "../../../../../../../libs/useAxiosAuth"
+import { useRouter } from 'next/navigation';
 
 interface PackageActivity {
   package_id: string;
@@ -52,12 +55,17 @@ export default function ExtendIdPage({ params }: any) {
   const [addActivitiesOpen, setAddActivitiesOpen] = useState(false)
   const [addDayOpen, setAddDayOpen] = useState(false)
   const [addServiceOpen, setAddServiceOpen] = useState(false)
+  const [bookingPackage, setBookingPackage] = useState(false)
+  const [cancelDialog, setCancelDialog] = useState(false)
   const [fieldAcitivityType, setFieldAcitivityType] = useState('')
   const [selectedObject, setSelectedObject] = useState('')
   const [selectedService, setSelectedService] = useState('')
   const [selectedAddDayActivities, setSelectedAddDayActivities] = useState(0)
   const [typeService, setTypeService] = useState(0)
   const [priceTotal, setPriceTotal] = useState(0)
+  const [descriptionNewActivites, setDescriptionNewActivities] = useState('')
+  const [descriptionNewDay, setDescriptionNewDay] = useState('')
+  const router = useRouter();
 
   const { data: dataPackageActivityById, isLoading: loadingPackageActivity } = useQuery({
     queryKey: ['packageActivity', params.id],
@@ -99,11 +107,14 @@ export default function ExtendIdPage({ params }: any) {
       },
     },
   };
+  const currentTime = new Date();
+  const formattedDate = currentTime.toISOString().slice(0, 19).replace('T', ' ');
 
   const handleAddDay = () => {
     const newDay = parseInt(maxDay.toString()) + 1
     setMaxDay(newDay)
     setSelectedAddDayActivities(newDay)
+    console.log(newDay, 'ini bagian newday');
 
     setAddDayOpen(!addDayOpen)
     const dataSelectedObject = dataListAllObject.filter((object: { id: string, name: string, type: string, price: string, category: string }) => object.id == `${selectedObject}`)
@@ -111,7 +122,7 @@ export default function ExtendIdPage({ params }: any) {
     const newActivities = [{
       package_id: `${params.id}`,
       object_id: `${selectedObject}`,
-      description: 'description',
+      description: `${descriptionNewActivites}`,
       day: newDay,
       activity_type: `${dataSelectedObject[0].type}`,
       activity_name: `${dataSelectedObject[0].name}`,
@@ -126,7 +137,7 @@ export default function ExtendIdPage({ params }: any) {
     const newDayPackage = [{
       package_id: `${params.id}`,
       day: newDay.toString(),
-      description: 'ini deskripsinya'
+      description: `${descriptionNewDay}`
     }]
     setPackageDay([...packageDay, ...newDayPackage])
   };
@@ -151,13 +162,12 @@ export default function ExtendIdPage({ params }: any) {
         }
       });
       const dataSelectedObject = dataListAllObject.filter((object: { id: string, name: string, type: string, price: string, category: string }) => object.id == `${selectedObject}`)
-      const price = (dataSelectedObject[0].price).toString()
 
       const newActivity = maxActivities + 1;
       const newActivities = [{
         package_id: `${params.id}`,
         object_id: `${selectedObject}`,
-        description: 'description',
+        description: `${descriptionNewActivites}`,
         day: selectedAddDayActivities,
         activity_type: `${dataSelectedObject[0].type}`,
         activity_name: `${dataSelectedObject[0].name}`,
@@ -165,7 +175,7 @@ export default function ExtendIdPage({ params }: any) {
         activity_lat: '000',
         activity: newActivity.toString(),
         canDelete: 1,
-        price: price,
+        price: dataSelectedObject[0].price,
         category: dataSelectedObject[0].category
       }];
       setPackageActivities([...packageActivities, ...newActivities]);
@@ -203,7 +213,6 @@ export default function ExtendIdPage({ params }: any) {
     const cekDaysActivitiesAfterRemove = packageActivities.filter(activity => activity.day == dayIndex);
     if (cekDaysActivitiesAfterRemove.length === 1) {
       setMaxDay(Number(maxDay) - 1)
-      console.log(dayIndex);
       const updatePackageDay = packageDay.filter(days => days.day != dayIndex.toString())
       setPackageDay(updatePackageDay)
     }
@@ -245,20 +254,20 @@ export default function ExtendIdPage({ params }: any) {
   };
 
   const saveAddService = () => {
-    const isIdExist = dataListAllServicePackageById.some((service: {id:string,name:string,package_id:string,price:number,status:number}) => service.id === `${selectedService}`);
+    const isIdExist = dataListAllServicePackageById.some((service: { id: string, name: string, package_id: string, price: number, status: number }) => service.id === `${selectedService}`);
     setAddServiceOpen(!addServiceOpen)
     if (!isIdExist) {
-      const selectedServiceData = dataListAllServicePackage.filter((service: {id:string,name:string,package_id:string,price:number,status:number,category:string}) => service.id === `${selectedService}`)
+      const selectedServiceData = dataListAllServicePackage.filter((service: { id: string, name: string, package_id: string, price: number, status: number, category: string }) => service.id === `${selectedService}`)
       const newService = [{
-      category: selectedServiceData[0].category,
-      id: `${selectedServiceData[0].id}`,
-      name: `${selectedServiceData[0].name}`,
-      package_id: "P0014",
-      price: Number(selectedServiceData[0].price) ,
-      service_package_id: "S01",
-      status: typeService,
-      canDelete: 1,
-    }];
+        category: selectedServiceData[0].category,
+        id: `${selectedServiceData[0].id}`,
+        name: `${selectedServiceData[0].name}`,
+        package_id: "P0014",
+        price: Number(selectedServiceData[0].price),
+        service_package_id: `${selectedServiceData[0].id}`,
+        status: typeService,
+        canDelete: 1,
+      }];
       setPackageService([...packageService, ...newService]);
       console.log("Service added successfully!");
     } else {
@@ -267,7 +276,6 @@ export default function ExtendIdPage({ params }: any) {
   }
 
   const handleRemoveService = (id: string) => {
-    console.log(id);
     const updatedServices = [...packageService];
 
     // Temukan indeks layanan yang sesuai dengan id
@@ -280,6 +288,30 @@ export default function ExtendIdPage({ params }: any) {
       setPackageService(updatedServices); // Perbarui state packageService
     } else {
       console.log("Service with id", id, "not found!");
+    }
+  }
+
+  const saveBooking = async () => {
+    if (dataPackageById && session && typeof window !== 'undefined') {
+      const extendPackageName = `${dataPackageById[0].name} extend by ${session.user.name} at ${formattedDate}`
+      console.log(extendPackageName);
+
+      const res = await useAxiosAuth.post('/package/createExtendBooking', ({
+        packageDay: packageDay,
+        packageActivities: packageActivities,
+        packageService: packageService,
+        dataPackageById: [{
+          id: dataPackageById[0].package_id,
+          name: extendPackageName,
+          type_id: dataPackageById[0].type_id,
+          min_capacity: dataPackageById[0].min_capacity,
+          price: priceTotal,
+          contact_person: dataPackageById[0].contact_person,
+          description: dataPackageById[0].description,
+          custom: 1,
+        }]
+      }))
+      if (res.status == 201) router.push(`/explore/package/${res.data.data}/booking`);
     }
   }
 
@@ -299,23 +331,17 @@ export default function ExtendIdPage({ params }: any) {
       setPackageService(initialPackageServices)
       setPackageDay(dataListAllDayPackageById)
     }
-  }, [dataPackageActivityById, dataPackageById, dataListAllServicePackageById]);
+  }, [dataPackageActivityById, dataPackageById, dataListAllServicePackageById, dataListAllDayPackageById]);
 
   useEffect(() => {
-    console.log(packageActivities);
-    console.log(packageService);
     if (dataPackageById) {
       const minCapacity: number = dataPackageById[0].min_capacity;
       const totalPriceActivites: number = packageActivities.reduce((total, activity) => {
-        // Jika category adalah '1', kalikan harga dengan minCapacity sebelum ditambahkan ke total
-        if (activity.category === '1') {
-          total += activity.price * minCapacity;
-        } else {
-          total += activity.price;
-        }
+        if (activity.category === '1') total += activity.price * minCapacity;
+        else total += activity.price;
         return total;
       }, 0);
-      console.log(totalPriceActivites);
+
       const totalPriceService: number = packageService.reduce((total, service) => {
         if (service.status == 1) {
           if (service.category == 1) total += service.price * minCapacity * maxDay
@@ -324,18 +350,12 @@ export default function ExtendIdPage({ params }: any) {
         }
         return total
       }, 0)
-      console.log(totalPriceService);
-      // const priceTotal = parseInt(totalPriceService.toString()) + parseInt(totalPriceActivites.toString())
-      const priceTotal:number = parseInt(totalPriceService.toString()) + parseInt(totalPriceActivites.toString())
+      const priceTotal = Number(totalPriceService) + Number(totalPriceActivites)
       setPriceTotal(priceTotal)
     }
-    
   }, [packageService, packageActivities, dataPackageById])
 
   if (dataPackageActivityById && dataListAllServicePackageById && dataPackageById && session && dataListAllObject && dataListAllDayPackageById && dataListAllServicePackage) {
-    // setPriceTotal(dataPackageById[0].price)
-    const currentTime = new Date();
-    const formattedDate = currentTime.toISOString().slice(0, 19).replace('T', ' ');
     const extendPackageName = `${dataPackageById[0].name} extend by ${session.user.name} at ${formattedDate}`
     return (
       <>
@@ -343,30 +363,62 @@ export default function ExtendIdPage({ params }: any) {
           <div className="w-full h-full px-1 ">
             <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
               <h1 className="text-center text-xl font-semibold">Extend Package</h1>
+              <br />
+              <div className="absolute mr-5 right-1 top-14">
+                <button className="text-white bg-green-500 px-3 py-1 rounded-lg hover:bg-green-600 mr-3" onClick={() => setBookingPackage(!bookingPackage)}>
+                  <FontAwesomeIcon icon={faCartPlus} /> Booking this Package
+                </button>
+                <Dialog open={bookingPackage} className="text-center rounded-lg">
+                  <DialogTitle className="text-blue-500">Ready to booking package?</DialogTitle>
+                  <div>
+                    <button className="border-solid border-2 p-2 m-1 border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white mr-5" onClick={() => setBookingPackage(!bookingPackage)}>
+                      <FontAwesomeIcon icon={faXmark} className="mr-2" />Cancel
+                    </button>
+                    <button className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white" onClick={() => saveBooking()}>
+                      <FontAwesomeIcon icon={faCartPlus} /> Booking</button>
+                  </div>
+                </Dialog>
+                <button className="text-white bg-red-500 px-3 py-1 rounded-lg hover:bg-red-600" onClick={() => setCancelDialog(!cancelDialog)}>
+                  <FontAwesomeIcon icon={faXmark} /> Cancel
+                </button>
+                <Dialog open={cancelDialog} className="text-center rounded-lg">
+                  <DialogTitle className="text-blue-500">Cancel Package?</DialogTitle>
+                  <h2>All changes will be lost</h2>
+                  <div>
+                    <button className="border-solid border-2 p-2 m-1 border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white mr-5" onClick={() => setCancelDialog(!cancelDialog)}>
+                      <FontAwesomeIcon icon={faPencil} className="mr-2" />Continue Extend Package
+                    </button>
+                    <Link href={'/explore/package'}>
+                      <button className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white">
+                        <FontAwesomeIcon icon={faCheck} /> I'm Sure</button>
+                    </Link>
+                  </div>
+                </Dialog>
+              </div>
               <table className="w-full mt-5">
                 <tbody>
                   <tr className="w-fit">
-                    <td className="font-semibold w-80 whitespace-no-wrap">Name</td>
+                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Name</td>
                     <td className="font-normal">{extendPackageName}</td>
                   </tr>
                   <tr className="w-fit">
-                    <td className="font-semibold w-80 whitespace-no-wrap">Package Base</td>
+                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Package Base</td>
                     <td className="font-normal">{dataPackageById[0].name}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold w-80 whitespace-no-wrap">Package Type</td>
+                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Package Type</td>
                     <td className="font-normal">{dataPackageById[0].type_name}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold w-80 whitespace-no-wrap">Minimal Capacity</td>
+                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Minimal Capacity</td>
                     <td className="font-normal">{dataPackageById[0].min_capacity} people</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold w-80 whitespace-no-wrap">Contact Person</td>
+                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Contact Person</td>
                     <td className="font-normal">{dataPackageById[0].contact_person}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold w-80 whitespace-no-wrap">Price Total</td>
+                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Price Total</td>
                     <td className="font-normal">{rupiah(priceTotal)}
                       <span className="italic text-slate-600"> *Based on the activities and services added</span>
                     </td>
@@ -526,7 +578,7 @@ export default function ExtendIdPage({ params }: any) {
           </div>
         </div>
         <Dialog open={addActivitiesOpen} fullWidth maxWidth='sm' className="text-center">
-          <DialogTitle className="text-blue-500">Add Acttivities</DialogTitle>
+          <DialogTitle className="text-blue-500">Add New Acttivities</DialogTitle>
           <DialogContent>
             <h2>Activity Type</h2>
             <Select displayEmpty label="Activity type" value={fieldAcitivityType}
@@ -566,8 +618,10 @@ export default function ExtendIdPage({ params }: any) {
                 ))}
             </Select >
             <br />
-            <h2>Description</h2>
-            <TextField label="Description" variant="outlined" />
+            <h2>Description for this activites</h2>
+            <TextField label="Description" variant="outlined" onChange={(event) => {
+              setDescriptionNewActivities(event.target.value)
+            }} />
           </DialogContent>
           <DialogActions>
             <div>
@@ -581,9 +635,11 @@ export default function ExtendIdPage({ params }: any) {
         </Dialog>
         <Dialog open={addDayOpen} fullWidth maxWidth='sm' className="text-center">
           <Box m={3} p={1}>
-            <DialogTitle className="text-blue-500">Add Day</DialogTitle>
-            <h2>Day Description</h2>
-            <TextField label="Description" variant="outlined" />
+            <DialogTitle className="text-blue-500">Add New Day</DialogTitle>
+            <h2>Description for this Day</h2>
+            <TextField label="Description" variant="outlined" onChange={(event) => {
+              setDescriptionNewDay(event.target.value)
+            }} />
             <DialogTitle className="text-blue-500">Add First Activity</DialogTitle>
             <h2>Activity Type</h2>
             <Select displayEmpty label="Activity type" value={fieldAcitivityType}
@@ -623,8 +679,10 @@ export default function ExtendIdPage({ params }: any) {
                 ))}
             </Select >
             <br />
-            <h2>Activity Description</h2>
-            <TextField label="Description" variant="outlined" />
+            <h2>Description for this activites</h2>
+            <TextField label="Description" variant="outlined" onChange={(event) => {
+              setDescriptionNewActivities(event.target.value)
+            }} />
             {/* </DialogContent> */}
             <div className="mt-5">
               <button className="border-solid border-2 p-2 m-1 border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white mr-5" onClick={() => setAddDayOpen(!addDayOpen)}>
@@ -645,10 +703,10 @@ export default function ExtendIdPage({ params }: any) {
                 setSelectedService(event.target.value);
               }}>
               {dataListAllServicePackage.map((service: { id: string, name: string }) => (
-                  <MenuItem key={service.id} value={service.id}>
-                    {service.name}
-                  </MenuItem >
-                ))}
+                <MenuItem key={service.id} value={service.id}>
+                  {service.name}
+                </MenuItem >
+              ))}
             </Select >
             <div className="mt-5">
               <button className="border-solid border-2 p-2 m-1 border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white mr-5" onClick={() => setAddServiceOpen(!addServiceOpen)}>
@@ -665,7 +723,7 @@ export default function ExtendIdPage({ params }: any) {
 
   return (
     <div className="flex flex-col justify-center items-center h-full">
-      <ClipLoader color="#36d7b7" speedMultiplier={3} />
+      <ClipLoader color="#36d7b7" speedMultiplier={3} className="items-center"/>
     </div>
   )
 }

@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Modal } from '@mui/material';
 import axios from "axios";
 import snapMidtrans from "@/hooks/snapMidtrans";
+import ReadGuide from "./_components/readGuide";
 // import { postReservationTransaction } from "@/app/(pages)/api/fetchers/reservation";
 
 export default function BookingIdPage({ params }: any) {
@@ -23,7 +24,7 @@ export default function BookingIdPage({ params }: any) {
   const [totalPricePackage, setTotalPricePackage] = useState(0)
   const [totalDeposit, setTotalDeposit] = useState(0)
   const [dateCheckOut, setDateCheckOut] = useState('')
-  const [isOpen, setIsopen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const [handleClose, setHandleClose] = useState(false)
   const [token, setToken] = useState('')
   const [snapShow, setSnapShow] = useState(false)
@@ -40,7 +41,7 @@ export default function BookingIdPage({ params }: any) {
   // });
 
   console.log(params.id);
-  
+
 
   const currentTime = new Date();
   const threeDaysLater = new Date(currentTime);
@@ -71,7 +72,8 @@ export default function BookingIdPage({ params }: any) {
       const data = {
         name: 'user',
         order_id: 'barangtest111000000',
-        total: 100100
+        total: 100100,
+        email: 'pargadbrother@gmail.com'
       }
       const config = {
         headers: {
@@ -80,11 +82,11 @@ export default function BookingIdPage({ params }: any) {
       }
       const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
       console.log(res.data);
-      
+
 
       if (res.status == 201) {
         setToken(res.data.token)
-        
+
       }
       // setToken('1fda8b50-6513-4606-adb6-f509f62a774b')
       // window.snap.pay('0cd5ef8f-b177-4226-a8a7-5be71cc0933c', {
@@ -100,11 +102,11 @@ export default function BookingIdPage({ params }: any) {
       //   },
       //   onError: (error: any) => {
       //     console.log(error);
-          
+
       //   },
       //   onClose: () => {
       //     console.log('di close Anda belum menyelesaikan pembayaran');
-          
+
       //   }
       // })
 
@@ -133,41 +135,41 @@ export default function BookingIdPage({ params }: any) {
     }
   }
 
-    useEffect(() => {
-      if (token) {
-        window.snap.pay(token, {
-          onSuccess: (result: any) => {
-            console.log(result, 'di onSuccess');
-            setToken('')
-          },
-          onPending: (result: any) => {
-            console.log(JSON.stringify(result), 'di onPending');
-            setToken('')
-          },
-          onError: (error: any) => {
-            console.log(error);
-            
-          },
-          onClose: () => {
-            console.log('di close Anda belum menyelesaikan pembayaran');
-            
-          }
-        })
-      }
-    }, [token])
+  useEffect(() => {
+    if (token) {
+      window.snap.pay(token, {
+        onSuccess: (result: any) => {
+          console.log(result, 'di onSuccess');
+          setToken('')
+        },
+        onPending: (result: any) => {
+          console.log(JSON.stringify(result), 'di onPending');
+          setToken('')
+        },
+        onError: (error: any) => {
+          console.log(error);
 
-    useEffect(() => {
-      const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js'; 
-      const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
-      const script = document.createElement('script')
-      script.src = midtransScriptUrl
-      if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
+        },
+        onClose: () => {
+          console.log('di close Anda belum menyelesaikan pembayaran');
 
-      document.body.appendChild(script)
+        }
+      })
+    }
+  }, [token])
 
-      return () => {
-          document.body.removeChild(script)
-      }
+  useEffect(() => {
+    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
+    const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
+    const script = document.createElement('script')
+    script.src = midtransScriptUrl
+    if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
+
+    document.body.appendChild(script)
+
+    return () => {
+      document.body.removeChild(script)
+    }
   }, [])
 
   useEffect(() => {
@@ -184,10 +186,6 @@ export default function BookingIdPage({ params }: any) {
       document.body.removeChild(scriptTag);
     }
   }, []);
-
-  const readGuideButtonHandler = () => {
-    setIsopen(true)
-  }
 
   const rupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -238,23 +236,10 @@ export default function BookingIdPage({ params }: any) {
       <div className="mx-60 bg-white rounded-lg">
         <div className="flex flex-col p-5 shadow-xl ">
           <h1 className="font-bold text-lg text-center">Reservation of Package</h1>
-          <div className="italic text-white bg-red-500 rounded-lg w-fit mt-5 py-1 px-3 hover:bg-red-700 select-none" role="button" onClick={readGuideButtonHandler}>
+          <div className="italic text-white bg-red-500 rounded-lg w-fit mt-5 py-1 px-3 hover:bg-red-700 select-none" role="button" onClick={() => setIsOpen(!isOpen)}>
             <FontAwesomeIcon icon={faInfo} /> Read this guide
           </div>
-          <Modal
-            open={isOpen}
-          // onClose={handleClose}
-          >
-            <div className="w-fit h-fit ">
-              <Typography id="modal-modal-title" variant="h6" component="h2">
-                Text in a modal
-              </Typography>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-              </Typography>
-            </div>
-
-          </Modal>
+          <ReadGuide readGuideOpen={isOpen} setReadGuideOpen={setIsOpen} />
           <div className="italic select-none">
             <FormControlLabel control={
               <Checkbox checked={readCheck} onChange={readCheckHandleChange} size="small" required />

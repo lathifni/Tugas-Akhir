@@ -50,11 +50,11 @@ export default function Reservation() {
                 <tr key={items.id}>
                   <td className="py-3">{index}</td>
                   <td className="py-3">{items.name}</td>
-                  <td className="py-3">{new Date(items.request_date).toLocaleString()}</td>
-                  <td className="py-3">{new Date(items.check_in).toLocaleString()}</td>
+                  <td className="py-3">{new Date(items.request_date).toDateString()}</td>
+                  <td className="py-3">{new Date(items.check_in).toDateString()}</td>
                   <td className="py-3">Status</td>
                   <td className="py-3">
-                    <Link href={`/explore/detailreservation/${items.id}`} >
+                    <Link href={`/explore/reservation/${items.id}`} >
                       <FontAwesomeIcon icon={faCircleInfo} className="p-2 text-blue-500 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-white hover:bg-blue-500" />
                     </Link>
                     {/* <a href={`/explore/detailreservation/${items.id}`}>

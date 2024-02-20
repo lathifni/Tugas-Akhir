@@ -1,6 +1,6 @@
 // import midtransClient from 'midtrans-client'
 var midtransClient = require("midtrans-client");
-const { createReservationController, getListReservationByUserIdController } = require("../controllers/reservationController");
+const { createReservationController, getListReservationByUserIdController, getReservationByIdController } = require("../controllers/reservationController");
 
 const createReservationHandler = async (req, res) => {
   const response = await createReservationController(req.body)
@@ -54,4 +54,14 @@ const getListReservationByUserIdHandler = async(req, res) => {
   }
 }
 
-module.exports = { createReservationHandler, getListReservationByUserIdHandler,  };
+const getReservationByIdHandler = async(req, res) => {
+  try {
+    const list = await getReservationByIdController(req.params)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { createReservationHandler, getListReservationByUserIdHandler, getReservationByIdHandler, };
