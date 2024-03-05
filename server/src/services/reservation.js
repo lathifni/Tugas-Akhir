@@ -37,4 +37,13 @@ const getActivityByReservationId = async(params) => {
   return rows;
 }
 
-module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, }
+const getLatestIdReservation = async() => {
+  const [rows] = await promisePool.query(`SELECT MAX(CAST(SUBSTRING(id, 2) AS UNSIGNED)) AS lastIdNumber FROM reservation`);
+  return rows[0];
+}
+
+const createReservation = async(params) => {
+  
+}
+
+module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation, }

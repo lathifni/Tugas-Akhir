@@ -15,6 +15,7 @@ import { Modal } from '@mui/material';
 import axios from "axios";
 import snapMidtrans from "@/hooks/snapMidtrans";
 import ReadGuide from "./_components/readGuide";
+import { useSession } from "next-auth/react";
 // import { postReservationTransaction } from "@/app/(pages)/api/fetchers/reservation";
 
 export default function BookingIdPage({ params }: any) {
@@ -28,6 +29,7 @@ export default function BookingIdPage({ params }: any) {
   const [handleClose, setHandleClose] = useState(false)
   const [token, setToken] = useState('')
   const [snapShow, setSnapShow] = useState(false)
+  const { data: session } = useSession();
 
   // const { snapEmbed } = snapMidtrans()
 
@@ -65,28 +67,29 @@ export default function BookingIdPage({ params }: any) {
   const saveReservationButtonHandler = async () => {
 
     if (!readCheck) {
-      console.log('tsetststs');
       toast.warn("Please read the guide and fill the checkbox");
     }
     try {
-      const data = {
-        name: 'user',
-        order_id: 'barangtest111000000',
-        total: 100100,
-        email: 'pargadbrother@gmail.com'
-      }
-      const config = {
-        headers: {
-          "Content-Type": "application/json"
+      if (session?.user) {
+        const data = {
+          name: session.user.name,
+          order_id: 'barangtest111000000',
+          total: 100100,
+          email: session.user.email
         }
-      }
-      const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
-      console.log(res.data);
+        const config = {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+        const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
+        console.log(res.data);
 
 
-      if (res.status == 201) {
-        setToken(res.data.token)
+        if (res.status == 201) {
+          setToken(res.data.token)
 
+        }
       }
       // setToken('1fda8b50-6513-4606-adb6-f509f62a774b')
       // window.snap.pay('0cd5ef8f-b177-4226-a8a7-5be71cc0933c', {
@@ -158,19 +161,19 @@ export default function BookingIdPage({ params }: any) {
     }
   }, [token])
 
-  useEffect(() => {
-    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
-    const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
-    const script = document.createElement('script')
-    script.src = midtransScriptUrl
-    if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
+  // useEffect(() => {
+  //   const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
+  //   const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
+  //   const script = document.createElement('script')
+  //   script.src = midtransScriptUrl
+  //   if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
 
-    document.body.appendChild(script)
+  //   document.body.appendChild(script)
 
-    return () => {
-      document.body.removeChild(script)
-    }
-  }, [])
+  //   return () => {
+  //     document.body.removeChild(script)
+  //   }
+  // }, [])
 
   useEffect(() => {
     const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';

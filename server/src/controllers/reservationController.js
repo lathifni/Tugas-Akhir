@@ -1,15 +1,30 @@
-const { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId } = require("../services/reservation");
+const { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation } = require("../services/reservation");
 
 const createReservationController = async (params) => {
   console.log(params);
   const authString = btoa(`${process.env.MIDTRANS_SERVER_KEY}:`);
+
+  const latestIdReservation = await getLatestIdReservation()
+  let lastIdNumber = latestIdReservation.lastIdNumber
+
+  let idReservation, idDownPayment, idRepayment
+  const generateId = () => {
+    lastIdNumber++;
+    const idNumberString = lastIdNumber.toString().padStart(4, "0");
+    idReservation = `R${idNumberString}`
+    idDownPayment = `DP${idNumberString}`
+    // idRepayment = `RP${idNumberString}`
+    // return `P${idNumberString}`;
+  };
+
+  // const createReservation = await 
 
   const currentDate = new Date();
   console.log(currentDate);
 
   const paramter = {
     transaction_details: {
-      order_id: 'DP002',
+      order_id: idDownPayment,
       // gross_amount: params.total,
       gross_amount: 800000
     },
