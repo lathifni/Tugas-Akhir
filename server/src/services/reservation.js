@@ -43,7 +43,11 @@ const getLatestIdReservation = async() => {
 }
 
 const createReservation = async(params) => {
-  
+  const {id,user_id,package_id,dp_id,request_date,token_midtrans,check_in,total_people,note,deposit,total_price,rating,status} = params
+  const [rows] = await promisePool.query(`INSERT INTO reservation (id,user_id,package_id,dp_id,request_date,token_midtrans,check_in,total_people,note,deposit,total_price,rating,status)
+  VALUES ('${id}','${user_id}','${package_id}','${dp_id}','${request_date}','${token_midtrans}','${check_in}','${total_people}','${note}','${deposit}','${total_price}','${rating}','${status}')`);
+  return rows[0];
 }
 
-module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation, }
+module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation,
+createReservation, }

@@ -3,15 +3,13 @@
 import { fetchPackageById } from "@/app/(pages)/api/fetchers/package";
 import { faInfo } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { Box, Checkbox, TextField, Typography } from "@mui/material"
+import { Box, Checkbox, TextField } from "@mui/material"
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { useQuery } from "@tanstack/react-query";
-import { CalendarClock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { addDays, format } from 'date-fns';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Modal } from '@mui/material';
 import axios from "axios";
 import snapMidtrans from "@/hooks/snapMidtrans";
 import ReadGuide from "./_components/readGuide";
@@ -24,7 +22,9 @@ export default function BookingIdPage({ params }: any) {
   const [totalOrderPackage, setTotalOrderPackage] = useState(0)
   const [totalPricePackage, setTotalPricePackage] = useState(0)
   const [totalDeposit, setTotalDeposit] = useState(0)
+  const [dateCheckIn, setDateCheckIn] = useState('')
   const [dateCheckOut, setDateCheckOut] = useState('')
+  const [note, setNote] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [handleClose, setHandleClose] = useState(false)
   const [token, setToken] = useState('')
@@ -42,9 +42,6 @@ export default function BookingIdPage({ params }: any) {
   //   queryFn: postReservationTransaction
   // });
 
-  console.log(params.id);
-
-
   const currentTime = new Date();
   const threeDaysLater = new Date(currentTime);
   threeDaysLater.setDate(currentTime.getDate() + 3);
@@ -57,10 +54,18 @@ export default function BookingIdPage({ params }: any) {
   const readDateHandleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputDate = new Date(event.target.value);
     const daysToAdd = parseInt(dataPackageById[0].max_day)
+    const formattedDateInput = format(inputDate, "yyyy-MM-dd HH:mm:ss");
     const newDate = new Date(inputDate);
+    setDateCheckIn(formattedDateInput)
+
     newDate.setHours(12, 0, 0, 0);
+    console.log(formattedDateInput);
+
     newDate.setDate(newDate.getDate() + daysToAdd - 1);
-    const formattedDate = newDate.toISOString().split("T")[0] + 'T12:00';
+    // const formattedDate = newDate.toISOString().split("T")[0] + 'T12:00';
+    const formattedDate = format(newDate, "yyyy-MM-dd HH:mm:ss")
+    console.log(formattedDate);
+
     setDateCheckOut(formattedDate)
   }
 
@@ -70,12 +75,20 @@ export default function BookingIdPage({ params }: any) {
       toast.warn("Please read the guide and fill the checkbox");
     }
     try {
+      const currentDate = new Date(); // Mendapatkan tanggal saat ini
+
+      const formattedCurrentDate = format(currentDate, "yyyy-MM-dd HH:mm:ss");
       if (session?.user) {
         const data = {
           name: session.user.name,
           order_id: 'barangtest111000000',
           total: 100100,
-          email: session.user.email
+          email: session.user.email,
+          user_id: session.user.user_id,
+          package_id: params.id,
+          request_date: formattedCurrentDate,
+          check_in: dateCheckIn,
+          total_people: totalPeople,
         }
         const config = {
           headers: {
@@ -85,11 +98,11 @@ export default function BookingIdPage({ params }: any) {
         const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
         console.log(res.data);
 
-
         if (res.status == 201) {
           setToken(res.data.token)
 
         }
+
       }
       // setToken('1fda8b50-6513-4606-adb6-f509f62a774b')
       // window.snap.pay('0cd5ef8f-b177-4226-a8a7-5be71cc0933c', {
@@ -203,6 +216,7 @@ export default function BookingIdPage({ params }: any) {
     const min_capacity = dataPackageById[0].min_capacity
     const price = dataPackageById[0].price
     let inputTotalPeople = Number(event.target.value)
+    setTotalPeople(inputTotalPeople)
 
     if (inputTotalPeople <= min_capacity) {
       setTotalOrderPackage(1);
