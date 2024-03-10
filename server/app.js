@@ -5,7 +5,7 @@ var logger = require('morgan');
 require('dotenv').config();
 const cors = require('cors')
 const corsOptions = {
-  origin: ['http://localhost:3001', 'http://localhost:3000'], // Sesuaikan dengan kebutuhan Anda
+  origin: ['http://localhost:3001', 'http://localhost:3000', 'https://8lcx6qm9-3001.asse.devtunnels.ms', 'https://8lcx6qm9-3000.asse.devtunnels.ms'], // Sesuaikan dengan kebutuhan Anda
 };
 const router = require('./src/routes/index')
 const rateLimit = require('express-rate-limit');

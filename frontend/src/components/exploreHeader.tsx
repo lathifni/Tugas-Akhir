@@ -55,7 +55,7 @@ export default function ExploreHeader() {
           {!session && (
             <div className='w-20 h-12 rounded-lg mr-5 flex items-center justify-center'>
               <Link href="/login">
-                <a className="p-1 text-white rounded-sm bg-blue-500 hover:bg-green-400">Login</a>
+                <p className="p-1 text-white rounded-lg bg-blue-500 hover:bg-green-400">Login</p>
               </Link>
             </div>
           )}

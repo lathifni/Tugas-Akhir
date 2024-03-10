@@ -15,16 +15,14 @@ export default function Reservation() {
     queryFn: () => fetchListReservationByUserId((session!.user.user_id).toString()),
     enabled: !!session
   })
-  console.log(dataReservationByUserId);
-
 
   if (isLoading) return <p className="text-center">Loading ...</p>
   if (dataReservationByUserId !== undefined && dataReservationByUserId.length === 0) {
     return (
       <div className="flex flex-col justify-center items-center h-full">
         <p className="text-center text-xl">Oops, no reservations found for your account.</p>
-        <Link href={"/explore/package"}>
-          <p className="hover:text-blue-500 text-lg">Make a new reservation</p>
+        <Link href={"/explore/package"} passHref>
+          <a className="hover:text-blue-500 text-lg">Make a new reservation</a>
         </Link>
       </div>
     );
@@ -57,8 +55,6 @@ export default function Reservation() {
                     <Link href={`/explore/reservation/${items.id}`} >
                       <FontAwesomeIcon icon={faCircleInfo} className="p-2 text-blue-500 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-white hover:bg-blue-500" />
                     </Link>
-                    {/* <a href={`/explore/detailreservation/${items.id}`}>
-                    </a> */}
                   </td>
                 </tr>
               ))}

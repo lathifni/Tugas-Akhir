@@ -38,7 +38,8 @@ const getActivityByReservationId = async(params) => {
 }
 
 const getLatestIdReservation = async() => {
-  const [rows] = await promisePool.query(`SELECT MAX(CAST(SUBSTRING(id, 2) AS UNSIGNED)) AS lastIdNumber FROM reservation`);
+  // const [rows] = await promisePool.query(`SELECT MAX(CAST(SUBSTRING(id, 2) AS UNSIGNED)) AS lastIdNumber FROM reservation`);
+  const [rows] = await promisePool.query(`SELECT MAX(CAST(RIGHT(id, 4) AS UNSIGNED)) AS lastIdNumber FROM reservation WHERE id LIKE 'RTeeesttttttttt%'`);
   return rows[0];
 }
 
@@ -49,5 +50,10 @@ const createReservation = async(params) => {
   return rows[0];
 }
 
+const callbackRedirect = async(param) => {
+  const [rows] = await promisePool.query(`SELECT id FROM reservation WHERE dp_id='${param.dp_id}'`);
+  return rows[0];
+}
+
 module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation,
-createReservation, }
+createReservation, callbackRedirect,  }

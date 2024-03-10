@@ -5,6 +5,7 @@ const {
   getActivityByReservationId,
   getLatestIdReservation,
   createReservation,
+  callbackRedirect,
 } = require("../services/reservation");
 
 const createReservationController = async (params) => {
@@ -107,8 +108,18 @@ const getReservationByIdController = async (params) => {
   };
 };
 
+const callbackController = async() => {
+
+}
+
+const callbackRedirectController = async(params) => {
+  return await callbackRedirect(params)
+}
+
 module.exports = {
   createReservationController,
   getListReservationByUserIdController,
   getReservationByIdController,
+  callbackController,
+  callbackRedirectController,
 };
