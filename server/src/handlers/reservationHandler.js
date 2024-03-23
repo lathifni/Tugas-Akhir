@@ -1,4 +1,4 @@
-const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController } = require("../controllers/reservationController");
+const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController } = require("../controllers/reservationController");
 
 const createReservationHandler = async (req, res) => {
   const response = await createReservationController(req.body)
@@ -29,9 +29,8 @@ const getReservationByIdHandler = async(req, res) => {
 
 const callbacNotificationkHandler = async(req, res) => {
   try {
-    // const { order_id, status_code, transaction_status } = req.params
-    const data = req.body
-    console.log(data);
+    // kalau transaction_status nya itu adalah capture dan settlement tu dah aman anggap dah berhasil dibayar
+    await callbackNotificationController(req.body)
 
     res.status(200).json({ status: 'success', message: 'ok' })
   } catch (error) {

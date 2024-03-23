@@ -9,8 +9,9 @@ const getListReservationByUserId = async(params) => {
 
 const getReservationById = async(params) => {
   const [rows] = await promisePool.query(
-    `SELECT R.*,P.name,P.min_capacity,P.price,p.description,PT.type_name,MAX(CAST(PD.day AS UNSIGNED)) AS max_day FROM reservation AS R JOIN package AS P ON R.package_id=P.id 
-    JOIN package_type AS PT ON PT.id=P.type_id JOIN package_day AS PD ON PD.package_id=R.package_id WHERE R.id='${params.id}'`
+    `SELECT R.*,RS.status,P.name,P.min_capacity,P.price,p.description,PT.type_name,MAX(CAST(PD.day AS UNSIGNED)) AS max_day FROM reservation AS R 
+    JOIN package AS P ON R.package_id=P.id JOIN package_type AS PT ON PT.id=P.type_id JOIN package_day AS PD ON PD.package_id=R.package_id 
+    JOIN reservation_status AS RS ON RS.id=R.status_id WHERE R.id='${params.id}'`
   );
   return rows;
 }
@@ -45,7 +46,7 @@ const getLatestIdReservation = async() => {
 
 const createReservation = async(params) => {
   const {id,user_id,package_id,dp_id,request_date,token_midtrans,check_in,total_people,note,deposit,total_price,rating,status} = params
-  const [rows] = await promisePool.query(`INSERT INTO reservation (id,user_id,package_id,dp_id,request_date,token_midtrans,check_in,total_people,note,deposit,total_price,rating,status)
+  const [rows] = await promisePool.query(`INSERT INTO reservation (id,user_id,package_id,dp_id,request_date,token_midtrans,check_in,total_people,note,deposit,total_price,rating,status_id)
   VALUES ('${id}','${user_id}','${package_id}','${dp_id}','${request_date}','${token_midtrans}','${check_in}','${total_people}','${note}','${deposit}','${total_price}','${rating}','${status}')`);
   return rows[0];
 }
@@ -55,5 +56,23 @@ const callbackRedirect = async(param) => {
   return rows[0];
 }
 
+const updateReservationInformation = async(params) => {
+  const { id,paymentDate,token,status_id } = params
+  const [rows] = await promisePool.query(`UPDATE reservation SET deposit_date = '${paymentDate}', token_midtrans='${token}', status_id = '${status_id}' WHERE id = '${id}'`);
+  return rows[0];
+}
+
+const updateAfterFullPaymentReservationInformation = async(params) => {
+  const { id,paymentDate,token,status_id } = params
+  const [rows] = await promisePool.query(`UPDATE reservation SET payment_date = '${paymentDate}', token_midtrans='${token}', status_id = '${status_id}' WHERE id = '${id}'`);
+  return rows[0];
+}
+
+const getReservationAfterDeposit = async(params) => {
+  const [rows] = await promisePool.query(`SELECT R.id,R.total_price,R.deposit,U.fullname,U.email,P.id AS 'package_id',P.name FROM reservation AS R 
+  JOIN users AS U ON U.id=R.user_id JOIN package AS P ON P.id=R.package_id WHERE R.id='${params}'`);
+  return rows[0];
+}
+
 module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation,
-createReservation, callbackRedirect,  }
+createReservation, callbackRedirect, updateReservationInformation, updateAfterFullPaymentReservationInformation, getReservationAfterDeposit, }

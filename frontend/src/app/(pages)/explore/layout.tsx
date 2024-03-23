@@ -11,7 +11,8 @@ export default function ExploreLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-full flex">
+    //tadi h-full
+    <div className="h-screen flex">
       {/* <SideBar/> */}
       <NavigationTest/>
       <main className="flex-1 h-full overflow-y-auto bg-slate-200">

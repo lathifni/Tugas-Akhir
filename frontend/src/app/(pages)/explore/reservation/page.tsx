@@ -22,7 +22,7 @@ export default function Reservation() {
       <div className="flex flex-col justify-center items-center h-full">
         <p className="text-center text-xl">Oops, no reservations found for your account.</p>
         <Link href={"/explore/package"} passHref>
-          <a className="hover:text-blue-500 text-lg">Make a new reservation</a>
+          <p className="hover:text-blue-500 text-lg">Make a new reservation</p>
         </Link>
       </div>
     );

@@ -13,8 +13,6 @@ export default function ExploreHeader() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const avatarButtonHandler = () => {
-    console.log('test');
-
     setDropdownOpen((prev) => !prev)
   }
 

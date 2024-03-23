@@ -3,7 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react";
-import { faBed, faBook, faBridgeWater, faBullhorn, faFish, faHouse, faList, faMap, faSquarePollHorizontal, faStar, faUserPen } from '@fortawesome/free-solid-svg-icons'
+import { faBed, faBook, faBridgeWater, faBullhorn, faComments, faFish, faHouse, faList, faMap, faSquarePollHorizontal, faStar, faUserPen } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
@@ -72,6 +72,22 @@ export default function NavigationItem() {
               <span className="flex-1">Homestay</span>
             </li>
           </Link>
+          {session?.user.role === 'customer'  && (
+            <Link href={'/explore/chat'}>
+              <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
+                <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.3em' }} />
+                <span className="flex-1">Chat</span>
+              </li>
+            </Link>
+          )}
+          {session?.user.role === 'admin' && (
+            <Link href={'/explore/chat'}>
+              <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
+                <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.3em' }} />
+                <span className="flex-1">Chat</span>
+              </li>
+            </Link>
+          )}
           <li className={`flex rounded-md p-2 cursor-pointer items-center gap-x-4 mb-2`} >
             <a href="https://www.instagram.com/green_talao_park/" className="flex-1" target="_blank">
               <div className="transition ease-in-out duration-500 flex hover:bg-blue-600 p-2 rounded-lg justify-center">

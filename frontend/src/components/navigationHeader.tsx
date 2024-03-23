@@ -39,7 +39,7 @@ export default function NavigationHeader() {
     <div className="flex flex-col mt-3 items-center justify-center text-white">
       <motion.div className=''>
         <a href="/" className="flex gap-2">
-          <img className="w-8" src="/icon/logo.svg" alt="Icon" />
+          <img className="w-9" src="/icon/logoWhite.svg" alt="Icon" />
           <h1 className="text-2xl lg:tracking-widest font-medium ">Village Tourism</h1>
         </a>
       </motion.div>
