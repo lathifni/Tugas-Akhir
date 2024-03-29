@@ -17,4 +17,9 @@ const listSouvenirByRadius = async(payload) => {
   return rows
 }
 
-module.exports = { listGeomSouvenir, listSouvenirByRadius  }
+const listAllSouvenir = async() => {
+  const [rows] = await promisePool.query('SELECT id,name FROM souvenir_place')
+  return rows
+}
+
+module.exports = { listGeomSouvenir, listSouvenirByRadius, listAllSouvenir }

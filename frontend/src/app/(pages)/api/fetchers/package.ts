@@ -50,3 +50,20 @@ export const createExtendBooking = async(packageDay:object, packageActivities:ob
   console.log(packageActivities, 'ini bagian activities');
   console.log(packageService, 'ini bagian service'); 
 }
+
+export const fetchAllPackage = async() => {
+  const res = await useAxiosAuth.get('/package/all')
+  return res.data.data
+}
+
+export const fetchAllService = async() => {
+  const res = await useAxiosAuth.get('/package/allservice')
+  return res.data.data
+}
+
+export const fetchServiceById = async(id:string) => {
+  const res = await useAxiosAuth.get(`/package/service/${id}`)
+  return res.data.data
+}
+
+// export const fetchAddService = async()

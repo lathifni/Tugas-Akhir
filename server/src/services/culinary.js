@@ -17,4 +17,9 @@ const listCulinaryByRadius = async(payload) => {
   return rows
 }
 
-module.exports = { listGeomCulinary, listCulinaryByRadius }
+const listAllCulinary = async() => {
+  const [rows] = await promisePool.query('SELECT id,name FROM culinary_place')
+  return rows
+}
+
+module.exports = { listGeomCulinary, listCulinaryByRadius, listAllCulinary }

@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/provider.tsx", "src/app/(pages)/api/route.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/provider.tsx", "src/app/(pages)/api/route.ts", "src/app/(pages)/(admin)/dashboard/facility/_components/columnsts"],
   "exclude": ["node_modules"]
 }

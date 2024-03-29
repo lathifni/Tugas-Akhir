@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react"
 import { fetchListReservationByUserId } from "../../api/fetchers/reservation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo, faInfo } from "@fortawesome/free-solid-svg-icons";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 
 export default function Reservation() {

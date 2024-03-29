@@ -1,4 +1,4 @@
-const { listGeomCulinaryController, listCulinaryByRadiusController } = require("../controllers/culinaryController");
+const { listGeomCulinaryController, listCulinaryByRadiusController, listAllCulinaryController } = require("../controllers/culinaryController");
 
 const listGeomCulinaryHandler = async(req, res) => {
   try {
@@ -20,4 +20,13 @@ const listCulinaryByRadiusHandler = async(req, res) => {
   }
 }
 
-module.exports = { listGeomCulinaryHandler,listCulinaryByRadiusHandler }
+const listAllCulinaryHandler = async(req, res) => {
+  try {
+    const list = await listAllCulinaryController()
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+module.exports = { listGeomCulinaryHandler,listCulinaryByRadiusHandler, listAllCulinaryHandler, }

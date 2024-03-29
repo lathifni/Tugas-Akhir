@@ -1,4 +1,4 @@
-const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController } = require("../controllers/reservationController");
+const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController, getAllReservationController } = require("../controllers/reservationController");
 
 const createReservationHandler = async (req, res) => {
   const response = await createReservationController(req.body)
@@ -48,4 +48,15 @@ const callbackRedirectHandler = async(req, res) => {
   }
 }
 
-module.exports = { createReservationHandler, getListReservationByUserIdHandler, getReservationByIdHandler, callbacNotificationkHandler, callbackRedirectHandler,  };
+const getAllReservationHandler = async(req, res) => {
+  try {
+    const data = await getAllReservationController()
+
+    res.status(200).json({ status: 'success', data: data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { createReservationHandler, getListReservationByUserIdHandler, getReservationByIdHandler, callbacNotificationkHandler, callbackRedirectHandler, 
+getAllReservationHandler, };

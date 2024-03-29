@@ -3,18 +3,19 @@
 import { ChevronDown } from "lucide-react";
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react";
-import { faBed, faBook, faBridgeWater, faBullhorn, faComments, faFish, faHouse, faList, faMap, faSquarePollHorizontal, faStar, faUserPen } from '@fortawesome/free-solid-svg-icons'
+import { faBed, faBook, faComments, faHouse, faMap, faSquarePollHorizontal, faUserPen } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
 export default function NavigationItem() {
-  const [subMenuOpenUniqueAttractions, setSubMenuOpenUniqueAttractions] = useState(false);
   const { data: session, update, status } = useSession()
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'authenticated') {
       if (session) {
+        console.log(session.user);
+        
         setIsLoading(false);
       }
     }
@@ -33,7 +34,7 @@ export default function NavigationItem() {
       <div className={`relative duration-500 select-none text-gray-200`} >
         <ul className="pt-6 px-3 font-medium text-lg">
           {session?.user.role === 'admin' && (
-            <Link href={'/explore/dashboard'}>
+            <Link href={'/dashboard'}>
               <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
                 <FontAwesomeIcon icon={faUserPen} style={{ fontSize: '1.3em' }} />
                 <span className="flex-1">Dashboard</span>
@@ -73,14 +74,6 @@ export default function NavigationItem() {
             </li>
           </Link>
           {session?.user.role === 'customer'  && (
-            <Link href={'/explore/chat'}>
-              <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
-                <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.3em' }} />
-                <span className="flex-1">Chat</span>
-              </li>
-            </Link>
-          )}
-          {session?.user.role === 'admin' && (
             <Link href={'/explore/chat'}>
               <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
                 <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.3em' }} />

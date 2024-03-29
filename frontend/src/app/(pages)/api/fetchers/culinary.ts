@@ -9,3 +9,8 @@ export const fetchListCulinaryByRadius = async (lat: number, lng: number, radius
   const res = await useAxiosAuth.get( `/culinary/listByRadius?lat=${lat}&lng=${lng}&radius=${radius}`)
   return res.data.data
 }
+
+export const fetchAllCulinary = async() => {
+  const res = await useAxiosAuth.get('/culinary/all')
+  return res.data.data
+}

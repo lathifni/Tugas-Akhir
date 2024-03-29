@@ -13,6 +13,12 @@ const {
   createPackageDay,
   createPackageActivites,
   createPackageService,
+  listAllPackage,
+  listAllServicePackage,
+  serviceById,
+  addService,
+  getLatestIdService,
+  deleteService,
 } = require("../services/package");
 
 const getAllBasePackageController = async () => {
@@ -107,6 +113,32 @@ const createExtendBookingController = async (params) => {
   return newId
 };
 
+const listAllPackageController = async() => {
+  return await listAllPackage()
+}
+
+const listAllServicePackageController = async() => {
+  return await listAllServicePackage()
+}
+
+const getServiceByIdController = async(params) => {
+  return await serviceById(params)
+}
+
+const postServiceController = async(params) => {
+  let {lastIdNumber} = await getLatestIdService()
+  let newId = lastIdNumber+1
+  const idNumberString = newId.toString().padStart(2, "0");
+  newId = `S${idNumberString}`
+  console.log(newId, 'ini idnya');
+  params.id = newId
+  return await addService(params)
+}
+
+const deleteServiceController = async(params) => {
+  return await deleteService(params)
+}
+
 module.exports = {
   getAllBasePackageController,
   getPackageByIdController,
@@ -118,4 +150,9 @@ module.exports = {
   getListDayPackageByIdController,
   getListAllServicePackageController,
   createExtendBookingController,
+  listAllPackageController,
+  listAllServicePackageController,
+  getServiceByIdController,
+  postServiceController,
+  deleteServiceController,
 }

@@ -1,4 +1,4 @@
-const { getAllBasePackageController, getListAllServicePackageByIdController, getPackageByIdController, getAverageRatingPackageByIdController, getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController, getListDayPackageByIdController, getListAllServicePackageController, getLatestIdPackageController, createExtendBookingControoler, createExtendBookingController } = require("../controllers/packageController");
+const { getAllBasePackageController, getListAllServicePackageByIdController, getPackageByIdController, getAverageRatingPackageByIdController, getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController, getListDayPackageByIdController, getListAllServicePackageController, getLatestIdPackageController, createExtendBookingControoler, createExtendBookingController, listAllPackageController, listAllServicePackageController, getServiceByIdController, postServiceController, deleteServiceController } = require("../controllers/packageController");
 
 const getAllBasePackageHandler = async(req, res) => {
   try {
@@ -110,6 +110,58 @@ const createExtendBookingHandler = async(req, res) => {
   }
 }
 
+const listAllPackageHandler = async(req, res) => {
+  try {
+    const list = await listAllPackageController()
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const listAllServicePackageHandler = async(req, res) => {
+  try {
+    const list = await listAllServicePackageController()
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const getServiceByIdHandler = async(req, res) => {
+  try {
+    const data = await getServiceByIdController(req.params)
+
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const postServiceHandler = async(req, res) => {
+  try {
+    const input = await postServiceController(req.body)
+    if (input == 1) return res.status(201).send({ status:'success' })
+    else return res.status(400).send({ status:'failed to add data',  })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const deleteServiceHandler = async(req, res) => {
+  try {
+    console.log(req.params);
+    const deleteRow = await deleteServiceController(req.params)
+    if (deleteRow == 1) return res.status(200).send({ status:'success' })
+    else return res.status(400).send({ status:'failed to add data',  })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = { getAllBasePackageHandler, getPackageByIdHandler, getListAllServicePackageByIdHandler, getAverageRatingPackageByIdHandler,
 getListPackageActivityByIdHandler, getListAllGalleryPackageByIdHandler, getListAllReviewPackageByIdHandler, getListDayPackageByIdHandler, 
-getListAllServicePackageHandler, getLatestIdPackageHandler, createExtendBookingHandler, }
+getListAllServicePackageHandler, getLatestIdPackageHandler, createExtendBookingHandler, listAllPackageHandler, listAllServicePackageHandler,
+getServiceByIdHandler, postServiceHandler, deleteServiceHandler, }

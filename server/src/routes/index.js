@@ -15,6 +15,7 @@ const package = require('./package')
 const reservation = require('./reservation')
 const chat = require('./chat')
 const messages = require('./messages')
+const facility = require('./facility')
 
 const router = {}
 
@@ -35,5 +36,6 @@ router.package = package
 router.reservation = reservation
 router.chat = chat
 router.messages = messages
+router.facility = facility
 
 module.exports = router

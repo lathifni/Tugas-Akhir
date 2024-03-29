@@ -56,7 +56,7 @@ export default function ChatPage() {
   return (
     <div className="flex m-2 gap-2">
       {/* Daftar chat */}
-      <div className="w-full sm:w-5/12 rounded-lg bg-white overflow-y-scroll">
+      <div className="w-full sm:w-5/12 rounded-lg bg-white overflow-y-scroll h-[92vh]">
         <h1 className="text-center text-xl font-semibold">List Chat</h1>
         {chats.filter((chat: { user_id: number }) => chat.user_id !== currentUser)
           .map((chat: { id: number, user_id: string, fullname: string, user_image: string }) => (
@@ -71,7 +71,7 @@ export default function ChatPage() {
       </div>
 
       {/* Isi chat */}
-      <div className="hidden sm:block w-7/12 rounded-lg bg-white overflow-y-scroll max-h-[900px]">
+      <div className="hidden sm:block w-7/12 rounded-lg bg-white overflow-y-scroll h-[92vh]">
         <ChatBox
           data={currentChat} currentUser={currentUser ?? 0}        //  currentUser={user._id}
           setSendMessage={setSendMessage}

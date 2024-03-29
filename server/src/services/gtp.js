@@ -18,4 +18,8 @@ const getAllObject = async() => {
   return rows
 }
 
+const getFacilty = async() => {
+  
+}
+
 module.exports = { getInfo, getGeom, getAllObject }

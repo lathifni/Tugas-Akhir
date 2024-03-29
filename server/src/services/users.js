@@ -1,12 +1,17 @@
 const promisePool = require('../../config/database')
 
-const getDataUsers = async () => {
-  return [rows] = await promisePool.query('SELECT * FROM users')
+const getAllCostumer = async () => {
+  // return [rows] = await promisePool.query(`SELECT U.* FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
+  // JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE AGU.group_id='2'`)
+  const sql = `SELECT U.* FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
+  JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE AGU.group_id='2'`
+  const [rows] = await promisePool.query(sql)
+  return rows
 }
 
 const createDataUser = async (params) => {
-  const { email, username, fullname, hashPassword } = params
-  const sql = `INSERT IGNORE INTO users (email,username,fullname,password_hash) VALUES ('${email}','${username}','${fullname}','${hashPassword}')`
+  const { email, username, fullname, hashPassword, phone, address} = params
+  const sql = `INSERT IGNORE INTO users (email,username,fullname,password_hash,phone,address) VALUES ('${email}','${username}','${fullname}','${hashPassword}','${phone}','${address}')`
   const [rows] = await promisePool.query(sql)
   if (rows.affectedRows == 0) return false
   createAuthGroupsUser(rows.insertId)
@@ -48,14 +53,16 @@ const checkAvailableEmailAndGoogle = async (params) => {
 }
 
 const getUserByUsernameOrEmail = async (params) => {
-  const sql = `SELECT id,fullname,email,password_hash,google,user_image FROM users WHERE (email='${params.emailOrUsername}' OR username='${params.emailOrUsername}') AND google=0`
+  const sql = `SELECT U.id,fullname,email,password_hash,google,user_image,AG.role FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
+  JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE (email='${params.emailOrUsername}' OR username='${params.emailOrUsername}') AND google=0`
   const [rows] = await promisePool.query(sql)
   if (rows[0] == undefined) return false
   return rows[0]
 }
 
 const getUserByEmailAndGoogle = async (params) => {
-  const sql = `SELECT U.id,U.google,U.user_image,AG.role FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE U.email='${params.email}' AND U.google=1 `
+  const sql = `SELECT U.id,U.google,U.user_image,AG.role FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
+  JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE U.email='${params.email}' AND U.google=1 `
   const [rows] = await promisePool.query(sql)
   if (rows[0] == undefined) return false
   return rows[0]
@@ -85,7 +92,14 @@ const deleteRefreshToken = async (params) => {
   return [rows] = await promisePool.query(sql)
 }
 
+const getAllAdminUser = async () => {
+  const sql = `SELECT U.* FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
+  JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE AGU.group_id='1'`
+  const [rows] = await promisePool.query(sql)
+  return rows
+}
+
 module.exports = { 
-getDataUsers, createDataUser, checkAvailablelUsername, checkAvailableEmail, getUserByUsernameOrEmail, storeRefreshToken, checkUsesrByRefreshToken,
-deleteRefreshToken, checkAvailableRefreshToken, getUserByEmailAndGoogle, checkAvailableEmailAndGoogle, createDataUserByGoogleOAuth
+getAllCostumer, createDataUser, checkAvailablelUsername, checkAvailableEmail, getUserByUsernameOrEmail, storeRefreshToken, checkUsesrByRefreshToken,
+deleteRefreshToken, checkAvailableRefreshToken, getUserByEmailAndGoogle, checkAvailableEmailAndGoogle, createDataUserByGoogleOAuth, getAllAdminUser
 }

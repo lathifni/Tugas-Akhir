@@ -18,7 +18,8 @@ const getReservationById = async(params) => {
 
 const getServiceByReservationId = async(params) => {
   const [rows] = await promisePool.query(
-    `SELECT SP.name,DSP.status FROM service_package AS SP JOIN detail_service_package AS DSP ON DSP.service_package_id=SP.id JOIN reservation AS R ON R.package_id=DSP.package_id WHERE R.id='${params.id}'`
+    `SELECT SP.name,DSP.status FROM service_package AS SP JOIN detail_service_package AS DSP ON DSP.service_package_id=SP.id JOIN reservation AS R ON R.package_id=DSP.package_id 
+    WHERE R.id='${params.id}'`
   );
   return rows;
 }
@@ -74,5 +75,11 @@ const getReservationAfterDeposit = async(params) => {
   return rows[0];
 }
 
+const allReservation = async() => {
+  const [rows] = await promisePool.query(`SELECT R.id,R.request_date,R.check_in,P.name,RS.status,U.fullname FROM reservation AS R JOIN package AS P ON P.id=R.package_id 
+  JOIN users AS U On U.id=R.user_id JOIN reservation_status AS RS ON RS.id=R.status_id ORDER BY R.check_in DESC`);
+  return rows;
+}
+
 module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation,
-createReservation, callbackRedirect, updateReservationInformation, updateAfterFullPaymentReservationInformation, getReservationAfterDeposit, }
+createReservation, callbackRedirect, updateReservationInformation, updateAfterFullPaymentReservationInformation, getReservationAfterDeposit, allReservation }

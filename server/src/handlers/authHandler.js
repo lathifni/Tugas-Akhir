@@ -17,7 +17,8 @@ const loginHandler = async (req, res) => {
         google: login.google,
         user_image: login.user_image,
         name: login.fullname,
-        refreshToken: login.refreshToken
+        refreshToken: login.refreshToken,
+        role: login.role
     })
 }
 

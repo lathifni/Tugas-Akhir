@@ -17,4 +17,9 @@ const listHomestayByRadius = async(payload) => {
   return rows
 }
 
-module.exports = { listGeomHomestay, listHomestayByRadius }
+const listAllHomestay = async() => {
+  const [rows] = await promisePool.query('SELECT id,name FROM homestay')
+  return rows
+}
+
+module.exports = { listGeomHomestay, listHomestayByRadius, listAllHomestay }

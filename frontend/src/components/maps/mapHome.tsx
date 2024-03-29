@@ -5,7 +5,7 @@ import { fetchListGeomKec, fetchListGeomKotaKab } from "@/app/(pages)/api/fetche
 import { fetchListVillage } from "@/app/(pages)/api/fetchers/vilage"
 import { Loader } from "@googlemaps/js-api-loader"
 import { useQuery } from "@tanstack/react-query"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { createRoot } from 'react-dom/client';
 import { GtpInfoWindow, Legend } from "./mapHelper"
 

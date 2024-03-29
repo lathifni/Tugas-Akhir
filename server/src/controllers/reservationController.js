@@ -9,6 +9,7 @@ const {
   updateReservationInformation,
   getReservationAfterDeposit,
   updateAfterFullPaymentReservationInformation,
+  allReservation,
 } = require("../services/reservation");
 const crypto = require("crypto");
 
@@ -216,10 +217,15 @@ const callbackRedirectController = async (params) => {
   return await callbackRedirect(params);
 };
 
+const getAllReservationController = async() => {
+  return await allReservation()
+}
+
 module.exports = {
   createReservationController,
   getListReservationByUserIdController,
   getReservationByIdController,
   callbackNotificationController,
   callbackRedirectController,
+  getAllReservationController,
 };

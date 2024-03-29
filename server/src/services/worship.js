@@ -17,4 +17,9 @@ const listWorshipByRadius = async(payload) => {
   return rows
 }
 
-module.exports = { listGeomWorship, listWorshipByRadius }
+const listAllWorship = async() => {
+  const [rows] = await promisePool.query('SELECT id,name FROM worship_place')
+  return rows
+}
+
+module.exports = { listGeomWorship, listWorshipByRadius , listAllWorship, }

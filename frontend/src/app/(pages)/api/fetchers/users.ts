@@ -7,16 +7,12 @@ interface User {
   fullname: string | null;
 }
 
-export const fetchUsers = async () => {
-  const response= await useAxiosAuth.get('/users') 
+export const fetchAllCostumer = async () => {
+  const response = await useAxiosAuth.get('/users/allcostumer') 
   return response.data.data
 };
 
-export const fetchCart = async () => {
-  console.log("Fetching Cart");
-  const response = await useAxiosAuth.get("http://localhost:3000/cart");
-  const cart = response.data;
-
-  console.log("Cart: ", cart);
-  return cart;
+export const fetchAllAdmin = async() => {
+  const response = await useAxiosAuth.get('/users/alladmin') 
+  return response.data.data
 };

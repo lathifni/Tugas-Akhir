@@ -118,6 +118,40 @@ const createPackageService = async(params) => {
   return rows;
 }
 
+const listAllPackage = async() => {
+  const [rows] = await promisePool.query(`SELECT id,name FROM package WHERE custom = '0'`)
+  return rows
+}
+
+const listAllServicePackage = async() => {
+  const [rows] = await promisePool.query(`SELECT id,name FROM service_package`)
+  return rows
+}
+
+const serviceById = async(params) => {
+  const [rows] = await promisePool.query(`SELECT * FROM service_package WHERE id='${params.id}'`)
+  return rows[0]
+}
+
+const getLatestIdService = async() => {
+  const [rows] = await promisePool.query(`SELECT MAX(CAST(SUBSTRING(id, 2) AS UNSIGNED)) AS lastIdNumber FROM service_package;`)
+  return rows[0]
+}
+
+const addService = async(params) => {
+  const sql = "INSERT INTO service_package (id, name, price, category) VALUES (?, ?, ?, ?)";
+  const values = [params.id, params.name, params.price, params.category];
+  const [rows] = await promisePool.query(sql, values);
+  return rows.affectedRows;
+}
+
+const deleteService = async(params) => {
+  // const sql = `Delete FROM service_package WHERE id =${params}`
+  // const values = [params.id, params.name, params.price, params.category];
+  const [rows] = await promisePool.query(`Delete FROM service_package WHERE id ='${params.id}'`)
+  return rows.affectedRows
+}
+
 module.exports = {
   getListAllBasePackage,
   getPackageById,
@@ -133,4 +167,10 @@ module.exports = {
   createPackageDay,
   createPackageActivites,
   createPackageService,
+  listAllPackage,
+  listAllServicePackage,
+  serviceById,
+  getLatestIdService,
+  addService,
+  deleteService,
 };
