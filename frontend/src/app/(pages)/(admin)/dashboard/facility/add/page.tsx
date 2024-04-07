@@ -1,6 +1,143 @@
+'use client'
+
+import { fetchAllTypeFacility } from "@/app/(pages)/api/fetchers/facility";
+import FileInput from "@/components/fileInput";
 import MapInput from "@/components/maps/mapInput";
+import { faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import 'react-toastify/dist/ReactToastify.css';
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import Link from "next/link";
+import { useRef, useState } from "react";
+import { ToastContainer, Bounce, toast } from "react-toastify";
+import useAxiosAuth from "../../../../../../../libs/useAxiosAuth";
+import { useRouter } from 'next/navigation'
+
+interface Image {
+  name: string;
+  url: string;
+  file: File;
+}
 
 export default function AddFacilityAdmin() {
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const mapInputRef = useRef<any>(null);
+  const [geometry, setGeometry] = useState<any | null>(null)
+  const [gallery, setGallery] = useState<Image[]>([]);
+  // const [linkGallery, setLinkGallery] = useState
+  const router = useRouter();
+  const [formDataInput, setFormDataInput] = useState({
+    name: "",
+    type: "",
+    price: "",
+    category: ""
+  });
+  const { data: dataAllTypeFacility, error } = useQuery({
+    queryKey: ['dataAllTypeFacility'],
+    queryFn: fetchAllTypeFacility
+  })
+
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormDataInput({ ...formDataInput, [name]: value });
+  };
+
+  const handleGalleryChange = (newGallery: any) => {
+    setGallery(newGallery);
+  }
+
+  const handleCoordinateChange = (latitude: number | null, longitude: number | null) => {
+    setLatitude(latitude)
+    setLongitude(longitude)
+  };
+
+  const handleLatitudeChange = (event: any) => {
+    setLatitude(event.target.value);
+  };
+
+  const handleLongitudeChange = (event: any) => {
+    setLongitude(event.target.value);
+  };
+
+  const handleSearchButton = () => {
+    if (latitude !== null && longitude !== null && mapInputRef.current) {
+      console.log('ini button search');
+      mapInputRef.current.search(longitude, latitude)
+    }
+  }
+
+  const handleGeometryChange = (geometry: any) => {
+    console.log("Geometry:", geometry);
+    setGeometry(geometry)
+  }
+
+  const handleDeletePolygon = () => {
+    if (mapInputRef.current) {
+      mapInputRef.current.deletePolygon();
+    }
+  };
+
+  const submitHandler = async (e: any) => {
+    if (formDataInput.category == '') {
+      toast.warn('category cannot be null')
+      return;
+    }
+    if (formDataInput.name == '') {
+      toast.warn('name cannot be null')
+      return;
+    }
+    if (formDataInput.price == '') {
+      toast.warn('price cannot be null')
+      return;
+    }
+    if (formDataInput.type == '') {
+      toast.warn('type facility cannot be null')
+      return;
+    }
+    if (geometry == null) {
+      toast.warn('Geometry on Google Maps cannot be null')
+      return;
+    }
+    if (gallery.length == 0) {
+      toast.warn('Gallery cannot be null')
+      return;
+    }
+
+    const formData = new FormData()
+    const category = 'facility'
+    formData.append('category', category);
+    gallery.forEach((image, index) => {
+      formData.append(`images[${index}]`, image.file);
+    });
+
+    try {
+      const response = await axios.post("/api/images", formData);
+      console.log(response.data);
+      const url = response.data.data
+      if (response.status === 201){
+        const data = {
+          name: formDataInput.name,
+          category: formDataInput.category,
+          type: formDataInput.type,
+          price: formDataInput.price,
+          url: url,
+          geom: geometry
+        }
+        const response = await useAxiosAuth.post('facility', data)
+        console.log(response);
+        
+        if (response.status === 201) router.push('/dashboard/facility')
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
   return (
     <>
       <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
@@ -8,39 +145,96 @@ export default function AddFacilityAdmin() {
           <h1 className="text-3xl text-center font-bold">Add Facility</h1>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900 ">Facility Name</label>
-            <input type="text" name='name'
+            <input type="text" name='name' onChange={handleChange}
               className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
           </div>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900 ">Facility Type</label>
-            <input type="text" name='name'
-              className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+            {dataAllTypeFacility ? (
+              <select
+                name="type"
+                value={formDataInput.type}
+                onChange={handleChange}
+                className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              >
+                <option value="">Please choose</option>
+                {dataAllTypeFacility.map((service: { id: string; type: string }) => (
+                  <option key={service.id} value={service.id}>
+                    {service.type}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input type="text" readOnly placeholder="Loading ..." className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+            )}
           </div>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900 ">Price</label>
-            <input type="text" name='name'
+            <input type="text" name='price' onChange={handleChange}
               className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
           </div>
+          <div className="px-8">
+            <label className="block mt-2 text-sm font-medium text-gray-900">Category</label>
+            <RadioGroup row name="category" onChange={handleChange}>
+              <FormControlLabel value="0" control={<Radio />} label="Group" />
+              <FormControlLabel value="1" control={<Radio />} label="Individu" />
+            </RadioGroup>
+          </div>
+          <div className="px-8">
+            <label className="block mt-2 text-sm font-medium text-gray-900">Gallery</label>
+            <FileInput onGalleryChange={handleGalleryChange} />
+          </div>
+          <div className="flex py-4 px-8 gap-4">
+            <button className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700" onClick={submitHandler}>
+              Submit
+            </button>
+            <Link href={"/dashboard/facility"}>
+              <button className="px-3 py-2 rounded-lg bg-red-500 text-white hover:bg-red-700">
+                Cancel
+              </button>
+            </Link>
+          </div>
         </div>
-        <div className="w-full h-full py-5 lg:w-7/12 items-center bg-white rounded-lg">
+        <div className="w-full h-full py-5 px-4 lg:w-7/12 items-center bg-white rounded-lg">
           <h1 className="text-3xl text-center font-bold">Google Maps</h1>
           <div className="flex justify-around">
             <div className="px-8">
               <label className="block mt-2 text-sm font-medium text-gray-900 ">Latitude</label>
-              <input type="text" name='latutude'
-                className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required placeholder="eg. -0.524313"/>
+              <input type="number" name='latutude' value={latitude ?? ''} placeholder={`eg. ${latitude !== null ? latitude : '-0.524313'}`} onChange={handleLatitudeChange}
+                className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
             </div>
             <div className="px-8">
               <label className="block mt-2 text-sm font-medium text-gray-900 ">Longitude</label>
-              <input type="text" name='longitude'
-                className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required placeholder="eg. 100.492351" />
+              <input type="number" name='longitude' value={longitude ?? ''} placeholder={`eg. ${longitude !== null ? longitude : '100.492351'}`} onChange={handleLongitudeChange}
+                className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
             </div>
           </div>
-          <div className="pb-5 md:mx-3">
-            <MapInput />
+          <div className="flex p-4 gap-8">
+            <button className="px-3 py-2 rounded-lg border text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white" onClick={handleSearchButton}>
+              <FontAwesomeIcon icon={faSearch} />
+            </button>
+            <button className="px-3 py-2 rounded-lg text-red-500 border border-red-500 hover:bg-red-500 hover:text-white" onClick={handleDeletePolygon}>
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
+          </div>
+          <div className="pb-5">
+            <MapInput onCoordinateChange={handleCoordinateChange} onGeometryChange={handleGeometryChange} ref={mapInputRef} />
           </div>
         </div>
       </div>
+      <ToastContainer
+        position="top-center"
+        autoClose={3500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </>
   )
 }

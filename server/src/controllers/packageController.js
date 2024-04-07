@@ -130,7 +130,6 @@ const postServiceController = async(params) => {
   let newId = lastIdNumber+1
   const idNumberString = newId.toString().padStart(2, "0");
   newId = `S${idNumberString}`
-  console.log(newId, 'ini idnya');
   params.id = newId
   return await addService(params)
 }

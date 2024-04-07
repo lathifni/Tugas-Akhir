@@ -101,7 +101,6 @@ const createPackageDay = async(params) => {
 }
 
 const createPackageActivites = async(params) => {
-  console.log(params);
   const [rows] = await promisePool.query(
     `INSERT INTO detail_package (package_id,day,activity,activity_type,object_id,description) 
     VALUES ('${params.package_id}','${params.day}','${params.activity}','${params.activity_type}','${params.object_id}',"${params.description}")`

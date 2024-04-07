@@ -41,7 +41,6 @@ export default function ServiceAdmin() {
         }
       }
     };
-
     fetchData();
   }, [notification])
 
@@ -57,7 +56,7 @@ export default function ServiceAdmin() {
           </div>
           <TableServiceAdmin columns={columns} data={data} isOpen={isOpenDelete} setIsOpen={setIsOpenDelete} onRowDelete={handleRowDelete} />
           <AddDialogiSerice isOpen={isOpen} setIsOpen={setIsOpen} setNotification={setNotification} />
-          <DeleteDialogService isOpen={isOpenDelete} setIsOpen={setIsOpenDelete} rowDelete={rowDelete} setNotification={setNotification} />
+          <DeleteDialogService isOpen={isOpenDelete} setIsOpen={setIsOpenDelete} rowDelete={rowDelete} setNotification={setNotification} onSuccessfulDelete={refetch}/>
         </div>
         <ToastContainer
           position="top-center"

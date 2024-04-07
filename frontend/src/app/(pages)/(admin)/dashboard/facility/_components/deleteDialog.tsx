@@ -8,20 +8,22 @@ interface Props {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   rowDelete: { name: string, id: string };
   setNotification: React.Dispatch<React.SetStateAction<{ message: string; type: string; } | null>>;
+  onSuccessfulDelete: () => void;
 }
 
-export default function DeleteDialogFacility({ isOpen, setIsOpen, rowDelete, setNotification }: Props) {
+export default function DeleteDialogFacility({ isOpen, setIsOpen, rowDelete, setNotification, onSuccessfulDelete }: Props) {
 
   const handleDelete = () => {
-    // useAxiosAuth.delete(`/package/service/${rowDelete.id}`)
-    // .then((res) => {
-    //   setIsOpen(!isOpen)
-    //   setNotification({ message: `Success delete data id ${rowDelete.name}`, type: 'success' });
-    // })
-    // .catch((error) => {
-    //   console.log(error);
-    //   setNotification({ message: `Failed delete data`, type: 'error' });
-    // })
+    useAxiosAuth.delete(`/facility/${rowDelete.id}`)
+    .then((res) => {
+      setIsOpen(!isOpen)
+      setNotification({ message: `Success delete data id ${rowDelete.name}`, type: 'success' });
+      onSuccessfulDelete();
+    })
+    .catch((error) => {
+      console.log(error);
+      setNotification({ message: `Failed delete data`, type: 'error' });
+    })
   }
 
   return (

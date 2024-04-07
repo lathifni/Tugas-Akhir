@@ -152,7 +152,6 @@ const postServiceHandler = async(req, res) => {
 
 const deleteServiceHandler = async(req, res) => {
   try {
-    console.log(req.params);
     const deleteRow = await deleteServiceController(req.params)
     if (deleteRow == 1) return res.status(200).send({ status:'success' })
     else return res.status(400).send({ status:'failed to add data',  })

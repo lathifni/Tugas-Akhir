@@ -4,7 +4,6 @@ import { fetchServiceById } from "@/app/(pages)/api/fetchers/package"
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useQuery } from "@tanstack/react-query"
-import Link from "next/link"
 import { useState } from "react"
 import EditDialogService from "./_components/editDialog"
 

@@ -9,7 +9,6 @@ import { ToastContainer, Bounce } from "react-toastify";
 import DeleteDialogFacility from "./_components/deleteDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import AddDialogFacility from "./_components/addDialog";
 import Link from "next/link";
 
 export default function FacilityAdmin() {
@@ -17,18 +16,19 @@ export default function FacilityAdmin() {
   const [isOpen, setIsOpen] = useState(false)
   const [rowDelete, setRowDelete] = useState<any>({})
   const [isOpenDelete, setIsOpenDelete] = useState(false)
-  const { data, error } = useQuery({
+  const { data, error, refetch } = useQuery({
     queryKey: ['dataAllFacility'],
-    queryFn: fetchAllFacility
+    queryFn: fetchAllFacility,
+    enabled: true
   })
-
+  
   const columns = React.useMemo(
     () => Columns(), []
   );
 
-  const handleRowDelete = (rowData: any) => {
+  const handleRowDelete = async (rowData: any) => {
     setRowDelete(rowData)
-    setIsOpenDelete(true)
+    setIsOpenDelete(true);
   };
 
   if (data) {
@@ -44,7 +44,7 @@ export default function FacilityAdmin() {
             </Link>
           </div>
           <TableFacilityAdmin columns={columns} data={data} isOpen={false} setIsOpen={setIsOpenDelete} onRowDelete={handleRowDelete} />
-          <DeleteDialogFacility isOpen={isOpenDelete} setIsOpen={setIsOpenDelete} rowDelete={rowDelete} setNotification={setNotification} />
+          <DeleteDialogFacility isOpen={isOpenDelete} setIsOpen={setIsOpenDelete} rowDelete={rowDelete} setNotification={setNotification} onSuccessfulDelete={refetch}/>
         </div>
         <ToastContainer
           position="top-center"

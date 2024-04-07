@@ -8,10 +8,12 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="h screen flex">
-      <NavigationAdmin/>
+      <NavigationAdmin />
       <main className="flex-1 overflow-y-auto bg-slate-200">
-        <ExploreHeader/>
-        {children}
+        <ExploreHeader />
+        <div style={{ overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
+          {children}
+        </div>
       </main>
     </div>
   )

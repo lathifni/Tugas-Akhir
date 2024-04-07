@@ -7,17 +7,57 @@ let map: google.maps.Map | null = null;
 let drawingManager: google.maps.drawing.DrawingManager | null = null;
 let marker: google.maps.Marker | null = null;
 
-interface MapInputProps {
+interface MapEditProps {
   onCoordinateChange: (latitude: number | null, longitude: number | null) => void;
   onGeometryChange: (geometry: any) => void;
+  geom: any;
 }
 
-const MapInput = forwardRef(({ onCoordinateChange, onGeometryChange }: MapInputProps, ref) => {
+const MapEdit = forwardRef(({ onCoordinateChange, onGeometryChange, geom }: MapEditProps, ref) => {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const mapRef = useRef<HTMLDivElement>(null)
   const markerRef = useRef<google.maps.Marker | null>(null);
   const newShapeRef = useRef<google.maps.Polygon | null>(null);
+
+  const setupGeom = async () => {
+    if (geom) {
+      const geomJson = JSON.parse(geom);
+
+      if (geomJson.type === 'MultiPolygon') {
+        const { Polygon } = await loader.importLibrary("maps")
+
+        // Jika tipe geometri adalah MultiPolygon
+        const polygons = geomJson.coordinates.map((polygonCoords: any) => {
+          // Membuat array koordinat untuk setiap polygon
+          const coordinates = polygonCoords[0].map((coord: any) => ({
+            lat: coord[1],
+            lng: coord[0]
+          }));
+
+          // Membuat poligon baru dari koordinat
+          const newPolygon = new google.maps.Polygon({
+            paths: coordinates,
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#FF0000',
+            fillOpacity: 0.35,
+            editable: true // Jika ingin poligon dapat diedit
+          });
+
+          // Menambahkan poligon ke peta
+          newPolygon.setMap(map);
+          return newPolygon;
+        });
+
+        // Mengatur ref newShapeRef dengan array poligon yang baru dibuat
+        newShapeRef.current = polygons;
+      } else {
+        // Handling for other types of geometry if needed
+      }
+    }
+  };
 
   const loader = new Loader({
     apiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY as string,
@@ -29,9 +69,9 @@ const MapInput = forwardRef(({ onCoordinateChange, onGeometryChange }: MapInputP
   }
 
   const deletePolygon = () => {
-    if (newShapeRef.current) {
+    if (newShapeRef.current?.setMap) {
       newShapeRef.current.setMap(null);
-      newShapeRef.current = null; 
+      newShapeRef.current = null;
       markerRef.current?.setMap(null)
       markerRef.current = null
       setLatitude(null)
@@ -128,24 +168,6 @@ const MapInput = forwardRef(({ onCoordinateChange, onGeometryChange }: MapInputP
 
     map = new Map(mapRef.current as HTMLDivElement, mapOptions)
     drawingManager = new google.maps.drawing.DrawingManager()
-
-    // const drawingManagerOpts = {
-    //   drawingMode: google.maps.drawing.OverlayType.POLYGON,
-    //   drawingControl: true,
-    //   drawingControlOptions: {
-    //     position: google.maps.ControlPosition.TOP_CENTER,
-    //     drawingModes: [
-    //       google.maps.drawing.OverlayType.POLYGON,
-    //     ]
-    //   },
-    //   polygonOptions: {
-    //     fillColor: 'blue',
-    //     strokeColor: 'blue',
-    //     editable: true,
-    //   },
-    //   map: map
-    // };
-    // drawingManager.setOptions(drawingManagerOpts);
     drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.POLYGON,
       drawingControl: true,
@@ -171,22 +193,20 @@ const MapInput = forwardRef(({ onCoordinateChange, onGeometryChange }: MapInputP
       const newShape = event.overlay;
       newShape.type = event.type;
       saveSelection(newShape);
-
-      // google.maps.event.addListener(newShape.getPath(), 'insert_at', () => {
-      //   saveSelection(newShape);
-      // });
-      // google.maps.event.addListener(newShape.getPath(), 'remove_at', () => {
-      //   saveSelection(newShape);
-      // });
-      // google.maps.event.addListener(newShape.getPath(), 'set_at', () => {
-      //   saveSelection(newShape);
-      // });
     });
-
     drawingManager.setMap(map);
+
+    if (newShapeRef.current) {
+      if (Array.isArray(newShapeRef.current)) {
+        newShapeRef.current.forEach(polygon => {
+          polygon.setMap(map);
+        });
+      }
+    }
   }
 
   useEffect(() => {
+    setupGeom()
     initMap()
   }, [])
 
@@ -203,4 +223,4 @@ const MapInput = forwardRef(({ onCoordinateChange, onGeometryChange }: MapInputP
   )
 })
 
-export default MapInput;
+export default MapEdit;

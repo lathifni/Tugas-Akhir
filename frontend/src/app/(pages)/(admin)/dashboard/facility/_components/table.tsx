@@ -62,8 +62,8 @@ export default function TableFacilityAdmin({ columns, data, isOpen, setIsOpen, o
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
-              <td className='px-1 py-2'> {/* Tambahkan kolom Action di sini */}
-                <Link href={`/dashboard/service/${row.original.id}`}>
+              <td className='px-1 py-2'>
+                <Link href={`/dashboard/facility/${row.original.id}`}>
                   <button className='mx-2 border-2 border-blue-500 p-2 rounded-lg text-blue-500 hover:text-white hover:bg-blue-500 '>
                     <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />
                   </button>

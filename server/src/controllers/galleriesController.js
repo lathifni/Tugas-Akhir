@@ -1,7 +1,11 @@
-const { galleriesGtp } = require("../services/galleries")
+const { galleriesGtp, gallerieFacility } = require("../services/galleries")
 
 const galleriesGtpController = async() => {
   return await galleriesGtp()
 }
 
-module.exports = { galleriesGtpController, }
+const galleriesFacilityController = async(params) => {
+  return await gallerieFacility(params)
+}
+
+module.exports = { galleriesGtpController, galleriesFacilityController, }
