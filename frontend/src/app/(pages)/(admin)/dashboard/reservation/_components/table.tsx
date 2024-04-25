@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, SortingState } from '@tanstack/react-table'
+import Link from 'next/link';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   columns: any[];
@@ -51,8 +54,11 @@ export default function TableReservationAdmin({ columns, data }: Props) {
                 </td>
               ))}
               <td className='px-1 py-2'> {/* Tambahkan kolom Action di sini */}
-                <button >Edit</button> {/* Tombol untuk edit */}
-                <button >Delete</button> {/* Tombol untuk hapus */}
+                <Link href={`/dashboard/reservation/${row.original.id}`}>
+                  <button className='mx-2 border-2 border-blue-500 p-2 rounded-lg text-blue-500 hover:text-white hover:bg-blue-500 '>
+                    <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />
+                  </button>
+                </Link>
               </td>
             </tr>
           ))}

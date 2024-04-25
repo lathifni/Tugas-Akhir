@@ -13,11 +13,7 @@ export default function NavigationItem() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      if (session) {
-        console.log(session.user);
-        
-        setIsLoading(false);
-      }
+      if (session) setIsLoading(false);
     }
   }, [update, status, session])
 

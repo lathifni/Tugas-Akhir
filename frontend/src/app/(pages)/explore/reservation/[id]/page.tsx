@@ -1,7 +1,7 @@
 'use client'
 
 import { fetchReservationById } from "@/app/(pages)/api/fetchers/reservation";
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -24,7 +24,7 @@ interface ReservationData {
 export default function ReservationId({ params }: any) {
   const [dataActivity, setDataActivity] = useState<{ day: string; activities: Activity[] }[]>([]);
   const [token, setToken] = useState('')
-  const steps = ['Deposit', 'Full Payment', 'Enjoy Trip']; 
+  const steps = ['Waiting Confirmation Date', 'Deposit', 'Full Payment', 'Enjoy Trip'];
   const getStatusStep = () => {
     switch (dataReservationById.reservation.status_id) {
       case 1:
@@ -32,13 +32,13 @@ export default function ReservationId({ params }: any) {
       case 2:
         return 1; // Langkah 2: Full Payment
       case 3:
-        return 3; // Langkah 3: Enjoy Trip
+        return 2; // Langkah 3: Enjoy Trip
+      case 4:
+        return 4
       default:
         return -1; // Status tidak valid, tampilkan semua langkah
     }
   };
-
-  
 
   const { data: dataReservationById, isLoading: loadingReservation } = useQuery({
     queryKey: ['reservationbyId', params.id],
@@ -191,14 +191,22 @@ export default function ReservationId({ params }: any) {
                     <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Status</td>
                     <td className="font-semibold">{dataReservationById.reservation.status}</td>
                   </tr>
-                  {dataReservationById.reservation.status_id === 3 ? null : (
+                  {dataReservationById.reservation.status_id === 2 ? (
                     <tr>
                       <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap"></td>
                       <td className="font-normal">
-                        <button className="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onClick={payNowButtonHandler}>Pay Now</button>
+                        <button className="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onClick={payNowButtonHandler}>Pay Deposit Now</button>
                       </td>
                     </tr>
-                  )}
+                  ): null}
+                  {dataReservationById.reservation.status_id === 3 ? (
+                    <tr>
+                      <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap"></td>
+                      <td className="font-normal">
+                        <button className="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onClick={payNowButtonHandler}>Pay Full Payment Now</button>
+                      </td>
+                    </tr>
+                  ): null}
                 </tbody>
               </table>
               {/* <Stepper activeStep={dataReservationById.reservation.status_id - 1}>

@@ -24,3 +24,8 @@ export const fetchAllReservation = async() => {
   const res = await useAxiosAuth.get('/reservation/all')
   return res.data.data
 }
+
+export const confirmationDate = async(id:string) => {
+  const res = await useAxiosAuth.get(`/reservation/confirmationDate/${id}`)
+  return res.data.data
+}

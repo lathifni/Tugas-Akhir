@@ -3,17 +3,17 @@
 import { fetchPackageById } from "@/app/(pages)/api/fetchers/package";
 import { faInfo } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { Box, Checkbox, TextField } from "@mui/material"
+import { Checkbox, TextField } from "@mui/material"
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { addDays, format } from 'date-fns';
+import { format } from 'date-fns';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios";
-import snapMidtrans from "@/hooks/snapMidtrans";
 import ReadGuide from "./_components/readGuide";
 import { useSession } from "next-auth/react";
+import { useRouter } from 'next/navigation'
 // import { postReservationTransaction } from "@/app/(pages)/api/fetchers/reservation";
 
 export default function BookingIdPage({ params }: any) {
@@ -26,12 +26,8 @@ export default function BookingIdPage({ params }: any) {
   const [dateCheckOut, setDateCheckOut] = useState('')
   const [note, setNote] = useState('')
   const [isOpen, setIsOpen] = useState(false)
-  const [handleClose, setHandleClose] = useState(false)
-  const [token, setToken] = useState('')
-  const [snapShow, setSnapShow] = useState(false)
   const { data: session } = useSession();
-
-  // const { snapEmbed } = snapMidtrans()
+  const router = useRouter();
 
   const { data: dataPackageById, isLoading: loadingPackageById } = useQuery({
     queryKey: ['PackageById', params.id],
@@ -59,36 +55,29 @@ export default function BookingIdPage({ params }: any) {
     setDateCheckIn(formattedDateInput)
 
     newDate.setHours(12, 0, 0, 0);
-    console.log(formattedDateInput);
 
     newDate.setDate(newDate.getDate() + daysToAdd - 1);
-    // const formattedDate = newDate.toISOString().split("T")[0] + 'T12:00';
     const formattedDate = format(newDate, "yyyy-MM-dd HH:mm:ss")
-    console.log(formattedDate);
 
     setDateCheckOut(formattedDate)
   }
 
   const saveReservationButtonHandler = async () => {
-
-    if (!readCheck) {
-      toast.warn("Please read the guide and fill the checkbox");
-    }
+    if (!readCheck) toast.warn("Please read the guide and fill the checkbox");
     try {
       const currentDate = new Date(); // Mendapatkan tanggal saat ini
 
       const formattedCurrentDate = format(currentDate, "yyyy-MM-dd HH:mm:ss");
       if (session?.user) {
         const data = {
-          name: session.user.name,
-          order_id: 'barangtest111000000',
-          total: 100100,
-          email: session.user.email,
           user_id: session.user.user_id,
           package_id: params.id,
           request_date: formattedCurrentDate,
           check_in: dateCheckIn,
           total_people: totalPeople,
+          total_price: totalPricePackage,
+          deposit: totalDeposit,
+          note: note
         }
         const config = {
           headers: {
@@ -96,112 +85,28 @@ export default function BookingIdPage({ params }: any) {
           }
         }
         const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
-        console.log(res.data);
 
         if (res.status == 201) {
-          setToken(res.data.token)
-
+          if (dataPackageById[0].max_day > 1) {
+            toast.success("Successful!");
+            toast.info("Redirecting You to Booking Homestay");
+            setTimeout(() => {
+              router.push(`/explore/detailreservation/${res.data.idReservation}`);
+            }, 1300);
+          }
+          else {
+            toast.success("Successful!");
+            toast.info("Redirecting You to Reservation");
+            setTimeout(() => {
+              router.push("/explore/reservation");
+            }, 1300);
+          }
         }
-
       }
-      // setToken('1fda8b50-6513-4606-adb6-f509f62a774b')
-      // window.snap.pay('0cd5ef8f-b177-4226-a8a7-5be71cc0933c', {
-      //   onSuccess: (result: any) => {
-      //     console.log(result, 'di onSuccess');
-      //     setToken('')
-      //   },
-      //   onPending: (result: any) => {
-      //     console.log(JSON.stringify(result), 'di onPending');
-      //     // localStorage.setItem('pembayaran',JSON.stringify(result))
-      //     setToken('')
-      //     window.snap.hide()
-      //   },
-      //   onError: (error: any) => {
-      //     console.log(error);
-
-      //   },
-      //   onClose: () => {
-      //     console.log('di close Anda belum menyelesaikan pembayaran');
-
-      //   }
-      // })
-
-      // if (res && res.status === 200) {
-      //   console.log('di dalam res responsenya nih');
-      //   setToken(res.data.token)
-
-      // const { snapEmbed } = snapMidtrans()
-      // snapEmbed(token, 'snap-container', {
-      //   onSuccess: function (result: any) {
-      //     console.log('success', result);
-      //     // action.onSuccess(result)
-      // },
-      // onPending: function (result: any) {
-      //     console.log('pending', result);
-      //     // action.onPending(result)
-      // },
-      // onClose: function () {
-      //     // action.onClose()
-
-      // }
-      // })
-      // }
     } catch (error) {
       console.log(error);
     }
   }
-
-  useEffect(() => {
-    if (token) {
-      window.snap.pay(token, {
-        onSuccess: (result: any) => {
-          console.log(result, 'di onSuccess');
-          setToken('')
-        },
-        onPending: (result: any) => {
-          console.log(JSON.stringify(result), 'di onPending');
-          setToken('')
-        },
-        onError: (error: any) => {
-          console.log(error);
-
-        },
-        onClose: () => {
-          console.log('di close Anda belum menyelesaikan pembayaran');
-
-        }
-      })
-    }
-  }, [token])
-
-  // useEffect(() => {
-  //   const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
-  //   const myMidtransClientKey = process.env.MIDTRANS_CLIENT_KEY
-  //   const script = document.createElement('script')
-  //   script.src = midtransScriptUrl
-  //   if (myMidtransClientKey) script.setAttribute('data-client-key', myMidtransClientKey);
-
-  //   document.body.appendChild(script)
-
-  //   return () => {
-  //     document.body.removeChild(script)
-  //   }
-  // }, [])
-
-  useEffect(() => {
-    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
-    let scriptTag = document.createElement('script');
-    scriptTag.src = midtransScriptUrl;
-    const myMidtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
-    console.log(myMidtransClientKey);
-
-    scriptTag.setAttribute('data-client-key', process.env.MIDTRANS_CLIENT_KEY!);
-    document.body.appendChild(scriptTag);
-
-    return () => {
-      document.body.removeChild(scriptTag);
-    }
-  }, []);
 
   const rupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -214,7 +119,6 @@ export default function BookingIdPage({ params }: any) {
 
   const totalPeopleHandleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const min_capacity = dataPackageById[0].min_capacity
-    const price = dataPackageById[0].price
     let inputTotalPeople = Number(event.target.value)
     setTotalPeople(inputTotalPeople)
 
@@ -247,8 +151,6 @@ export default function BookingIdPage({ params }: any) {
   }, [totalOrderPackage, dataPackageById]);
 
   if (dataPackageById) {
-    console.log(dataPackageById);
-
     return (
       <div className="mx-60 bg-white rounded-lg">
         <div className="flex flex-col p-5 shadow-xl ">
@@ -273,9 +175,6 @@ export default function BookingIdPage({ params }: any) {
           </div>
           <div>
             <h2 className="font-medium text-lg">Booking</h2>
-            {snapShow && (
-              <div id="snap-container"></div>
-            )}
             <div className="relative w-fit ml-5">
               <p>Check-in</p>
               {/* <Datetime value={new Date()} className="appearance-none shadow border rounded-lg w-fit py-1 px-2" /> */}
@@ -297,12 +196,10 @@ export default function BookingIdPage({ params }: any) {
           <p className="mt-3">Total Order Package</p>
           <TextField id="outlined-basic" value={totalOrderPackage + ' Pcs'} variant="outlined" size="small" />
           <p className="mt-3">Note</p>
-          <TextField id="outlined-basic" variant="outlined" size="small" />
+          <TextField id="outlined-basic" variant="outlined" size="small" onChange={(event) => setNote(event.target.value)} />
           <p className="mt-3">Total Price Package</p>
-          {/* <TextField id="outlined-basic" value={rupiah(totalPackageOrder * dataPackageById[0].price)} variant="outlined" size="small" /> */}
           <TextField id="outlined-basic" value={rupiah(totalPricePackage)} variant="outlined" size="small" />
           <p className="mt-3">Deposit</p>
-          {/* <TextField id="outlined-basic" value={rupiah(0.2 * totalPackageOrder * dataPackageById[0].price)} variant="outlined" size="small" /> */}
           <TextField id="outlined-basic" value={rupiah(totalDeposit)} variant="outlined" size="small" />
           <div className="flex items-center mt-5">
             <button type="button" className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700 ml-auto disabled:" onClick={saveReservationButtonHandler}>Save Reservation</button>

@@ -46,10 +46,10 @@ const getLatestIdReservation = async() => {
 }
 
 const createReservation = async(params) => {
-  const {id,user_id,package_id,dp_id,request_date,token_midtrans,check_in,total_people,note,deposit,total_price,rating,status} = params
-  const [rows] = await promisePool.query(`INSERT INTO reservation (id,user_id,package_id,dp_id,request_date,token_midtrans,check_in,total_people,note,deposit,total_price,rating,status_id)
-  VALUES ('${id}','${user_id}','${package_id}','${dp_id}','${request_date}','${token_midtrans}','${check_in}','${total_people}','${note}','${deposit}','${total_price}','${rating}','${status}')`);
-  return rows[0];
+  const {id,user_id,package_id,dp_id,request_date,check_in,total_people,note,deposit,total_price} = params
+  const [rows] = await promisePool.query(`INSERT INTO reservation (id,user_id,package_id,dp_id,request_date,check_in,total_people,note,deposit,total_price,rating,status_id)
+  VALUES ('${id}','${user_id}','${package_id}','${dp_id}','${request_date}','${check_in}','${total_people}','${note}','${deposit}','${total_price}','0','1')`);
+  return rows.affectedRows;
 }
 
 const callbackRedirect = async(param) => {
@@ -81,5 +81,21 @@ const allReservation = async() => {
   return rows;
 }
 
+const getReservationAndUserById = async(params) => {
+  const [rows] = await promisePool.query(
+    `SELECT R.*,RS.status,U.email,COALESCE(NULLIF(U.fullname,''), U.username) AS user_name,P.name,P.min_capacity,P.price,p.description,PT.type_name,MAX(CAST(PD.day AS UNSIGNED)) 
+    AS max_day FROM reservation AS R 
+    JOIN package AS P ON R.package_id=P.id JOIN package_type AS PT ON PT.id=P.type_id JOIN package_day AS PD ON PD.package_id=R.package_id 
+    JOIN reservation_status AS RS ON RS.id=R.status_id JOIN users AS U ON U.id=R.user_id WHERE R.id='${params.id}'`
+  );
+  return rows[0];
+} 
+
+const updateReservationConfirmation = async(params) => {
+  const [rows] = await promisePool.query(`UPDATE reservation SET token_midtrans='${params.token_midtrans}',confirmation_date='${params.confirmation_date}',status_id='${params.status_id}' WHERE id ='${params.id}'`);
+  return rows[0];
+}
+
 module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation,
-createReservation, callbackRedirect, updateReservationInformation, updateAfterFullPaymentReservationInformation, getReservationAfterDeposit, allReservation }
+createReservation, callbackRedirect, updateReservationInformation, updateAfterFullPaymentReservationInformation, getReservationAfterDeposit, allReservation, 
+getReservationAndUserById, updateReservationConfirmation, }

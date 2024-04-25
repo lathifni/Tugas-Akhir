@@ -1,10 +1,16 @@
-const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController, getAllReservationController } = require("../controllers/reservationController");
+const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController, getAllReservationController, confirmationDateController } = require("../controllers/reservationController");
 
 const createReservationHandler = async (req, res) => {
   const response = await createReservationController(req.body)
 
   if (response.status !== 201) return res.status(500).send({ status: 'error', message: 'failed to create reservation'})
-  return res.status(201).send({ token: response.token })
+  return res.status(201).send({  status:'success', idReservation: response.idReservation })
+}
+
+const confirmationDateHandler = async(req, res) => {
+  await confirmationDateController(req.params)
+
+  return res.status(200).send({ status:'success' })
 }
 
 const getListReservationByUserIdHandler = async(req, res) => {
@@ -58,5 +64,5 @@ const getAllReservationHandler = async(req, res) => {
   }
 }
 
-module.exports = { createReservationHandler, getListReservationByUserIdHandler, getReservationByIdHandler, callbacNotificationkHandler, callbackRedirectHandler, 
+module.exports = { createReservationHandler, confirmationDateHandler, getListReservationByUserIdHandler, getReservationByIdHandler, callbacNotificationkHandler, callbackRedirectHandler, 
 getAllReservationHandler, };

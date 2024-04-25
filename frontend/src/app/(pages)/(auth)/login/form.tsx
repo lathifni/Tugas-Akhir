@@ -23,7 +23,8 @@ export default function Form() {
          if (res?.error) {
             setErrorLogin('Invalid Email/Username or Password');
          } else {
-             router.replace('/');
+            //  router.replace('https://8lcx6qm9-3001.asse.devtunnels.ms/explore');
+             router.replace('/explore');
           }
       } catch (error: any) {
          setErrorLogin(error)
@@ -32,7 +33,8 @@ export default function Form() {
 
    const handleSignInGoogle = () => {
       signIn('google', {
-         callbackUrl: '/'
+         // callbackUrl: 'https://8lcx6qm9-3001.asse.devtunnels.ms/explore'
+         callbackUrl: '/explore'
       })
    }
 
