@@ -22,4 +22,8 @@ const listAllHomestay = async() => {
   return rows
 }
 
+// SELECT H.name,UH.unit_number,UH.nama_unit,UH.capacity,UH.price FROM unit_homestay AS UH JOIN homestay AS H ON H.id=UH.homestay_id
+// LEFT JOIN detail_reservation AS DR ON DR.homestay_id=UH.homestay_id AND DR.unit_type=UH.unit_type AND DR.unit_number=UH.unit_number AND DR.date BETWEEN '2023-11-12' AND '2023-11-12'
+// WHERE DR.date IS NULL;
+
 module.exports = { listGeomHomestay, listHomestayByRadius, listAllHomestay }

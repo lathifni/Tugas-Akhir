@@ -1,4 +1,4 @@
-const { userChatsController, createChatController, findChatController } = require("../controllers/chatController");
+const { userChatsController, createChatController, findChatController, whatsAppClientController, sendMessage } = require("../controllers/chatController");
 
 const createChatHandler = async(req, res) => {
   try {
@@ -29,4 +29,27 @@ const findChatHandler = async(req, res) => {
   }
 }
 
-module.exports = { createChatHandler, userChatsHandler, findChatHandler, }
+const whatsAppClientHandler = async(req, res) => {
+  try {
+    await whatsAppClientController()
+
+    // console.log(qr);
+
+    // res.send()
+    res.status(200).json({ status: 'success', informasi: 'testttt' })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const sendWhatsAppMessageHandler = async (req, res) => {
+  try {
+    await sendMessage(req.body)
+
+    res.status(200).json({ status: 'success', informasi: 'testttt' })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { createChatHandler, userChatsHandler, findChatHandler, whatsAppClientHandler, sendWhatsAppMessageHandler, }

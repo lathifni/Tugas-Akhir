@@ -15,4 +15,4 @@ const findChat = async(params) => {
   return rows
 }
 
-module.exports = { createChat, userChats, findChat, }
+module.exports = { createChat, userChats, findChat }

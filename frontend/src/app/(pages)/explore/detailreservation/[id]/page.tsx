@@ -9,6 +9,8 @@ import ClipLoader from "react-spinners/ClipLoader";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAdd, faCheck, faInfo } from "@fortawesome/free-solid-svg-icons";
+import AddUnitHomestayDialog from "./_components/addUnitHomestayDialog";
+import GuideHomestayDialog from "./_components/guideHomestayDialog";
 
 interface Activity {
   day: string;
@@ -22,6 +24,8 @@ interface ReservationData {
 
 export default function DetailReservationIdPage({ params }: any) {
   const [dataActivity, setDataActivity] = useState<{ day: string; activities: Activity[] }[]>([]);
+  const [addHomestayDialog, setAddHomestayDialog] = useState(false)
+  const [guideDialog, setGuideDialog] = useState(false)
 
   const { data: dataReservationById, isLoading: loadingReservation } = useQuery({
     queryKey: ['reservationbyId', params.id],
@@ -64,6 +68,8 @@ export default function DetailReservationIdPage({ params }: any) {
     return (
       <div className="flex flex-col xl:flex-row m-1 sm:m-3 lg:m-5">
         <div className="w-full h-full px-1 xl:w-1/2">
+          <AddUnitHomestayDialog isOpen={addHomestayDialog} setIsOpen={setAddHomestayDialog}/>
+          <GuideHomestayDialog isOpen={guideDialog} setIsOpen={setGuideDialog}/>
           {dataReservationById && (
             <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
               <div id="snap-container"></div>
@@ -190,8 +196,8 @@ export default function DetailReservationIdPage({ params }: any) {
           <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
             <h1 className="text-center text-xl font-bold mb-5">Reservation Homestay</h1>
             <div className="flex gap-4">
-              <button className="border border-blue-500 rounded-lg bg-white text-blue-500 px-3 py-2 hover:text-white hover:bg-blue-500"><FontAwesomeIcon icon={faAdd} />Add Unit Homestay</button>
-              <button className="px-3 py-2 rounded-lg bg-red-500 text-white hover:bg-red-700"><FontAwesomeIcon icon={faInfo} /> Read Guide</button>
+              <button className="border border-blue-500 rounded-lg bg-white text-blue-500 px-3 py-2 hover:text-white hover:bg-blue-500" onClick={() => setAddHomestayDialog(!addHomestayDialog)}><FontAwesomeIcon icon={faAdd} /> Add Unit Homestay</button>
+              <button className="px-3 py-2 rounded-lg bg-red-500 text-white hover:bg-red-700" onClick={() => setGuideDialog(!guideDialog)}><FontAwesomeIcon icon={faInfo} /> Read Guide</button>
             </div>
             <p>*This date is the day of the homestay reservation and the check out time is {(() => {
               const checkInDate = moment(dataReservationById.reservation.check_in);
