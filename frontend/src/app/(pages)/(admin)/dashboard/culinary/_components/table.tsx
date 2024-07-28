@@ -37,7 +37,7 @@ export default function TableCulinaryAdmin({ columns, data, isOpen, setIsOpen, o
 
   return (
     <div>
-      <table className='w3-table w3-striped w3-bordered w-auto mt-8 '>
+      <table className='w3-table-all w3-hoverable mt-2 w-auto'>
         <thead className='text-lg'>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -63,7 +63,7 @@ export default function TableCulinaryAdmin({ columns, data, isOpen, setIsOpen, o
                 </td>
               ))}
               <td className='px-1 py-2'> {/* Tambahkan kolom Action di sini */}
-                <Link href={''}>
+                <Link href={`/dashboard/culinary/${row.original.id}`}>
                   <button className='mx-2 border-2 border-blue-500 p-2 rounded-lg text-blue-500 hover:text-white hover:bg-blue-500 '>
                     <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />
                   </button>

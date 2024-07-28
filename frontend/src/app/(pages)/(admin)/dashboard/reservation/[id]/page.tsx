@@ -12,6 +12,7 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import ConfirmationDateDialog from "./_components/confirmationDateDialog";
 import useAxiosAuth from "../../../../../../../libs/useAxiosAuth";
+import { fetchBookedHomestay } from "@/app/(pages)/api/fetchers/homestay";
 
 interface Activity {
   day: string;
@@ -26,6 +27,7 @@ interface ReservationData {
 export default function ReservationId({ params }: any) {
   const [dataActivity, setDataActivity] = useState<{ day: string; activities: Activity[] }[]>([]);
   const [token, setToken] = useState('')
+  const [totalPriceHomestay, setTotalPriceHomestay] = useState(0)
   const [isOpenDialog, setIsOpenDialog] = useState(false)
   const steps = ['Waiting Confirmation Date', 'Deposit', 'Full Payment', 'Enjoy Trip'];
   const getStatusStep = () => {
@@ -49,6 +51,12 @@ export default function ReservationId({ params }: any) {
     // staleTime: 10000
   })
 
+  const { data: dataBookedHomestay, isLoading: loadingBookedHomestay } = useQuery({
+    queryKey: ['bookedHomestay', params.id],
+    queryFn: () => fetchBookedHomestay(params.id),
+    // staleTime: 10000
+  }) 
+
   const rupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -61,13 +69,12 @@ export default function ReservationId({ params }: any) {
   const confirmation = async (value: string) => {
     const res = await useAxiosAuth.get(`/reservation/confirmationDate/${params.id}/${value}`)
     console.log(res.data.data);
-    
   }
 
   useEffect(() => {
     try {
       const groupedData: { [key: string]: Activity[] } = {};
-      if (dataReservationById) {
+      if (dataReservationById && dataBookedHomestay) {
         dataReservationById.activity.forEach((activity: Activity) => {
           if (!groupedData[activity.day]) {
             groupedData[activity.day] = [];
@@ -79,12 +86,13 @@ export default function ReservationId({ params }: any) {
           day,
           activities: activities.sort((a, b) => parseInt(a.activity) - parseInt(b.activity))
         }));
+        setTotalPriceHomestay(dataBookedHomestay.reduce((total:number, homestay:any) => total + homestay.price, 0)) 
         setDataActivity(accordionContent);
       }
     } catch (error) {
       console.log(error);
     }
-  }, [dataReservationById])
+  }, [dataReservationById, dataBookedHomestay])
 
   useEffect(() => {
     const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
@@ -283,6 +291,34 @@ export default function ReservationId({ params }: any) {
         <div className="w-full h-full px-1 xl:w-1/2">
           <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
             <h1 className="text-center text-xl font-bold">Reservation Homestay</h1>
+            <table className="w3-table-all w3-hoverable w3-card-2">
+              <thead>
+                <tr>
+                  <th className="w3-center">Homestay</th>
+                  <th className="w3-center">Unit</th>
+                  <th className="w3-center">Capacity</th>
+                  <th className="w3-center">Price</th>
+                </tr>
+              </thead>
+              <tbody >
+              {dataBookedHomestay.map((homestay: { name:string, nama_unit:string, unit_number:string, capacity:number, price:number}) => (
+              <tr key={homestay.unit_number} className="justify-center">
+                <td className="w3-center">{homestay.name}</td>
+                <td className="w3-center">{homestay.nama_unit}-{homestay.unit_number}</td>
+                <td className="w3-center">{homestay.capacity}</td>
+                <td className="w3-center">{rupiah(homestay.price)}</td>
+              </tr>
+            ))}
+                <tr>
+                  <th colSpan={2} className="text-left">Total Days</th>
+                  <th colSpan={3} className="text-left">: {dataReservationById.reservation.max_day-1} Days</th>
+                </tr>
+                <tr>
+                  <th colSpan={2} className="text-left">Total Price Homestay</th>
+                  <th colSpan={3} className="text-left">: {rupiah(totalPriceHomestay)}</th>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

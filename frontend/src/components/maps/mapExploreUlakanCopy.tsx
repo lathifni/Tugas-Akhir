@@ -133,7 +133,7 @@ export default function MapExploreUlakanCopy({
 
     if (dataUlakanVillage && Array.isArray(dataUlakanVillage)) {
       dataUlakanVillage.forEach((item: { name: string, geom: string }) => {
-        const geom = JSON.parse(item.geom)
+        const geom = item.geom;
 
         digitasiVillage.addGeoJson({
           type: 'Feature',
@@ -158,7 +158,7 @@ export default function MapExploreUlakanCopy({
 
     if (dataGeomGtp && Array.isArray(dataGeomGtp)) {
       dataGeomGtp.forEach((item: { geom: string }) => {
-        const geom: string = JSON.parse(item.geom)
+        const geom = item.geom;
 
         digitasiGtp.addGeoJson({
           type: 'Feature',

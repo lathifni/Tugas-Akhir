@@ -1,4 +1,4 @@
-const { listGeomCulinaryController, listCulinaryByRadiusController, listAllCulinaryController } = require("../controllers/culinaryController");
+const { listGeomCulinaryController, listCulinaryByRadiusController, listAllCulinaryController, getCulinaryByIdController, postCulinaryController, putCulinaryByIdController, deleteCulinaryByIdController } = require("../controllers/culinaryController");
 
 const listGeomCulinaryHandler = async(req, res) => {
   try {
@@ -20,6 +20,36 @@ const listCulinaryByRadiusHandler = async(req, res) => {
   }
 }
 
+const postCulinaryHandler = async(req, res) => {
+  try {
+    const input = await postCulinaryController(req.body)
+    
+    return res.status(201).send({ status:'success test'})
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const putCulinaryByIdHandler = async(req, res) => {
+  try {
+    const putData = await putCulinaryByIdController(req.body)
+    
+    return res.status(200).send({ status:'success'})
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const deleteCulinaryByIdHandler = async(req, res) => {
+  try {
+    const deleteRow = await deleteCulinaryByIdController(req.params)
+    if (deleteRow == 1) return res.status(200).send({ status:'success' })
+    else return res.status(400).send({ status:'failed to add data',  })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 const listAllCulinaryHandler = async(req, res) => {
   try {
     const list = await listAllCulinaryController()
@@ -29,4 +59,16 @@ const listAllCulinaryHandler = async(req, res) => {
     console.log(error);
   }
 }
-module.exports = { listGeomCulinaryHandler,listCulinaryByRadiusHandler, listAllCulinaryHandler, }
+
+const getCulinaryByIdHandler = async(req, res) => {
+  try {
+    const data = await getCulinaryByIdController(req.params)
+
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { listGeomCulinaryHandler,listCulinaryByRadiusHandler, postCulinaryHandler, putCulinaryByIdHandler, deleteCulinaryByIdHandler
+  , listAllCulinaryHandler, getCulinaryByIdHandler,  }

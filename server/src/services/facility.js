@@ -21,7 +21,8 @@ const addFacility = async(params) => {
   // const [rows] = await promisePool.query(sql, values);
   // return rows.affectedRows;
   const [rows] = await promisePool.query(
-    `INSERT INTO facility (id, name, type_id, geom, price, category) VALUES ('${params.id}', '${params.name}','${params.type}',ST_GeomFromText(${params.geom}),'${params.price}','${params. category}')`
+    `INSERT INTO facility (id, name, type_id, geom, price, category) 
+    VALUES ('${params.id}', '${params.name}','${params.type}',ST_GeomFromText(${params.geom}),'${params.price}','${params. category}')`
   );
   return rows.affectedRows;
 }

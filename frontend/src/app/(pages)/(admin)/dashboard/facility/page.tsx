@@ -5,7 +5,7 @@ import { Columns } from "./_components/column";
 import { useQuery } from "@tanstack/react-query"
 import TableFacilityAdmin from "./_components/table"
 import React, { useState } from "react";
-import { ToastContainer, Bounce } from "react-toastify";
+import { ToastContainer, Bounce, toast } from "react-toastify";
 import DeleteDialogFacility from "./_components/deleteDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -29,6 +29,8 @@ export default function FacilityAdmin() {
   const handleRowDelete = async (rowData: any) => {
     setRowDelete(rowData)
     setIsOpenDelete(true);
+    if (notification?.type == 'error') return toast.error(notification.message)
+    return toast.success(notification?.message)
   };
 
   if (data) {

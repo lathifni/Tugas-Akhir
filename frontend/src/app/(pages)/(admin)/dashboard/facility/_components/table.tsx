@@ -37,7 +37,7 @@ export default function TableFacilityAdmin({ columns, data, isOpen, setIsOpen, o
 
   return (
     <div>
-      <table className='w3-table w3-striped w3-bordered w-auto'>
+      <table className='w3-table-all w3-hoverable mt-2 w-auto'>
         <thead className='text-lg'>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>

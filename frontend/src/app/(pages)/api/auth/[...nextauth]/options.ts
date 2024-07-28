@@ -46,8 +46,8 @@ export const options: NextAuthOptions = {
       async jwt({ token, user, account, profile }) {
          if (account?.provider == 'google' && profile) {
             const requestLogin = await fetch(
-               'https://8lcx6qm9-3000.asse.devtunnels.ms/oauth2/google/frontend',
-               // 'http://localhost:3000/oauth2/google/frontend',
+               // 'https://8lcx6qm9-3000.asse.devtunnels.ms/oauth2/google/frontend',
+               'http://localhost:3000/oauth2/google/frontend',
                {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },

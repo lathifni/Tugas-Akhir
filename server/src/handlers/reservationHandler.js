@@ -1,16 +1,24 @@
-const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController, getAllReservationController, confirmationDateController } = require("../controllers/reservationController");
+const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController, getAllReservationController, confirmationDateController, bookingHomestayByReservationIdController } = require("../controllers/reservationController");
 
 const createReservationHandler = async (req, res) => {
-  const response = await createReservationController(req.body)
-
-  if (response.status !== 201) return res.status(500).send({ status: 'error', message: 'failed to create reservation'})
-  return res.status(201).send({  status:'success', idReservation: response.idReservation })
+  try {
+    const response = await createReservationController(req.body)
+  
+    if (response.status !== 201) return res.status(500).send({ status: 'error', message: 'failed to create reservation'})
+    return res.status(201).send({  status:'success', idReservation: response.idReservation })
+  } catch (error) {
+    console.log(error); 
+  }
 }
 
 const confirmationDateHandler = async(req, res) => {
-  await confirmationDateController(req.params)
-
-  return res.status(200).send({ status:'success' })
+  try {
+    await confirmationDateController(req.params)
+  
+    return res.status(200).send({ status:'success' })
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 const getListReservationByUserIdHandler = async(req, res) => {
@@ -64,5 +72,15 @@ const getAllReservationHandler = async(req, res) => {
   }
 }
 
+const bookingHomestayByReservationIdHandler = async(req, res) => {
+  try {
+    const save = await bookingHomestayByReservationIdController(req.body)
+
+    res.status(200).json({ status: 'success', data: save })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = { createReservationHandler, confirmationDateHandler, getListReservationByUserIdHandler, getReservationByIdHandler, callbacNotificationkHandler, callbackRedirectHandler, 
-getAllReservationHandler, };
+getAllReservationHandler, bookingHomestayByReservationIdHandler,  };

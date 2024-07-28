@@ -1,4 +1,4 @@
-const { listGeomWorshipController, listWorshipByRadiusController, listAllWorshipController } = require("../controllers/worshipController");
+const { listGeomWorshipController, listWorshipByRadiusController, listAllWorshipController, getWorshipByIdController, postWorshipController, deleteWorshipByIdController, putWorshipByIdController } = require("../controllers/worshipController");
 
 
 const listGeomWorshipHandler = async(req, res) => {
@@ -31,4 +31,46 @@ const listAllWorshipHandler = async(req, res) => {
   }
 }
 
-module.exports = { listGeomWorshipHandler, listWorshipByRadiusHandler, listAllWorshipHandler }
+const getWorshipByIdHandler = async(req, res) => {
+  try {
+    const data = await getWorshipByIdController(req.params)
+
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const postWorshipHandler = async(req, res) => {
+  try {
+    const input = await postWorshipController(req.body)
+    
+    return res.status(201).send({ status:'success test'})
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const putWorshipByIdHandler = async(req, res) => {
+  try {
+    const putData = await putWorshipByIdController(req.body)
+    
+    return res.status(200).send({ status:'success'})
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const deleteWorshipByIdHandler = async(req, res) => {
+  try {
+    const deleteRow = await deleteWorshipByIdController(req.params)
+    if (deleteRow == 1) return res.status(200).send({ status:'success' })
+    else return res.status(400).send({ status:'failed to add data',  })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { listGeomWorshipHandler, listWorshipByRadiusHandler, listAllWorshipHandler, getWorshipByIdHandler, postWorshipHandler
+  , deleteWorshipByIdHandler, putWorshipByIdHandler, 
+ }

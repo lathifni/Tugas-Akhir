@@ -5,8 +5,23 @@ const galleriesGtp = async() => {
   return rows
 }
 
-const gallerieFacility = async(params) => {
+const galleriesFacility = async(params) => {
   const [rows] = await promisePool.query(`SELECT url FROM gallery_facility WHERE facility_id='${params.id}'`)
+  return rows
+}
+
+const galleriesCulinary = async(params) => {
+  const [rows] = await promisePool.query(`SELECT url FROM gallery_culinary_place WHERE culinary_place_id='${params.id}'`)
+  return rows
+}
+
+const galleriesWorship = async(params) => {
+  const [rows] = await promisePool.query(`SELECT url FROM gallery_worship_place WHERE worship_place_id='${params.id}'`)
+  return rows
+}
+
+const galleriesSouvenir = async(params) => {
+  const [rows] = await promisePool.query(`SELECT url FROM gallery_souvenir_place WHERE souvenir_place_id='${params.id}'`)
   return rows
 }
 
@@ -16,8 +31,37 @@ const deleteGalleriesFacilityById = async(params) => {
 }
 
 const deleteGalleriesFacilityByUrl = async(params) => {
-  console.log('ini di delete by url', params);
   const [rows] = await promisePool.query(`DELETE FROM gallery_facility WHERE url='${params.url}'`)
+  return rows
+}
+
+const deleteGalleriesCulinaryByUrl = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_culinary_place WHERE url='${params.url}'`)
+  return rows
+}
+
+const deleteGalleriesCulinaryById = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_culinary_place WHERE culinary_place_id='${params.id}'`)
+  return rows
+}
+
+const deleteGalleriesWorshipById = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_worship_place WHERE worship_place_id='${params.id}'`)
+  return rows
+}
+
+const deleteGalleriesWorshipByUrl = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_worship_place WHERE url='${params.url}'`)
+  return rows
+}
+
+const deleteGalleriesSouvenirByUrl = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_souvenir_place WHERE url='${params.url}'`)
+  return rows
+}
+
+const deleteGalleriesSouvenirById = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_souvenir_place WHERE souvenir_place_id='${params.id}'`)
   return rows
 }
 
@@ -26,4 +70,6 @@ const deleteGalleriesFacilityByUrl = async(params) => {
 //   return rows
 // }
 
-module.exports = { galleriesGtp, gallerieFacility, deleteGalleriesFacilityById, deleteGalleriesFacilityByUrl, }
+module.exports = { galleriesGtp, galleriesFacility, galleriesCulinary, galleriesWorship, deleteGalleriesFacilityById, deleteGalleriesFacilityByUrl
+  ,deleteGalleriesCulinaryByUrl, deleteGalleriesCulinaryById, deleteGalleriesWorshipById, deleteGalleriesWorshipByUrl, deleteGalleriesSouvenirByUrl
+  , deleteGalleriesSouvenirById, galleriesSouvenir,  }

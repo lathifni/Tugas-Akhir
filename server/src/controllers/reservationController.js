@@ -14,8 +14,10 @@ const {
   allReservation,
   getReservationAndUserById,
   updateReservationConfirmation,
+  newTotalByIdReservation,
 } = require("../services/reservation");
 const crypto = require("crypto");
+const { bookingHomestay, bookedHomestay } = require('../services/homestay');
 
 const createReservationController = async (params) => {
   const latestIdReservation = await getLatestIdReservation();
@@ -189,7 +191,6 @@ const getReservationByIdController = async (params) => {
 const callbackNotificationController = async (params) => {
   const { order_id, status_code, transaction_status } = params;
   const SERVER_KEY = process.env.MIDTRANS_SERVER_KEY;
-  // console.log(id, 'ini idnya yah');
   const hash = crypto
     .createHash("sha512")
     .update(
@@ -202,16 +203,31 @@ const callbackNotificationController = async (params) => {
       params.transaction_status == "capture"
     ) {
       if (order_id.startsWith("DP")) {
+        const itemDetails = [];
         let id = order_id;
         id = id.replace(/^DP/, "R");
         const dataReservation = await getReservationAfterDeposit(id);
+        const listBookedHomestayByReservationId = await bookedHomestay({ id })
+        console.log(listBookedHomestayByReservationId, 'ini data homestay');
+        console.log(dataReservation);
+        const totalPriceHomestay = listBookedHomestayByReservationId.reduce((total, homestay) => total + homestay.price, 0);
+        console.log(totalPriceHomestay, 'ini total biaya homestay nya');
+
+        listBookedHomestayByReservationId.forEach(homestay => {
+          itemDetails.push({
+              id: homestay.id, // Ganti dengan ID unik dari homestay jika ada
+              name: `${homestay.name} ${homestay.nama_unit}-${homestay.unit_number}`, // Sesuaikan dengan format yang diinginkan
+              price: homestay.price, // Harga homestay
+              quantity: 1, // Satu unit homestay
+          });
+        });
 
         const authString = btoa(`${process.env.MIDTRANS_SERVER_KEY}:`);
         const parameterAskPayment = {
           transaction_details: {
             order_id: dataReservation.id,
             // gross_amount: params.total,
-            gross_amount: dataReservation.total_price - dataReservation.deposit,
+            gross_amount: dataReservation.total_price + totalPriceHomestay - dataReservation.deposit,
           },
           customer_details: {
             first_name: dataReservation.fullname,
@@ -223,19 +239,23 @@ const callbackNotificationController = async (params) => {
             unit: "days",
           },
           item_details: [
-            {
-              id: dataReservation.package_id,
-              name: dataReservation.name,
-              price: dataReservation.total_price,
-              quantity: 1,
-            },
-            {
-              name: "down payment",
-              price: -dataReservation.deposit,
-              quantity: 1,
-            },
           ],
         };
+        // Tambahkan semua detail homestay ke dalam parameter pembayaran
+        const firstItemDetails = [
+          {
+            id: dataReservation.package_id,
+            name: dataReservation.name,
+            price: dataReservation.total_price,
+            quantity: 1,
+          },
+          {
+            name: "Down Payment Applied",
+            price: -dataReservation.deposit,
+            quantity: 1,
+          },
+        ]
+        parameterAskPayment.item_details.push(...firstItemDetails, ...itemDetails);
         console.log(parameterAskPayment);
         const responseAskPayment = await fetch(
           `${process.env.MIDTRANS_APP_URL}`,
@@ -263,7 +283,7 @@ const callbackNotificationController = async (params) => {
         }
       }
       else {
-        console.log('ini di bagian reservation, id R depannya');
+        // console.log('ini di bagian reservation, id R depannya');
         const dataUpdate = {
           paymentDate: params.transaction_time,
           // token:token,
@@ -294,6 +314,23 @@ const getAllReservationController = async() => {
   return await allReservation()
 }
 
+const bookingHomestayByReservationIdController = async(params) => {
+  const { detailReservation, selectedHomestays, totalPriceHomestay } = params 
+  const { id, total_price } =  detailReservation
+  const check_in = moment(detailReservation.check_in).utc().format('YYYY-MM-DD')
+  
+  for (let i=1; i<detailReservation.max_day; i++) {
+    const date = moment(check_in).utc().add(i, 'days').format('YYYY-MM-DD');
+    for (const homestay of selectedHomestays) {
+      await bookingHomestay({ homestay, date, id })
+    }
+  }
+
+  const new_total_price = total_price + totalPriceHomestay
+  const new_deposit = 0.2 * new_total_price
+  return await newTotalByIdReservation({ id, new_deposit })
+}
+
 module.exports = {
   createReservationController,
   confirmationDateController,
@@ -302,4 +339,5 @@ module.exports = {
   callbackNotificationController,
   callbackRedirectController,
   getAllReservationController,
+  bookingHomestayByReservationIdController,
 };

@@ -21,13 +21,6 @@ interface dataRouteActivity {
 }
 
 interface MapPackageProps {
-    // userLocation: UserLocation | null;
-    // dataMapforType: dataListGeom[] | null
-    // radius?: number | null;
-    // objectAround: MapType | null;
-    // isManualLocation: boolean;
-    // setIsManualLocation: React.Dispatch<React.SetStateAction<boolean>>;
-    // setUserLocation: React.Dispatch<React.SetStateAction<UserLocation | null>>;
     distances: number[];
     instructions: string[];
     setDistances: React.Dispatch<React.SetStateAction<number[]>>;
@@ -122,7 +115,7 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
 
         if (gtpData && Array.isArray(gtpData)) {
             gtpData.forEach((item: { geom: string }) => {
-                const geom: string = JSON.parse(item.geom)
+                const geom = item.geom;
 
                 digitasiGtp.addGeoJson({
                     type: 'Feature',

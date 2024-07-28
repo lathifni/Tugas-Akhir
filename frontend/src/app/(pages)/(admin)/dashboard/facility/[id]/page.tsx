@@ -189,7 +189,7 @@ export default function FacilityIdPage({ params }: any) {
       <>
         <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
           <div className="w-full h-full px-2 py-3 mb-4 lg:p-4 lg:mb-0 lg:mr-3 lg:w-5/12 bg-white rounded-lg">
-            <h1 className="text-3xl text-center font-bold">Add Facility</h1>
+            <h1 className="text-3xl text-center font-bold">Edit Facility</h1>
             <div className="px-8">
               <label className="block mt-2 text-sm font-medium text-gray-900 ">Facility Name</label>
               <input type="text" name='name' onChange={handleChange} value={formDataInput.name}

@@ -54,7 +54,7 @@ const deleteFacilityByIdHandler = async(req, res) => {
   try {
     const deleteRow = await deleteFacilityByIdController(req.params)
     if (deleteRow == 1) return res.status(200).send({ status:'success' })
-    else return res.status(400).send({ status:'failed to add data',  })
+    else return res.status(400).send({ status:'failed to deleted data',  })
   } catch (error) {
     console.log(error);
   }

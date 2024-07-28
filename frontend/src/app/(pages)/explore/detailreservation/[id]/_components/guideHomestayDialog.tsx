@@ -10,7 +10,7 @@ export default function GuideHomestayDialog({ isOpen, setIsOpen }: Props) {
   return (
     <Dialog open={isOpen}>
       <div className="flex flex-col px-4 w-full">
-        <h1 className="text-3xl text-center font-bold">Reservation Guide</h1>
+        <h1 className="text-3xl text-center font-bold">Reservation Homestay Guide</h1>
         <hr className="border-t-1 border-gray-300" />
         <div className="w-full">
           <h2 className="text-xl text-center font-bold">Homestay Reservation</h2>

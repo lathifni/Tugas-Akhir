@@ -33,7 +33,7 @@ export default function TableReservationAdmin({ columns, data }: Props) {
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <th key={header.id} className='font-semibold select-none' onClick={header.column.getToggleSortingHandler()}>
+                <th key={header.id} className='font-semibold select-none w3-center' onClick={header.column.getToggleSortingHandler()}>
                   {header.isPlaceholder ? null
                     : flexRender(
                       header.column.columnDef.header,
@@ -49,11 +49,11 @@ export default function TableReservationAdmin({ columns, data }: Props) {
           {table.getRowModel().rows.map(row => (
             <tr key={row.id} className='px-6 py-3 hover:bg-gray-200'>
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className='px-1 py-2'>
+                <td key={cell.id} className='px-1 py-2 w3-center'>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
-              <td className='px-1 py-2'> {/* Tambahkan kolom Action di sini */}
+              <td className='px-1 py-2'>
                 <Link href={`/dashboard/reservation/${row.original.id}`}>
                   <button className='mx-2 border-2 border-blue-500 p-2 rounded-lg text-blue-500 hover:text-white hover:bg-blue-500 '>
                     <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />

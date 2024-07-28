@@ -21,8 +21,8 @@ const MapEdit = forwardRef(({ onCoordinateChange, onGeometryChange, geom }: MapE
   const newShapeRef = useRef<google.maps.Polygon | null>(null);
 
   const setupGeom = async () => {
-    if (geom) {
-      const geomJson = JSON.parse(geom);
+    if (geom) {      
+      const geomJson = geom;
 
       if (geomJson.type === 'MultiPolygon') {
         const { Polygon } = await loader.importLibrary("maps")
@@ -34,6 +34,8 @@ const MapEdit = forwardRef(({ onCoordinateChange, onGeometryChange, geom }: MapE
             lat: coord[1],
             lng: coord[0]
           }));
+          console.log(coordinates);
+          
 
           // Membuat poligon baru dari koordinat
           const newPolygon = new google.maps.Polygon({
@@ -213,8 +215,9 @@ const MapEdit = forwardRef(({ onCoordinateChange, onGeometryChange, geom }: MapE
   useEffect(() => {
     if (longitude !== null && latitude !== null && map) {
       let newPosition = new google.maps.LatLng(latitude, longitude);
+      
       map.panTo(newPosition);
-      map.setZoom(19);
+      map.setZoom(17);
     }
   }, [longitude, latitude])
 

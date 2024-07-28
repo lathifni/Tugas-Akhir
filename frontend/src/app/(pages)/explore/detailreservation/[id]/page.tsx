@@ -1,16 +1,19 @@
 'use client'
 
-import { fetchReservationById } from "@/app/(pages)/api/fetchers/reservation";
+import { bookingHomestayByIdReservation, fetchReservationById } from "@/app/(pages)/api/fetchers/reservation";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAdd, faCheck, faInfo } from "@fortawesome/free-solid-svg-icons";
+import { faAdd, faCheck, faInfo, faTrash } from "@fortawesome/free-solid-svg-icons";
 import AddUnitHomestayDialog from "./_components/addUnitHomestayDialog";
 import GuideHomestayDialog from "./_components/guideHomestayDialog";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import Reservation from "../../reservation/page";
 
 interface Activity {
   day: string;
@@ -22,15 +25,36 @@ interface ReservationData {
   activity: Activity[];
 }
 
+interface ListHomestay {
+  id: string;
+  capacity: number;
+  nama_unit: string;
+  unit_type: string;
+  price: number;
+  unit_number: string;
+  name: string;
+}
+
 export default function DetailReservationIdPage({ params }: any) {
   const [dataActivity, setDataActivity] = useState<{ day: string; activities: Activity[] }[]>([]);
   const [addHomestayDialog, setAddHomestayDialog] = useState(false)
   const [guideDialog, setGuideDialog] = useState(false)
+  const [listHomestay, setListHomestay] = useState<ListHomestay[]>([])
+  const [selectedHomestays, setSelectedHomestays] = useState<ListHomestay[]>([]);
+  const [totalPriceHomestay, setTotalPriceHomestay] = useState(0)
 
   const { data: dataReservationById, isLoading: loadingReservation } = useQuery({
     queryKey: ['reservationbyId', params.id],
     queryFn: () => fetchReservationById(params.id),
+    refetchOnWindowFocus: false
     // staleTime: 10000
+  })
+  
+  const { mutateAsync: bookingHomestayByIdReservationMutation } = useMutation({
+    mutationFn: bookingHomestayByIdReservation,
+    onSuccess: () => {
+      useQueryClient().invalidateQueries({ queryKey: ['bookingHomestayByIdReservation']})
+    }
   })
 
   const rupiah = (number: number) => {
@@ -64,11 +88,45 @@ export default function DetailReservationIdPage({ params }: any) {
     }
   }, [dataReservationById])
 
-  if (dataReservationById) {
+  const handleAddHomestay = (homestay: ListHomestay) => {
+    const isDuplicate = selectedHomestays.some(selected => selected.unit_number === homestay.unit_number);    
+    if (isDuplicate) return toast.warning('Already choosen')
+    
+    setSelectedHomestays([...selectedHomestays, homestay]);
+    setListHomestay(listHomestay.filter(h => h.unit_number !== homestay.unit_number));
+    const dayHomestay = dataReservationById.reservation.max_day-1
+    const newTotalPrice = (totalPriceHomestay + homestay.price) * dayHomestay ;
+    setTotalPriceHomestay(newTotalPrice);
+    setAddHomestayDialog(false);
+  };
+
+  const handleRemoveHomestay = (unitNumberToRemove: string) => {
+    const homestayToRemove = selectedHomestays.find(h => h.unit_number === unitNumberToRemove);
+    if (!homestayToRemove) return;
+
+    setSelectedHomestays(prev => prev.filter(h => h.unit_number !== unitNumberToRemove));
+    const dayHomestay = dataReservationById.reservation.max_day - 1;
+    const newTotalPrice = totalPriceHomestay - (homestayToRemove.price * dayHomestay);
+    setTotalPriceHomestay(newTotalPrice);
+  };
+
+  const handleBookingHomestay = async() => {
+    const data = {
+      detailReservation: dataReservationById.reservation,
+      selectedHomestays: selectedHomestays,
+      totalPriceHomestay: totalPriceHomestay
+    }
+    await bookingHomestayByIdReservationMutation(data)
+  }
+
+  if (dataReservationById) {    
     return (
       <div className="flex flex-col xl:flex-row m-1 sm:m-3 lg:m-5">
         <div className="w-full h-full px-1 xl:w-1/2">
-          <AddUnitHomestayDialog isOpen={addHomestayDialog} setIsOpen={setAddHomestayDialog}/>
+          <AddUnitHomestayDialog isOpen={addHomestayDialog} setIsOpen={setAddHomestayDialog} 
+          max_day={dataReservationById.reservation.max_day} checkin_date={dataReservationById.reservation.check_in}
+          onAddHomestay={handleAddHomestay}
+          />
           <GuideHomestayDialog isOpen={guideDialog} setIsOpen={setGuideDialog}/>
           {dataReservationById && (
             <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
@@ -211,50 +269,61 @@ export default function DetailReservationIdPage({ params }: any) {
               return `${checkOutDate.format('dddd, Do MMMM  YYYY')}, ${checkOutDate.format('HH:mm')}`;
             })()} WIB
             </p>
-            <table className="w-full">
+            <table className="w3-table-all w3-hoverable w3-card-2">
               <thead>
                 <tr>
-                  <th>No</th>
-                  <th>Date</th>
-                  <th>Homestay Name</th>
-                  <th>Capacity</th>
-                  <th>Price</th>
-                  <th>Actions</th>
+                  <th className="w3-center">Homestay</th>
+                  <th className="w3-center">Unit</th>
+                  <th className="w3-center">Capacity</th>
+                  <th className="w3-center">Price</th>
+                  <th className="w3-center">Action</th>
                 </tr>
               </thead>
               <tbody >
-                <tr >
-                  <th className="font-normal">1</th>
-                  <th>Date</th>
-                  <th>Homestay Name</th>
-                  <th>Capacity</th>
-                  <th>Price</th>
-                  <th>Actions</th>
-                </tr>
-                <tr>
-                  <th>1</th>
-                  <th>Date</th>
-                  <th>Homestay Name</th>
-                  <th>Capacity</th>
-                  <th>Price</th>
-                  <th>Actions</th>
-                </tr>
+              {selectedHomestays.map(homestay => (
+              <tr key={homestay.unit_number} className="justify-center">
+                <td className="w3-center">{homestay.name}</td>
+                <td className="w3-center">{homestay.nama_unit}-{homestay.unit_number}</td>
+                <td className="w3-center">{homestay.capacity}</td>
+                <td className="w3-center">{rupiah(homestay.price)}</td>
+                <td className="text-red-500 w3-center">
+                  <button className="hover:text-red-400" onClick={() => handleRemoveHomestay(homestay.unit_number)}>
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
+                </td>
+              </tr>
+            ))}
                 <tr>
                   <th colSpan={2} className="text-left">Total Days</th>
-                  <th colSpan={3} className="text-left">: {dataReservationById.reservation.max_day} Days</th>
+                  <th colSpan={3} className="text-left">: {dataReservationById.reservation.max_day-1} Days</th>
                 </tr>
                 <tr>
                   <th colSpan={2} className="text-left">Total Price Homestay</th>
-                  <th colSpan={3} className="text-left">: Rp500.000</th>
+                  <th colSpan={3} className="text-left">: {rupiah(totalPriceHomestay)}</th>
                 </tr>
               </tbody>
             </table>
             <div className="flex justify-end gap-4 mt-4">
               <button type="button" className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-700" >Continue Without Homestay</button>
-              <button type="button" className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700" ><FontAwesomeIcon icon={faCheck}/> Save Booking Homestay</button>
+              <button type="button" className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700" onClick={handleBookingHomestay}>
+                <FontAwesomeIcon icon={faCheck}/> Save Booking Homestay
+              </button>
             </div>
           </div>
         </div>
+        <ToastContainer
+          position="top-center"
+          autoClose={3500}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
       </div>
     )
   }

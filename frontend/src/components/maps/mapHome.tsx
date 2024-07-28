@@ -37,20 +37,24 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
 
   const { data: kotaKabData, isLoading: loadingKotaKab } = useQuery({
     queryKey: ['kotaKab'],
-    queryFn: fetchListGeomKotaKab
+    queryFn: fetchListGeomKotaKab,
+    refetchOnWindowFocus: false
   })
   const { data: kecData, isLoading: loadingKec } = useQuery({
     queryKey: ['kec'],
-    queryFn: fetchListGeomKec
+    queryFn: fetchListGeomKec,
+    refetchOnWindowFocus: false
   })
   const { data: villageData, isLoading: loadingVillage } = useQuery({
     queryKey: ['village'],
-    queryFn: fetchListVillage
+    queryFn: fetchListVillage,
+    refetchOnWindowFocus: false
   })
   const { data: gtpData, isLoading: loadingGtp } = useQuery({
     queryKey: ['geomGtp'],
-    queryFn: fetchGeomGtp
-  })
+    queryFn: fetchGeomGtp,
+    refetchOnWindowFocus: false
+  })  
 
   const initMap = async (kotaKabData: any[], kecData: any[], villageData: any[], gtpData: any[]) => {
     const { Map } = await loader.importLibrary('maps')
@@ -108,7 +112,6 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
     const negaraGeoJsons = ['N01', 'N02']
     const provinsiGeojsons = ['P01', 'P02', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09']
 
-
     for (const negaraGeoJson of negaraGeoJsons) {
       fetch(`maps/${negaraGeoJson}.geojson`)
         .then(response => response.json())
@@ -142,10 +145,11 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
         })
         .catch(error => console.error(error))
     }
-
+    
     if (kotaKabData && Array.isArray(kotaKabData)) {
       kotaKabData.forEach((item: { id: string, name: string, geom: string }) => {
-        const geom: string = JSON.parse(item.geom)
+        const geom = item.geom;
+        
         const { id, name } = item
 
         digitasiKotaKabupaten.addGeoJson({
@@ -164,10 +168,10 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
         digitasiKotaKabupaten.setMap(map)
       });
     }
-
+    
     if (kecData && Array.isArray(kecData)) {
       kecData.forEach((item: { id: string, name: string, geom: string }) => {
-        const geom: string = JSON.parse(item.geom)
+        const geom = item.geom;
         const { id, name } = item
 
         digitasiKecamatan.addGeoJson({
@@ -188,7 +192,7 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
 
     if (villageData && Array.isArray(villageData)) {
       villageData.forEach((item: { id: string, name: string, geom: string }) => {
-        const geom: string = JSON.parse(item.geom)
+        const geom = item.geom;
         const { id, name } = item
 
         digitasiVillage.addGeoJson({
@@ -209,7 +213,7 @@ export default function MapHome({ userLocation, goToObject, setGoToObject, showL
 
     if (gtpData && Array.isArray(gtpData)) {
       gtpData.forEach((item: { geom: string }) => {
-        const geom: string = JSON.parse(item.geom)
+        const geom = item.geom;
 
         digitasiGtp.addGeoJson({
           type: 'Feature',

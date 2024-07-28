@@ -32,7 +32,7 @@ export default function Reservation() {
       <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
         <div className="w-full h-full px-1 py-5 mb-3 bg-white rounded-lg">
           <h1 className='text-xl font-bold text-center mb-5'>List Reservation</h1>
-          <table className="w-full">
+          <table className="w3-table-all w3-hoverable w3-card-2">
             <thead >
               <tr className="border-b border-gray-300 font-semibold text-lg">
                 <td className="py-3">#</td>

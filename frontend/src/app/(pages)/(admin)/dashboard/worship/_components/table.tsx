@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, SortingState } from '@tanstack/react-table'
+import Link from 'next/link';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   columns: any[];
   data: any[];
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onRowDelete: (rowData: any) => void;
 }
 
-export default function TableWorshipAdmin({ columns, data }: Props) {
+export default function TableWorshipAdmin({ columns, data, isOpen, setIsOpen, onRowDelete }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [filtering, setFiltering] = useState('')
   const table = useReactTable({
@@ -23,9 +29,15 @@ export default function TableWorshipAdmin({ columns, data }: Props) {
     onGlobalFilterChange: setFiltering
   })
 
+  const handlingDeleteButton = (data: any) => {
+    setIsOpen(!isOpen)
+    // setSelectedData(data);
+    onRowDelete(data);
+  }
+
   return (
     <div>
-      <table className='w3-table w3-striped w3-bordered w-auto mt-8 '>
+      <table className='w3-table-all w3-hoverable mt-2 w-auto'>
         <thead className='text-lg'>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -50,9 +62,15 @@ export default function TableWorshipAdmin({ columns, data }: Props) {
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
-              <td className='px-1 py-2'> {/* Tambahkan kolom Action di sini */}
-                <button >Edit</button> {/* Tombol untuk edit */}
-                <button >Delete</button> {/* Tombol untuk hapus */}
+              <td className='px-1 py-2'>
+                <Link href={`/dashboard/worship/${row.original.id}`}>
+                  <button className='mx-2 border-2 border-blue-500 p-2 rounded-lg text-blue-500 hover:text-white hover:bg-blue-500 '>
+                    <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />
+                  </button>
+                </Link>
+                <button className='mx-2 border-2 border-red-500 p-2 rounded-lg text-red-500 hover:text-white hover:bg-red-500' onClick={() => handlingDeleteButton(row.original)}>
+                  <FontAwesomeIcon icon={faTrash} style={{ fontSize: '1.3em' }} />
+                </button>
               </td>
             </tr>
           ))}

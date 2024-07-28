@@ -22,4 +22,62 @@ const listAllCulinary = async() => {
   return rows
 }
 
-module.exports = { listGeomCulinary, listCulinaryByRadius, listAllCulinary }
+const getCulinaryById = async(params) => {
+  const [rows] = await promisePool.query(
+    `SELECT id,name,address,contact_person,open,close,capacity,description,status,ST_AsGeoJSON(geom) AS geom FROM culinary_place WHERE id='${params.id}'`)
+  return rows[0]
+}
+
+const getLatestIdCulinary = async() => {
+  const [rows] = await promisePool.query(`SELECT MAX(CAST(SUBSTRING(id, 3) AS UNSIGNED)) AS lastIdNumber FROM culinary_place`)
+  return rows[0]
+}
+
+const addCulinary = async(params) => {
+  // const sql = "INSERT INTO facility (id, name, type_id, geom, price, category) VALUES (?, ?, ?, ST_GeomFromText(?), ?, ?)";
+  // const values = [params.id, params.name, params.type, params.geom, params.price, params.category];
+  // const [rows] = await promisePool.query(sql, values);
+  // return rows.affectedRows;
+  const [rows] = await promisePool.query(
+    `INSERT INTO culinary_place (id, name, address, contact_person, open, close, capacity, description, status, geom) 
+    VALUES ('${params.id}', '${params.name}','${params.address}','${params.contact_person}','${params.open}'
+    ,'${params.close}','${params.capacity}','${params.description}','${params.status}',ST_GeomFromText(${params.geom}))`
+  );
+  return rows.affectedRows;
+}
+
+const getLatestIdGalleryCulinary = async() => {
+  const [rows] = await promisePool.query(`SELECT MAX(CAST(SUBSTRING(id, 3) AS UNSIGNED)) AS lastIdNumberGallery FROM gallery_culinary_place`)
+  return rows[0]
+}
+
+const addCulinaryGallery = async(params) => {
+  const sql = "INSERT INTO gallery_culinary_place (id, culinary_place_id, url) VALUES (?, ?, ?)";
+  const values = [params.id, params.culinary_place_id, params.url];
+  const [rows] = await promisePool.query(sql, values);
+  return rows.affectedRows;
+}
+
+const putCulinaryById = async(params) => {
+  if (params.geom == null) {
+    const [rows] = await promisePool.query(
+      `UPDATE culinary_place SET name='${params.name}', address='${params.address}', description='${params.description}', contact_person='${params. contact_person}',
+      open='${params.open}', close='${params.close}', capacity='${params.capacity}', status='${params.status}' WHERE id='${params.id}'`
+    );
+    return rows.affectedRows;
+  }
+  const [rows] = await promisePool.query(
+    `UPDATE culinary_place SET name='${params.name}', address='${params.address}', geom=ST_GeomFromText(${params.geom}), description='${params.description}', 
+    contact_person='${params. contact_person}', open='${params.open}', close='${params.close}', capacity='${params.capacity}', status='${params.status}' WHERE id='${params.id}'`
+  );
+  return rows.affectedRows;
+}
+
+const deleteCulinaryById = async(params) => {
+  const [rows] = await promisePool.query(`Delete FROM culinary_place WHERE id ='${params.id}'`)
+  return rows.affectedRows
+}
+
+module.exports = { listGeomCulinary, listCulinaryByRadius, listAllCulinary, getCulinaryById, getLatestIdCulinary, addCulinary
+  ,getLatestIdGalleryCulinary, addCulinaryGallery, putCulinaryById, deleteCulinaryById, 
+ }

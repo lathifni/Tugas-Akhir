@@ -14,3 +14,8 @@ export const fetchAllCulinary = async() => {
   const res = await useAxiosAuth.get('/culinary/all')
   return res.data.data
 }
+
+export const fetchCulinaryById = async(params: any) => {
+  const res = await useAxiosAuth.get(`/culinary/${params}`)
+  return res.data.data
+}

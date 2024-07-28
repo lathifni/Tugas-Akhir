@@ -10,6 +10,7 @@ import moment from "moment";
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
+import { fetchBookedHomestay } from "@/app/(pages)/api/fetchers/homestay";
 
 interface Activity {
   day: string;
@@ -24,6 +25,7 @@ interface ReservationData {
 export default function ReservationId({ params }: any) {
   const [dataActivity, setDataActivity] = useState<{ day: string; activities: Activity[] }[]>([]);
   const [token, setToken] = useState('')
+  const [totalPriceHomestay, setTotalPriceHomestay] = useState(0)
   const steps = ['Waiting Confirmation Date', 'Deposit', 'Full Payment', 'Enjoy Trip'];
   const getStatusStep = () => {
     switch (dataReservationById.reservation.status_id) {
@@ -45,6 +47,11 @@ export default function ReservationId({ params }: any) {
     queryFn: () => fetchReservationById(params.id),
     // staleTime: 10000
   })
+  const { data: dataBookedHomestay, isLoading: loadingBookedHomestay } = useQuery({
+    queryKey: ['bookedHomestay', params.id],
+    queryFn: () => fetchBookedHomestay(params.id),
+    // staleTime: 10000
+  })  
 
   const rupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -82,31 +89,32 @@ export default function ReservationId({ params }: any) {
 
   useEffect(() => {
     try {
-      const groupedData: { [key: string]: Activity[] } = {};
-      dataReservationById.activity.forEach((activity: Activity) => {
-        if (!groupedData[activity.day]) {
-          groupedData[activity.day] = [];
-        }
-        groupedData[activity.day].push(activity);
-      });
+      if (dataReservationById  && dataBookedHomestay) {
+        const groupedData: { [key: string]: Activity[] } = {};
+        dataReservationById.activity.forEach((activity: Activity) => {
+          if (!groupedData[activity.day]) {
+            groupedData[activity.day] = [];
+          }
+          groupedData[activity.day].push(activity);
+        });
+  
+        const accordionContent = Object.entries(groupedData).map(([day, activities]: [string, Activity[]]) => ({
+          day,
+          activities: activities.sort((a, b) => parseInt(a.activity) - parseInt(b.activity))
+        }));
 
-      const accordionContent = Object.entries(groupedData).map(([day, activities]: [string, Activity[]]) => ({
-        day,
-        activities: activities.sort((a, b) => parseInt(a.activity) - parseInt(b.activity))
-      }));
-
-      setDataActivity(accordionContent);
+        setTotalPriceHomestay(dataBookedHomestay.reduce((total:number, homestay:any) => total + homestay.price, 0))        
+        setDataActivity(accordionContent);
+      }
     } catch (error) {
       console.log(error);
     }
-  }, [dataReservationById])
+  }, [dataReservationById, dataBookedHomestay])
 
   useEffect(() => {
     const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
     let scriptTag = document.createElement('script');
     scriptTag.src = midtransScriptUrl;
-    const myMidtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
-    console.log(myMidtransClientKey);
 
     scriptTag.setAttribute('data-client-key', process.env.MIDTRANS_CLIENT_KEY!);
     document.body.appendChild(scriptTag);
@@ -118,7 +126,6 @@ export default function ReservationId({ params }: any) {
 
   if (dataReservationById) {
     const activeStep = getStatusStep();
-    console.log(dataReservationById.reservation.token_midtrans);
     return (
       <div className="flex flex-col xl:flex-row m-1 sm:m-3 lg:m-5">
         <div className="w-full h-full px-1 xl:w-1/2">
@@ -313,6 +320,34 @@ export default function ReservationId({ params }: any) {
         <div className="w-full h-full px-1 xl:w-1/2">
           <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
             <h1 className="text-center text-xl font-bold">Reservation Homestay</h1>
+            <table className="w3-table-all w3-hoverable w3-card-2">
+              <thead>
+                <tr>
+                  <th className="w3-center">Homestay</th>
+                  <th className="w3-center">Unit</th>
+                  <th className="w3-center">Capacity</th>
+                  <th className="w3-center">Price</th>
+                </tr>
+              </thead>
+              <tbody >
+              {dataBookedHomestay.map((homestay: { name:string, nama_unit:string, unit_number:string, capacity:number, price:number}) => (
+              <tr key={homestay.unit_number} className="justify-center">
+                <td className="w3-center">{homestay.name}</td>
+                <td className="w3-center">{homestay.nama_unit}-{homestay.unit_number}</td>
+                <td className="w3-center">{homestay.capacity}</td>
+                <td className="w3-center">{rupiah(homestay.price)}</td>
+              </tr>
+            ))}
+                <tr>
+                  <th colSpan={2} className="text-left">Total Days</th>
+                  <th colSpan={3} className="text-left">: {dataReservationById.reservation.max_day-1} Days</th>
+                </tr>
+                <tr>
+                  <th colSpan={2} className="text-left">Total Price Homestay</th>
+                  <th colSpan={3} className="text-left">: {rupiah(totalPriceHomestay)}</th>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

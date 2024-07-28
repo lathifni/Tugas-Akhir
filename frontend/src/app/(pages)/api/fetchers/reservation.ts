@@ -29,3 +29,9 @@ export const confirmationDate = async(id:string) => {
   const res = await useAxiosAuth.get(`/reservation/confirmationDate/${id}`)
   return res.data.data
 }
+
+export const bookingHomestayByIdReservation = async(data: any) => {
+  const res = await useAxiosAuth.post('/reservation/booking-homestay', data)
+  console.log(res.data.data);
+  
+}

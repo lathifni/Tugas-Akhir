@@ -96,6 +96,12 @@ const updateReservationConfirmation = async(params) => {
   return rows[0];
 }
 
+const newTotalByIdReservation = async(params) => {
+  console.log(params);
+  const [rows] = await promisePool.query(`UPDATE reservation SET deposit='${params.new_deposit}' WHERE id ='${params.id}'`);
+  return rows[0];
+}
+
 module.exports = { getListReservationByUserId, getReservationById, getServiceByReservationId, getActivityByReservationId, getLatestIdReservation,
 createReservation, callbackRedirect, updateReservationInformation, updateAfterFullPaymentReservationInformation, getReservationAfterDeposit, allReservation, 
-getReservationAndUserById, updateReservationConfirmation, }
+getReservationAndUserById, updateReservationConfirmation, newTotalByIdReservation, }

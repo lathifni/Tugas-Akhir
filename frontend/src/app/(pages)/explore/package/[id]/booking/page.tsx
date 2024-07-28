@@ -63,7 +63,7 @@ export default function BookingIdPage({ params }: any) {
   }
 
   const saveReservationButtonHandler = async () => {
-    if (!readCheck) toast.warn("Please read the guide and fill the checkbox");
+    if (!readCheck) return toast.warn("Please read the guide and fill the checkbox");
     try {
       const currentDate = new Date(); // Mendapatkan tanggal saat ini
 
