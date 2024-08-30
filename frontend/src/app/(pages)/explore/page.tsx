@@ -37,12 +37,13 @@ export default function Explore() {
   ] = queryMutiple()
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex(prevIndex => (prevIndex + 1) % dataGalleries.length);
-    }, 3000);
-
+    if (dataGalleries) {
+      const interval = setInterval(() => {
+        setCurrentIndex(prevIndex => (prevIndex + 1) % dataGalleries.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
     // Membersihkan interval saat komponen di-unmount
-    return () => clearInterval(interval);
   }, [dataGalleries]);
 
   const prevSlide = () => {

@@ -53,21 +53,34 @@ export default function ChatPage() {
     }
   }, [sendMessage])
 
+  console.log(chats);
+
+
   return (
     <div className="flex m-2 gap-2">
       {/* Daftar chat */}
       <div className="w-full sm:w-5/12 rounded-lg bg-white overflow-y-scroll h-[92vh]">
         <h1 className="text-center text-xl font-semibold">List Chat</h1>
-        {chats.filter((chat: { user_id: number }) => chat.user_id !== currentUser)
-          .map((chat: { id: number, user_id: string, fullname: string, user_image: string }) => (
-            <div key={chat.id} role="button" onClick={() => setCurrentChat(chat)}>
-              <Conversation
-                data={chat}
-                currentUser={currentUser ?? 0}
-              />
-            </div>
-          ))
-        }
+        {chats.length === 0 ? (
+          <div className="flex justify-center items-center h-full">
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+              // onClick={handleAddNewChat} // Tambahkan handler untuk aksi button
+            >
+              Add New Chat
+            </button>
+          </div>
+        ) : (
+          chats.filter((chat: { user_id: number }) => chat.user_id !== currentUser)
+            .map((chat: { id: number, user_id: string, fullname: string, user_image: string }) => (
+              <div key={chat.id} role="button" onClick={() => setCurrentChat(chat)}>
+                <Conversation
+                  data={chat}
+                  currentUser={currentUser ?? 0}
+                />
+              </div>
+            ))
+        )}
       </div>
 
       {/* Isi chat */}
