@@ -53,6 +53,7 @@ const listAllSouvenirHandler = async(req, res) => {
 const getSouvenirByIdHandler = async(req, res) => {
   try {
     const data = await getSouvenirByIdController(req.params)
+    data.icon = 'souvenir.png'
 
     return res.status(200).send({ status:'success', data:data })
   } catch (error) {

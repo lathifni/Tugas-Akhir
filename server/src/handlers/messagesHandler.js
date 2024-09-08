@@ -1,8 +1,10 @@
-const { getMessagesController, addMessageController } = require("../controllers/messagesController");
+const { getMessagesController, addMessageController, updateStatusReadController } = require("../controllers/messagesController");
 
 const addMessageHandler = async(req, res) => {
   try {
     const message = await addMessageController(req.body)
+    console.log(message);
+    
 
     res.status(200).json({ status: 'success', data: message })
   } catch (error) {
@@ -20,5 +22,14 @@ const getMessageHandler = async(req, res) => {
   }
 }
 
+const updateStatusReadHandler = async(req, res) => {
+  try {
+    await updateStatusReadController(req.params)
 
-module.exports = { addMessageHandler, getMessageHandler, }
+    res.status(200).json({ status: 'success' })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { addMessageHandler, getMessageHandler, updateStatusReadHandler}

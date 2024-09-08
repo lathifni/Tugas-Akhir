@@ -58,4 +58,12 @@ const bookedHomestay = async(params) => {
 // LEFT JOIN detail_reservation AS DR ON DR.homestay_id=UH.homestay_id AND DR.unit_type=UH.unit_type AND DR.unit_number=UH.unit_number AND DR.date BETWEEN '2023-11-12' AND '2023-11-12'
 // WHERE DR.date IS NULL;
 
-module.exports = { listGeomHomestay, listHomestayByRadius, listAllHomestay, availableHomestay, bookingHomestay, bookedHomestay }
+const getHomestayById = async(params) => {
+  const [rows] = await promisePool.query(
+    `SELECT id,name,address,contact_person,description,ST_AsGeoJSON(geom) AS geom,
+    ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng FROM homestay WHERE id='${params.id}'`)
+  return rows[0]
+} 
+
+module.exports = { listGeomHomestay, listHomestayByRadius, listAllHomestay, availableHomestay, bookingHomestay
+  , bookedHomestay, getHomestayById,  }

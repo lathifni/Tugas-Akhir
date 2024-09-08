@@ -105,7 +105,7 @@ export const MapContentWorshipPlaces: React.FC<MapContentWorshipPlacesProps> = (
 }
 
 export const MapContentSouvenirPlaces: React.FC<MapContentSouvenirPlacesProps> = ({ id, name, address, contact_person, lat, lng, onRouteClick }) => {
-  const addressHref = `/explore/worship/${id}`
+  const addressHref = `/explore/souvenir/${id}`
   const routeClickHandler = () => {
     onRouteClick(lat, lng)
   }

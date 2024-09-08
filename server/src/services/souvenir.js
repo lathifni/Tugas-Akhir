@@ -42,7 +42,8 @@ const addSouvenir = async(params) => {
 
 const getSouvenirById = async(params) => {
   const [rows] = await promisePool.query(
-    `SELECT id,name,address,contact_person,open,close,price,description,status,ST_AsGeoJSON(geom) AS geom FROM souvenir_place WHERE id='${params.id}'`)
+    `SELECT id,name,address,contact_person,open,close,price,description,status,ST_AsGeoJSON(geom) AS geom,
+    ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng FROM souvenir_place WHERE id='${params.id}'`)
   return rows[0]
 }
 

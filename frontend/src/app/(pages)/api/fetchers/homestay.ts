@@ -19,3 +19,8 @@ export const fetchBookedHomestay = async(id: string) => {
   const res = await useAxiosAuth.get(`/homestay/booked-homestay/${id}`)
   return res.data.data
 }
+
+export const fetchHomestayById = async(params: any) => {
+  const res = await useAxiosAuth.get(`/homestay/${params}`)
+  return res.data.data
+}

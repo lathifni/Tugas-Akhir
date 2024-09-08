@@ -1,10 +1,9 @@
 const promisePool = require('../../config/database')
 
 const getAllCostumer = async () => {
-  // return [rows] = await promisePool.query(`SELECT U.* FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
-  // JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE AGU.group_id='2'`)
-  const sql = `SELECT U.* FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
-  JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE AGU.group_id='2'`
+  // const sql = `SELECT U.* FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
+  // JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE AGU.group_id='2'`
+  const sql = `SELECT U.* FROM users U JOIN role R ON R.id=U.role_id WHERE R.id=2;`
   const [rows] = await promisePool.query(sql)
   return rows
 }

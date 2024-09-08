@@ -1,6 +1,6 @@
 const moment = require('moment');
 
-const { listGeomHomestay, listHomestayByRadius, listAllHomestay, availableHomestay, bookedHomestay } = require("../services/homestay.js")
+const { listGeomHomestay, listHomestayByRadius, listAllHomestay, availableHomestay, bookedHomestay, getHomestayById } = require("../services/homestay.js")
 
 const listGeomHomestayController = async() => {
   return await listGeomHomestay()
@@ -26,6 +26,10 @@ const bookedHomestayController = async(params) => {
   return await bookedHomestay(params)
 }
 
+const getHomestayByIdController = async(params) => {
+  return await getHomestayById(params)
+}
+
 module.exports = { listGeomHomestayController, listHomestayByRadiusController, listAllHomestayController, availableHomestayController
-  ,bookedHomestayController, 
+  ,bookedHomestayController, getHomestayByIdController, 
  }

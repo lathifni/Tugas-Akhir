@@ -34,6 +34,7 @@ const listAllWorshipHandler = async(req, res) => {
 const getWorshipByIdHandler = async(req, res) => {
   try {
     const data = await getWorshipByIdController(req.params)
+    data.icon = 'worship.png'
 
     return res.status(200).send({ status:'success', data:data })
   } catch (error) {

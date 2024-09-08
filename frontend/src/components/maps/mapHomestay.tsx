@@ -108,11 +108,12 @@ export default function MapHomestay({ selectedHomestayId, userLocation, setUserL
     map = new Map(mapRef.current as HTMLDivElement, mapOptions)
     const digitasiVillage = new google.maps.Data()
     const digitasiHomestay = new google.maps.Data()
-
+    
     if (dataGeomGtp && Array.isArray(dataGeomGtp)) {
       dataGeomGtp.forEach((item: { id: string, name: string, geom: string }) => {
         const { id, name } = item
-        const geom: string = JSON.parse(item.geom)
+        // const geom: string = JSON.parse(item.geom)
+        const geom: string = item.geom
 
         digitasiVillage.addGeoJson({
           type: 'Feature',
@@ -134,7 +135,8 @@ export default function MapHomestay({ selectedHomestayId, userLocation, setUserL
       dataListGeomHomestay.forEach((item: { id: string, name: string, address: string, contact_person: string, lat: number, lng: number, geom: string }) => {
         const marker = new google.maps.Marker()
         const { id, name, address, contact_person, lat, lng } = item
-        const geom: string = JSON.parse(item.geom)
+        // const geom: string = JSON.parse(item.geom)
+        const geom: string = item.geom
         const markerOptions = {
           map: map,
           position: { lat, lng },
@@ -298,7 +300,6 @@ export default function MapHomestay({ selectedHomestayId, userLocation, setUserL
   // }, [userLocation])
 
   useEffect(() => {
-    // console.log(isManualLocation, 'di isManualLocation');
     let clickListener: google.maps.MapsEventListener | null = null;
     const handleMapClick = (mapsMouseEvent: any) => {
       const newLocation = {
@@ -306,8 +307,6 @@ export default function MapHomestay({ selectedHomestayId, userLocation, setUserL
         lng: mapsMouseEvent.latLng.lng()
       };
       setUserLocation(newLocation);
-      console.log(newLocation);
-      console.log(userLocation);
 
       if (clickListener) {
         clickListener.remove();

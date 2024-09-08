@@ -34,7 +34,7 @@ export default function CulinaryAdmin () {
     return (
       <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
         <div className="w-full h-full px-1 py-5 mb-3 bg-white rounded-lg">
-          <h1 className="text-2xl font-semibold text-center">Manage Culinary</h1>
+        <h1 className="text-2xl font-semibold text-center">Manage Culinary</h1>
           <div className="flex justify-end">
             <Link href={'/dashboard/culinary/add'}>
               <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 mr-8">

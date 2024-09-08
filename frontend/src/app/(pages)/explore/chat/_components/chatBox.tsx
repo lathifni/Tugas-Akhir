@@ -1,113 +1,188 @@
 'use client'
 
 import { Avatar } from "@mui/material";
-import { fetchGetMessages, fetchSendMessage } from "@/app/(pages)/api/fetchers/messages";
+import { fetchGetMessages, fetchSendMessage, fetchStatusMessage } from "@/app/(pages)/api/fetchers/messages";
 import { useEffect, useRef, useState } from "react";
 import { format } from 'timeago.js'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import moment from "moment";
+import { faArrowLeft, faCheck, faCheckDouble, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { io } from "socket.io-client";
 
 interface ChatBoxProps {
-  data: { fullname: string; user_image: string, id: number, user_id: string }
+  data: { chat_room_id: string, fullname: string; user_image: string, user_id: string }
   currentUser: number;
-  setSendMessage: any;
-  receivedMessage: any;
 }
 
 interface Message {
-  id: string;
-  chat_id: number;
+  chat_room_id: string;
   sender_id: number;
   text: string;
   created_at: string;
+  is_read: number;
 }
 
-export default function ChatBox({ data, currentUser, setSendMessage, receivedMessage }: ChatBoxProps) {
+export default function ChatBox({ data, currentUser  }: ChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>([])
+  const [socket, setSocket] = useState<any>(undefined)
+  const [receivedMessage, setReceivedMessage] = useState(null);
   const [inputMessage, setInputMessage] = useState("");
-  const scroll = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const socket = io('ws://localhost:3002')
+    socket.emit('join-room', data.chat_room_id);
+    setSocket(socket)
+
     const fetchMessage = async () => {
       try {
-        const response = await fetchGetMessages(data.id)
+        const response = await fetchGetMessages(data.chat_room_id)
         setMessages(response)
+        updateStatusMessage(data.chat_room_id)
       } catch (error) {
         console.log(error);
       }
     }
-    if (data.id !== 0) fetchMessage()
+    if (data.chat_room_id !== '0') fetchMessage()
+
+    return () => {
+      socket.disconnect(); // Pastikan socket terputus untuk menghindari kebocoran
+    };
   }, [data])
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit('read-all-messages', data.chat_room_id)
+
+      socket.on('receive-message', (message:any) => {
+        setReceivedMessage(message);
+      });
+
+      socket.on('is-read-notification', (updateMessage: any) => {
+        setMessages(prevMessages =>
+          prevMessages.map(message =>
+            message.created_at === updateMessage.created_at
+              ? { ...message, is_read: 1 }
+              : message
+          )
+        );
+      });
+
+      socket.on('read-all-messages-notification', () => {
+        setMessages(prevMessages =>
+        prevMessages.map(message =>
+          message.is_read === 0 // Hanya update pesan yang belum dibaca
+            ? { ...message, is_read: 1 }
+            : message
+          )
+        );
+      })
+  
+      return () => {
+        socket.off('receive-message'); // Bersihkan listener untuk menghindari duplikasi
+        socket.off('is-read-notification');
+        socket.off('read-all-messages-notification');
+      };
+    }
+  }, [socket]);
 
   const handleMessageSend = () => {
     // Validasi pesan tidak kosong sebelum mengirim
     if (inputMessage.trim() !== "") {
-      // Kirim pesan
       const sendMessageToServer = async () => {
-        const receiverId = data.user_id
         const message = {
-          chat_id: data.id,
-          sender_id: currentUser,
+          chat_room_id: data.chat_room_id,
           text: inputMessage,
-          created_at: moment().format('YYYY-MM-DD HH:mm:ss')
+          sender_id: currentUser,
+          is_read: 0, 
+          receiver_id: data.user_id,
         }
         const messageToServer = await fetchSendMessage(message)
         setMessages([...messages, messageToServer])
-        setSendMessage({ ...messageToServer, receiverId });
+        socket.emit('send-message', messageToServer);
       }
       sendMessageToServer();
       setInputMessage("");
     }
   };
 
+  const updateStatusMessage = async(params: any) => {    
+    await fetchStatusMessage(params)
+  }
+
   useEffect(() => {
-    if (receivedMessage !== null && receivedMessage.chat_id === data.id) {
+    if (receivedMessage !== null && messages) {
       setMessages([...messages, receivedMessage])
-      console.log(receivedMessage, 'ini received message di chatbox nya');
+      socket.emit('is-read', receivedMessage)
+      updateStatusMessage(data.chat_room_id)
     }
   }, [receivedMessage])
-
+  
   useEffect(() => {
-    if (scroll.current) {
-      scroll.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages])
+  }, [messages]); 
 
   return (
-    <div>
-      {data.id !== 0 ? (
-        <div className="">
-          <div className="sticky top-0 flex gap-2 items-center rounded-lg p-2 bg-slate-100">
-            <Avatar alt='test' src={data.user_image} sx={{ width: 50, height: 50 }} />
-            <p className="text-xl font-semibold ">{data.fullname}</p>
-          </div>
-          <div className="flex flex-col" ref={scroll}>
-            {messages.map((message: { sender_id: number, text: string, created_at: string, id: string }) => (
-              <div key={message.id} className={`flex ${message.sender_id === currentUser ? 'justify-end ml-[40%]' : 'justify-start mr-[40%]'} bg-blue-600 text-white m-2 p-4 rounded-lg `} >
-                <div className="flex flex-col">
-                  <p className="">{message.text}</p>
-                  <p className={`${message.sender_id === currentUser ? 'text-right' : 'text-left'} font-thin text-sm`}>{format(message.created_at)}</p>
+  <div className="relative h-full grid grid-rows-[auto_1fr_auto] overflow-auto" ref={scrollRef}>
+    {data.chat_room_id !== '0' ? (
+      <>
+        <div className="sticky top-0 flex gap-2 items-center rounded-lg p-1 bg-slate-100 z-10">
+          {/* <button className="block sm:hidden">
+            <FontAwesomeIcon icon={faArrowLeft} className="text-2xl" />
+          </button> */}
+          <Avatar alt='test' src={data.user_image} sx={{ width: 50, height: 50 }} />
+          <p className="text-xl font-semibold">{data.fullname}</p>
+        </div>
+        <div className="flex flex-col " >
+          {messages.map((message) => (
+            <div
+              key={message.created_at}
+              className={`flex ${message.sender_id === currentUser ? 'justify-end ml-[40%]' : 'justify-start mr-[40%]'} bg-blue-600 text-white m-2 p-4 rounded-lg shadow-lg`}
+            >
+              <div className="flex flex-col">
+                <p>{message.text}</p>
+                <div className={`flex items-center ${message.sender_id === currentUser ? 'justify-end' : 'justify-start'} font-thin text-sm`}>
+                  <p>{format(message.created_at)}</p>
+                  {message.sender_id === currentUser && (
+                    <div className="ml-2">
+                      {message.is_read === 0 ? (
+                        <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                      ) : (
+                        <FontAwesomeIcon icon={faCheckDouble} className="text-xs" />
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
-            <div className="sticky buttom-0 bg-slate-200 bottom-0 w-full pt-2">
-              <div className="flex">
-                <input className="w-full rounded-full h-10 px-4" type="text" placeholder="Write a message"
-                  title="write a message" value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} />
-                <button className="mx-4 bg-white p-1 rounded-lg" title="send" onClick={handleMessageSend}>
-                  <FontAwesomeIcon icon={faPaperPlane} className="w-8 h-7 border-1 text-blue-500" />
-                </button>
-              </div>
             </div>
+          ))}
+        </div>
+        <div className="sticky bottom-0 bg-slate-200 w-full pt-2">
+          <div className="flex">
+            <input
+              className="w-full rounded-full h-10 px-4"
+              type="text"
+              placeholder="Write a message"
+              title="write a message"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+            />
+            <button
+              className="mx-4 bg-white p-1 rounded-lg"
+              title="send"
+              onClick={handleMessageSend}
+            >
+              <FontAwesomeIcon icon={faPaperPlane} className="w-8 h-7 border-1 text-blue-500" />
+            </button>
           </div>
-
         </div>
-      ) : (
-        <div className="flex h-full items-center justify-center">
-          <p className="font-bold text-lg">Tap a Chat to Start a Conversation</p>
-        </div>
-      )}
-    </div>
-  )
+      </>
+    ) : (
+      <div className="flex h-full items-center justify-center">
+        <p className="font-bold text-lg">Tap a Chat to Start a Conversation</p>
+      </div>
+    )}
+  </div>
+);
 }

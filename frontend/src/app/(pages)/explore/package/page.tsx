@@ -24,9 +24,9 @@ export default function Package() {
   if (isLoading) return <p>Loading ...</p>
   if (data) {
     return (
-      <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
-        <div className="w-full h-full p-5 mb-3 bg-white rounded-lg">
-          <h1 className="text-xl font-semibold text-center">List Package</h1>
+      <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-4">
+        <div className="w-full h-full px-4 mb-2 bg-white rounded-lg">
+          <h1 className="text-2xl font-bold text-center">List Package</h1>
           <div className="flex flex-col items-center sm:items-start">
             <div className="w-fit p-2  bg-blue-500 hover:bg-blue-600 text-white rounded-lg mb-7" role="button">
               <Link href={`/explore/package/custom`}>

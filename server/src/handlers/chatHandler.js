@@ -1,4 +1,5 @@
-const { userChatsController, createChatController, findChatController, whatsAppClientController, sendMessage } = require("../controllers/chatController");
+const { userChatsController, createChatController, findChatController, whatsAppClientController, sendMessage, createRoomChatController, whatsAppClientControllerLamaaa } = require("../controllers/chatController");
+const { addNewChatWithAdmin } = require("../services/chat");
 
 const createChatHandler = async(req, res) => {
   try {
@@ -31,18 +32,21 @@ const findChatHandler = async(req, res) => {
 
 const whatsAppClientHandler = async(req, res) => {
   try {
-    await whatsAppClientController()
+    const qrCode = await whatsAppClientControllerLamaaa()
+    // const qrCode = await whatsAppClientController()
 
     // console.log(qr);
 
     // res.send()
-    res.status(200).json({ status: 'success', informasi: 'testttt' })
+    res.status(200).json({ status: 'success', data: qrCode })
   } catch (error) {
     console.log(error);
   }
 }
 
 const sendWhatsAppMessageHandler = async (req, res) => {
+  console.log('di sendMessage');
+  
   try {
     await sendMessage(req.body)
 
@@ -52,4 +56,25 @@ const sendWhatsAppMessageHandler = async (req, res) => {
   }
 }
 
-module.exports = { createChatHandler, userChatsHandler, findChatHandler, whatsAppClientHandler, sendWhatsAppMessageHandler, }
+const addNewChatWithAdminHandler = async (req, res) => {
+  try {
+    const data = await addNewChatWithAdmin(req.params)
+
+    res.status(200).json({ status: 'success', data: data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const createRoomChatHandler = async (req, res) => {
+  try {
+    const data = await createRoomChatController(req.body)
+
+    res.status(200).json({ status: 'success', data: data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { createChatHandler, userChatsHandler, findChatHandler, whatsAppClientHandler, sendWhatsAppMessageHandler
+  , addNewChatWithAdminHandler, createRoomChatHandler}

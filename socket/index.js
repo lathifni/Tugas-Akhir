@@ -12,26 +12,30 @@ io.on("connection", (socket) => {
     // if user is not added previously
     if (!activeUsers.some((user) => user.userId === newUserId)) {
       activeUsers.push({ userId: newUserId, socketId: socket.id });
-      console.log("New User Connected", activeUsers);
     }
-    // send all active users to new user
-    io.emit("get-users", activeUsers);
+  });
+
+  socket.on("join-room", (chat_room_id) => {
+    socket.join(chat_room_id);
+    console.log(`User joined room: ${chat_room_id}`);
   });
 
   socket.on("disconnect", () => {
-    // remove user from active users
     activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
-    console.log("User Disconnected", activeUsers);
+    console.log("User Disconnected");
     // send all active users to all users
-    io.emit("get-users", activeUsers);
   });
 
   // send message to a specific user
-  socket.on("send-message", (data) => {
-    const { receiverId } = data;
-    const user = activeUsers.find((user) => user.userId === receiverId);
-    if (user) {
-      io.to(user.socketId).emit("recieve-message", data);
-    }
+  socket.on("send-message", (message) => {    
+    socket.to(message.chat_room_id).emit("receive-message", message);
+  });
+
+  socket.on("is-read", (message) => {
+    socket.to(message.chat_room_id).emit("is-read-notification", message);
+  });
+
+  socket.on("read-all-messages", (chat_room_id) => {
+    socket.to(chat_room_id).emit("read-all-messages-notification");
   });
 });

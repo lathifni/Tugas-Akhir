@@ -1,4 +1,4 @@
-const { listGeomHomestayController, listHomestayByRadiusController, listAllHomestayController, availableHomestayController, bookedHomestayController } = require("../controllers/homestayController");
+const { listGeomHomestayController, listHomestayByRadiusController, listAllHomestayController, availableHomestayController, bookedHomestayController, getHomestayByIdController } = require("../controllers/homestayController");
 
 const listGeomHomestayHandler = async(req, res) => {
   try {
@@ -50,6 +50,17 @@ const bookedHomestayHandler = async(req, res) => {
   }
 }
 
+const getHomestayByIdHandler = async(req, res) => {
+  try {
+    const data = await getHomestayByIdController(req.params)
+    data.icon = 'homestay.png'
+
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = { listGeomHomestayHandler, listHomestayByRadiusHandler, listAllHomestayHandler, availableHomestayHandler, bookedHomestayHandler
-  , 
+  , getHomestayByIdHandler
  }

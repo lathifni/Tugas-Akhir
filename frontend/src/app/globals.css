@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
+/* * {
   scrollbar-width: thin;
-}
+} */
 
 html,
 body,

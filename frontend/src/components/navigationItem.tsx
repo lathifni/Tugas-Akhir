@@ -3,13 +3,17 @@
 import { ChevronDown } from "lucide-react";
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react";
-import { faBed, faBook, faComments, faHouse, faMap, faSquarePollHorizontal, faUserPen } from '@fortawesome/free-solid-svg-icons'
+import { faBed, faBook, faCloudSun, faComments, faHouse, faMap, faSquarePollHorizontal, faUserPen, faWater } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import { faInstagram, faTiktok } from "@fortawesome/free-brands-svg-icons";
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 export default function NavigationItem() {
   const { data: session, update, status } = useSession()
   const [isLoading, setIsLoading] = useState(true)
+  const faInstagramIcon = faInstagram as IconProp;
+  const faTiktokIcon = faTiktok as IconProp;
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -69,7 +73,7 @@ export default function NavigationItem() {
               <span className="flex-1">Homestay</span>
             </li>
           </Link>
-          {session?.user.role === 'customer'  && (
+          {(session?.user.role === 'customer' || session?.user.role === 'admin')  && (
             <Link href={'/explore/chat'}>
               <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
                 <FontAwesomeIcon icon={faComments} style={{ fontSize: '1.3em' }} />
@@ -77,17 +81,29 @@ export default function NavigationItem() {
               </li>
             </Link>
           )}
+          <Link href={'/explore/weather-forecast'}>
+            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faCloudSun} style={{ fontSize: '1.3em' }} />
+              <span className="flex-1">Weather Forecast</span>
+            </li>
+          </Link>
+          <Link href={'/explore/water-info'}>
+            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faWater} style={{ fontSize: '1.3em' }} />
+              <span className="flex-1">Water Info</span>
+            </li>
+          </Link>
           <li className={`flex rounded-md p-2 cursor-pointer items-center gap-x-4 mb-2`} >
             <a href="https://www.instagram.com/green_talao_park/" className="flex-1" target="_blank">
-              <div className="transition ease-in-out duration-500 flex hover:bg-blue-600 p-2 rounded-lg justify-center">
-                <img className="w-4" src="/icon/instagram.svg" alt="IconInstagram" />
-                <h1 className="pl-2 text-sm font-medium ">Instagram</h1>
+              <div className="flex hover:bg-blue-600 p-2 rounded-lg justify-center">
+                <FontAwesomeIcon icon={faInstagramIcon} className=""/>
+                <span className="flex-1 ml-2 text-sm font-medium">Instagram</span>
               </div>
             </a>
             <a href="https://www.tiktok.com/@greentalaopark009" className="flex-1" target="_blank">
-              <div className="transition ease-in-out duration-500 flex hover:bg-blue-600 p-2 rounded-lg justify-center">
-                <img className="w-4 " src="/icon/tiktok.svg" alt="IconTikTok" />
-                <h1 className="pl-2 text-sm font-medium ">Tik Tok</h1>
+              <div className="flex hover:bg-blue-600 p-2 rounded-lg justify-center">
+                <FontAwesomeIcon icon={faTiktokIcon} className=""/>
+                <span className="flex-1 ml-2 text-sm font-medium">Tik Tok</span>
               </div>
             </a>
           </li>

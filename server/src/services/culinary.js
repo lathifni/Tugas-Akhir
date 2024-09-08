@@ -24,7 +24,8 @@ const listAllCulinary = async() => {
 
 const getCulinaryById = async(params) => {
   const [rows] = await promisePool.query(
-    `SELECT id,name,address,contact_person,open,close,capacity,description,status,ST_AsGeoJSON(geom) AS geom FROM culinary_place WHERE id='${params.id}'`)
+    `SELECT id,name,address,contact_person,open,close,capacity,description,status,ST_AsGeoJSON(geom) AS geom,
+    ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng FROM culinary_place WHERE id='${params.id}'`)
   return rows[0]
 }
 

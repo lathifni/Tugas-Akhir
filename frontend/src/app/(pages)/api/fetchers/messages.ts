@@ -9,3 +9,8 @@ export const fetchSendMessage = async(params: any) => {
   const res = await useAxiosAuth.post('/messages', params)
   return res.data.data
 }
+
+export const fetchStatusMessage = async(params: any) => {
+  const res = await useAxiosAuth.put(`/messages/read/${params}`)
+  return res.data.data
+}

@@ -23,7 +23,9 @@ const listAllWorship = async() => {
 }
 
 const getWorshipById = async(params) => {
-  const [rows] = await promisePool.query(`SELECT id,name,address,capacity,description,price,status,ST_AsGeoJSON(geom) AS geom FROM worship_place WHERE id='${params.id}'`)
+  const [rows] = await promisePool.query(`
+    SELECT id,name,address,capacity,description,price,status,ST_AsGeoJSON(geom) AS geom,
+    ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng FROM worship_place WHERE id='${params.id}'`)
   return rows[0]
 }
 

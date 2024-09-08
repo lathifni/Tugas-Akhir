@@ -3,8 +3,10 @@
 import { ChevronDown } from "lucide-react";
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react";
-import { faBed, faCalendarCheck, faCartShopping, faComment, faFileCircleCheck, faHouse, faList, faListUl, faMosque, faPuzzlePiece, faSquarePollHorizontal, faUsers, faUtensils } from '@fortawesome/free-solid-svg-icons'
+import { faBed, faCalendarCheck, faCartShopping, faComment, faFileCircleCheck, faHouse, faList, faListUl, faMosque, faPuzzlePiece, faSquarePollHorizontal, faTemperature0, faUsers, faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons"
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import Link from "next/link";
 
 export default function NavigationItemAdmin() {
@@ -12,6 +14,7 @@ export default function NavigationItemAdmin() {
   const [subMenuPackage, setSubMenuPackage] = useState(false)
   const [subMenuObject, setSubMenuObject] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const faWhatsappIcon = faWhatsapp as IconProp;
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -43,12 +46,6 @@ export default function NavigationItemAdmin() {
             <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
               <FontAwesomeIcon icon={faCalendarCheck} style={{ fontSize: '1.3em' }} />
               <span className="flex-1">Manage Reservation</span>
-            </li>
-          </Link>
-          <Link href={'/explore/chat'}>
-            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
-              <FontAwesomeIcon icon={faComment} style={{ fontSize: '1.3em' }} />
-              <span className="flex-1">Chats</span>
             </li>
           </Link>
           <Link href={'/dashboard/users'}>
@@ -143,6 +140,12 @@ export default function NavigationItemAdmin() {
               </Link>
             </ul>
           )}
+          <Link href={'/dashboard/whatsapp'}>
+            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`}>
+              <FontAwesomeIcon icon={faWhatsappIcon} className="text-2xl"/>
+              <span className="flex-1">WhatsApp</span>
+            </li>
+          </Link>
         </ul>
       </div>
     </>

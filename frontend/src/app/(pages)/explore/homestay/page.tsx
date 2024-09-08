@@ -41,8 +41,6 @@ export default function Homestay() {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       });
-      console.log(userLocation);
-
     } catch (error) {
       console.error("Error getting location:", error);
     }
@@ -111,7 +109,7 @@ export default function Homestay() {
           </div>
         </div>
         <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
-          <div className="text-2xl text-center justify-center font-bold">
+          <div className="text-xl text-center justify-center font-semibold">
             <h1 className="">List Homestay</h1>
           </div>
           <div className="w-full px-5">

@@ -63,6 +63,7 @@ const listAllCulinaryHandler = async(req, res) => {
 const getCulinaryByIdHandler = async(req, res) => {
   try {
     const data = await getCulinaryByIdController(req.params)
+    data.icon = 'culinary.png'
 
     return res.status(200).send({ status:'success', data:data })
   } catch (error) {
