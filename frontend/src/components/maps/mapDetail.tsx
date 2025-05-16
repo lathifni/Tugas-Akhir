@@ -80,13 +80,10 @@ export default function MapDetail({ geomObject, lat, lng, name, icon }:MapDetail
     const digitasiVillage = new google.maps.Data()
     const digitasiObject = new google.maps.Data()
     
-    if (dataGeomGtp && Array.isArray(dataGeomGtp)) {
-      console.log(dataGeomGtp);
-      
+    if (dataGeomGtp && Array.isArray(dataGeomGtp)) {      
       dataGeomGtp.forEach((item: { id: string, name: string, geom: string }) => {
         const { id, name } = item
         const geom: string = item.geom
-        console.log({geom});
 
         digitasiVillage.addGeoJson({
           type: 'Feature',
@@ -105,7 +102,6 @@ export default function MapDetail({ geomObject, lat, lng, name, icon }:MapDetail
       })
     }
     if (geomObject !== undefined && geomObject !== null) {
-      console.log(geomObject);
       digitasiObject.addGeoJson({
         type: 'Feature',
         // properties: { id:1, name:'name' },

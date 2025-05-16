@@ -5,15 +5,23 @@ import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { useEffect, useState } from 'react'
 import { MoonLoader } from 'react-spinners'
+import { useRouter } from 'next/navigation'
 
 export default function NavigationHeader() {
   const { data: session, update, status } = useSession()
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter();
 
   useEffect(() => {
     if (status === 'authenticated') {
       if (session) {
         setIsLoading(false);
+        if (session.user.google == 1 && session.user.role == 'customer' && session.user.phone == undefined) {
+        
+          // 6285274953262 nomor gilang
+          console.log('test');
+          router.push('/register')
+        }
       }
     }
   }, [update, status, session])
@@ -27,7 +35,7 @@ export default function NavigationHeader() {
   }, []);
 
   if (isLoading) return (
-    <div className="flex flex-col mt-3 items-center justify-center text-white">
+    <div className="flex flex-col items-center justify-center text-white">
       <h1 className="text-2xl lg:tracking-widest font-medium">Village Tourism</h1>
       <br />
       <MoonLoader color="#36d7b7" speedMultiplier={3} size={75} />
@@ -36,7 +44,7 @@ export default function NavigationHeader() {
   )
 
   return (
-    <div className="flex flex-col mt-3 items-center justify-center text-white">
+    <div className="flex flex-col items-center justify-center text-white">
       <motion.div className=''>
         <a href="/" className="flex gap-2">
           <img className="w-9" src="/icon/logoWhite.svg" alt="Icon" />

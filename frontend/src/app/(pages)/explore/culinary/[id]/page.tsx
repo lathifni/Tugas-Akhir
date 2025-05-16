@@ -5,6 +5,8 @@ import { fetchGalleriesCulinary } from "@/app/(pages)/api/fetchers/galleries"
 import MapDetail from "@/components/maps/mapDetail"
 import { useQuery } from "@tanstack/react-query"
 import MoonLoader from "react-spinners/MoonLoader"
+import Image from 'next/image';
+import Galleries from "@/components/galleries"
 
 export default function CulinaryId({ params }: any) {
   const { isError, isSuccess, isLoading, data } = useQuery({
@@ -17,13 +19,12 @@ export default function CulinaryId({ params }: any) {
   })
   console.log(data);
   
-  
   return (
     <div className="flex flex-col xl:flex-row m-1 sm:m-2 lg:m-4">
       { (data && dataGallery) ? (
         <>
           <div className="w-full h-full px-1 xl:p-0 xl:mb-0 xl:mr-3 xl:w-7/12 ">
-            <div className="relative py-5 bg-white rounded-lg mb-4 px-4 shadow-lg">
+            <div className="relative py-2 bg-white rounded-lg mb-4 px-4 shadow-lg">
               <h1 className="text-2xl font-bold text-center mb-5">Culinary Place Information</h1>
               {isLoading ? (
                 <p>Loading</p>
@@ -64,18 +65,10 @@ export default function CulinaryId({ params }: any) {
                 </>
               ))}
             </div>
-            <div className="py-5 bg-white rounded-lg mb-4 px-4 shadow-lg">
-              <h1 className="text-2xl font-semibold text-center mb-4">Our Gallery</h1>
+            <div className="py-2 bg-white rounded-lg mb-4 px-4 shadow-lg">
+              <h1 className="text-2xl font-semibold text-center">Our Gallery</h1>
               <div className="flex justify-center items-center flex-wrap">
-                {/* {dataGallery.map((photo: { url: string }, index: number) => (
-                  <img
-                    key={index}
-                    src={`/photos/package/${photo.url}`}
-                    alt={`Photo ${index + 1}`}
-                    className="m-2"
-                    style={{ width: '110px', height: '110px', objectFit: 'cover' }}
-                  />
-                ))} */}
+                <Galleries type={'culinary'} urls={dataGallery} />
               </div>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 
-interface Image {
+interface ImageVideo {
   name: string;
   url: string;
   // size: number;
@@ -12,26 +12,31 @@ interface Image {
 }
 
 interface FileInputProps {
-  onGalleryChange: (newGallery: Image[]) => void;
+  onGalleryChange: (newGallery: ImageVideo[]) => void;
+  fileType: 'image' | 'video';
 }
 
-export default function FileInput({ onGalleryChange }: FileInputProps) {
-  const [images, setImages] = useState<Image[]>([])
+export default function FileInput({ onGalleryChange, fileType  }: FileInputProps) {
+  const [imagesVideos, setImagesVideos] = useState<ImageVideo[]>([])
   // const [gallery, setGallery] = useState<any[]>([])
   const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const selectFiles = () => {
-    // fileInputRef.current.click()
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   }
 
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files == null) return;
+    
+    const fileTypeAllowed = fileType
     for (let i = 0; i < files.length; i++) {
-      if (files[i].type.split('/')[0] !== 'image') continue;
-      if (!images.some((e: any) => e.name === files[i].name)) {
-        setImages((prevImages: any) => [
+      if (files[i].type.split('/')[0] !== `${fileTypeAllowed}`) continue;
+      if (!imagesVideos.some((e: any) => e.name === files[i].name)) {
+        setImagesVideos((prevImages: any) => [
           ...prevImages,
           {
             name: files[i].name,
@@ -47,7 +52,7 @@ export default function FileInput({ onGalleryChange }: FileInputProps) {
   }
 
   const handleDelete = (index: number) => {
-    setImages((prevImages) => {
+    setImagesVideos((prevImages) => {
       return prevImages.filter((_, i) => i !== index)
     })
     // setGallery((prevGallery) => {
@@ -72,8 +77,8 @@ export default function FileInput({ onGalleryChange }: FileInputProps) {
     for (let i = 0; i < files.length; i++) {
       console.log(files[i].type);
       if (files[i].type.split('/')[0] !== 'image') continue;
-      if (!images.some((e: any) => e.name === files[i].name)) {
-        setImages((prevImages: any) => [
+      if (!imagesVideos.some((e: any) => e.name === files[i].name)) {
+        setImagesVideos((prevImages: any) => [
           ...prevImages,
           {
             name: files[i].name,
@@ -85,12 +90,12 @@ export default function FileInput({ onGalleryChange }: FileInputProps) {
   }
 
   const sendGalleryToParent = () => {
-    onGalleryChange(images);
+    onGalleryChange(imagesVideos);
   }
 
   useEffect(() => {
     sendGalleryToParent()
-  }, [images]);
+  }, [imagesVideos]);
 
   return (
     <>
@@ -100,20 +105,28 @@ export default function FileInput({ onGalleryChange }: FileInputProps) {
             <p className="flex justify-center my-8 gap-2">Drop Images Here</p>
           ) : (
             <div className="flex justify-center my-8 gap-2">
-              <p className="">Drag & Drop Image Here or</p>
-              <label className="underline" htmlFor="fileInput" role="button" onClick={selectFiles}>Browse</label>
+              <p>Drag & Drop {fileType === 'image' ? 'Image' : 'Video'} Here or</p>
+              {/* <label className="underline" htmlFor="fileInput" role="button" onClick={selectFiles}>Browse</label> */}
+              <div className="underline" role="button" onClick={selectFiles}>Browse</div>
             </div>
           )}
           <input type="file" multiple ref={fileInputRef} id="fileInput" onChange={onFileSelect} hidden />
         </div>
         <div className="flex flex-col justify-center items-center p-4">
-          {images.map((image: Image, index: number) => (
+          {imagesVideos.map((imagesVideos: ImageVideo, index: number) => (
             <div key={index} className="relative bg-white rounded-lg mb-2">
-              <p className="absolute ">{image.name}</p>
+              <p className="absolute ">{imagesVideos.name}</p>
               <button className="absolute top-1 right-1 px-3 py-2 bg-red-500 rounded-full text-white" onClick={() => handleDelete(index)}>
                 <FontAwesomeIcon icon={faTrash} />
               </button>
-              <img className="p-8" src={image.url} alt={image.name} />
+              {/* <img className="p-8" src={image.url} alt={image.name} /> */}
+              {fileType === 'image' ? (
+              <img className="p-8" src={imagesVideos.url} alt={imagesVideos.name} />
+              ) : (
+                <video className="p-8" controls>
+                  <source src={imagesVideos.url} />
+                </video>
+              )}
             </div>
           ))}
         </div>

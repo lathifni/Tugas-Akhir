@@ -1,4 +1,4 @@
-const { listVillageController, getUlakanVillageController } = require("../controllers/village.Controller.js");
+const { listVillageController, getUlakanVillageController, getEstuaryController, getEstuaryGeomController } = require("../controllers/village.Controller.js");
 
 const listVillageHandler = async(req, res) => {
   try {
@@ -20,4 +20,14 @@ const getUlakanVillageHandler = async(req, res) => {
   }
 }
 
-module.exports = { listVillageHandler, getUlakanVillageHandler, }
+const getEstuaryGeomHandler = async(req, res) => {
+  try {
+    const ulakan = await getEstuaryGeomController()
+
+    return res.status(200).send({ status:'success', data: ulakan })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { listVillageHandler, getUlakanVillageHandler, getEstuaryGeomHandler }

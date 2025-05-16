@@ -4,11 +4,10 @@ import FileInput from "@/components/fileInput";
 import MapInput from "@/components/maps/mapInput";
 import { faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import 'react-toastify/dist/ReactToastify.css';
+// import 'react-toastify/dist/ReactToastify.css';
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
-import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -163,7 +162,7 @@ export default function AddWorshipAdmin() {
           </div>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900">Gallery</label>
-            <FileInput onGalleryChange={handleGalleryChange} />
+            <FileInput fileType={"image"} onGalleryChange={handleGalleryChange} />
           </div>
           <div className="flex py-4 px-8 gap-4">
             <button className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700" onClick={submitHandler}>

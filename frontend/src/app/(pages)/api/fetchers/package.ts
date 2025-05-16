@@ -25,6 +25,11 @@ export const fetchPackageActivityById = async (id:string) => {
   return res.data.data
 }
 
+export const fetchPackageAllActivityById = async (id:string) => {
+  const res = await useAxiosAuth.get(`/package/allActivityById/${id}`)
+  return res.data.data
+}
+
 export const fetchListAllGalleryPackageById = async (id:string) => {
   const res = await useAxiosAuth.get(`/package/listAllGalleryPackageById/${id}`)
   return res.data.data
@@ -63,6 +68,31 @@ export const fetchAllService = async() => {
 
 export const fetchServiceById = async(id:string) => {
   const res = await useAxiosAuth.get(`/package/service/${id}`)
+  return res.data.data
+}
+
+export const fetchAllPackageType = async() => {
+  const res = await useAxiosAuth.get(`/package/allPackageType`)
+  return res.data.data
+}
+
+export const fetchAllPackageInformationById = async(id:string) => {
+  const res = await useAxiosAuth.get(`/package/allPackageInformation/${id}`)
+  return res.data.data
+}
+
+export const fetchExploreOurPackage = async() => {
+  const res = await useAxiosAuth.get(`/package/explore-our-package`)
+  return res.data.data
+}
+
+export const fetchExploreBrowsePackage = async(id: string) => {
+  const res = await useAxiosAuth.get(`/package/explore-browse-package/${id}`)
+  return res.data.data
+}
+
+export const fetchExploreMyPackage = async(idUser:number) => {
+  const res = await useAxiosAuth.get(`/package/explore-my-package/${idUser}`)
   return res.data.data
 }
 

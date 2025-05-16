@@ -48,6 +48,8 @@ app.use('/reservation', router.reservation)
 app.use('/chat', router.chat)
 app.use('/messages', router.messages)
 app.use('/facility', router.facility)
+app.use('/referral', router.referral)
+app.use('/integration', router.integration)
 
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;

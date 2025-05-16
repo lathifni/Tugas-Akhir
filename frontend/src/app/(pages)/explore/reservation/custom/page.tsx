@@ -10,10 +10,11 @@ import { CalendarClock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { addDays, format } from 'date-fns';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// import 'react-toastify/dist/ReactToastify.css';
 import { Modal } from '@mui/material';
 import axios from "axios";
 import snapMidtrans from "@/hooks/snapMidtrans";
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 // import { postReservationTransaction } from "@/app/(pages)/api/fetchers/reservation";
 
 export default function CostumbookingIdPage({ params }: any) {
@@ -75,7 +76,7 @@ export default function CostumbookingIdPage({ params }: any) {
           "Content-Type": "application/json"
         }
       }
-      const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
+      const res = await axios.post(`${backendUrl}/reservation/process-transaction`, data, config)
       console.log(res.data);
       
 

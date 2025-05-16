@@ -1,12 +1,12 @@
 'use client'
 
-import { fetchAverageRatingPackageById, fetchListAllGalleryPackageById, fetchListAllReviewPackageById, fetchListAllServicePackageById, fetchPackageActivityById, fetchPackageById } from "@/app/(pages)/api/fetchers/package";
+import { fetchAverageRatingPackageById, fetchListAllGalleryPackageById, fetchListAllReviewPackageById, fetchListAllServicePackageById, fetchPackageActivityById, fetchPackageAllActivityById, fetchPackageById } from "@/app/(pages)/api/fetchers/package";
 import { useQuery } from "@tanstack/react-query";
 import { Rating } from "@mui/material"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretDown, faCartPlus, faCirclePlay, faRoad } from "@fortawesome/free-solid-svg-icons";
+import { faCaretDown, faCartPlus, faCirclePlay, faPenClip, faRoad, faSquarePlus } from "@fortawesome/free-solid-svg-icons";
 import MapPackage from "@/components/maps/mapPackage";
-import { SetStateAction, useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 interface UserLocation {
@@ -20,6 +20,7 @@ interface dataActivityDay {
   activity_type: string;
   activity_lat: number;
   activity_lng: number;
+  activity: string;
 }
 
 interface dataRouteActivity {
@@ -58,6 +59,10 @@ export default function PackageIdPage({ params }: any) {
     queryKey: ['packageActivity', params.id],
     queryFn: () => fetchPackageActivityById(params.id)
   })
+  const { data: dataPackageAllActivityById, isLoading: loadingPackageAllActivity } = useQuery({
+    queryKey: ['packageAllActivity', params.id],
+    queryFn: () => fetchPackageAllActivityById(params.id)
+  })
   const { data: dataListAllGalleryPackageById, isLoading: loadingGalleryPackage } = useQuery({
     queryKey: ['listAllGalleryPackageById', params.id],
     queryFn: () => fetchListAllGalleryPackageById(params.id)
@@ -66,6 +71,8 @@ export default function PackageIdPage({ params }: any) {
     queryKey: ['listAllReviewPackageById', params.id],
     queryFn: () => fetchListAllReviewPackageById(params.id)
   })
+  console.log(dataPackageActivityById);
+  
 
   const rupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -114,7 +121,7 @@ export default function PackageIdPage({ params }: any) {
   };
 
   const handleDayButtonClick = (dayParams: number) => {
-    const datanya = dataPackageActivityById.filter((item: { object_id: string, day: number }) => item.day === dayParams)
+    const datanya = dataPackageActivityById.filter((item: { object_id: string, day: number }) => item.day === dayParams)    
     setDataActivityDay(datanya)
     setJenisnya('day')
   }
@@ -164,20 +171,41 @@ export default function PackageIdPage({ params }: any) {
       <div className="flex flex-col xl:flex-row m-1 sm:m-3 lg:m-5">
         <div className="w-full h-full px-1 xl:p-0 xl:mb-0 xl:mr-3 xl:w-7/12 ">
           <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
-            <h1 className="text-center text-xl font-semibold">Package Information</h1>
-            {dataPackageActivityById && (
-              <Link href={`/explore/package/${dataPackageActivityById[0].package_id}/booking`}>
+            <h1 className="text-center text-2xl font-semibold">Package Information</h1>
+            {/* {dataPackageActivityById && (
+              <Link href={`/explore/package/${dataPackageActivityById[0]?.package_id}/booking`}>
                 <div className="absolute right-1 sm:right-5 px-3 py-1 bg-green-500 rounded-lg text-white hover:bg-green-700" role="button">
                   <FontAwesomeIcon icon={faCartPlus} /> Booking
                 </div>
               </Link>
-            )}
-            <div className="absolute flex right-28 sm:right-36">
+            )} */}
+            <div className="justify-center items-center">
+              {dataPackageActivityById && (
+                <Link href={`/explore/package/${dataPackageActivityById[0]?.package_id}/booking`}>
+                  <button className="px-3 py-1 m-2 bg-green-500 rounded-lg text-white hover:bg-green-700">
+                    <FontAwesomeIcon icon={faCartPlus} /> Booking
+                  </button>
+                </Link>
+              )}
+              {dataPackageActivityById && (
+                <Link href={`/explore/package/${dataPackageActivityById[0]?.package_id}/extend`}>
+                  <button className="px-3 py-1 m-2 bg-green-500 rounded-lg text-white hover:bg-green-700">
+                    <FontAwesomeIcon icon={faSquarePlus} /> Extend Package
+                  </button>
+                </Link>
+              )}
+              {dataPackageActivityById && (
+                <Link href={`/explore/package/${dataPackageActivityById[0]?.package_id}/custom`}>
+                  <button  className="px-3 py-1 m-2 bg-green-500 rounded-lg text-white hover:bg-green-700">
+                    <FontAwesomeIcon icon={faPenClip} /> Customize Package
+                  </button>
+                </Link>
+              )}
+            </div>
+            <div className="justify-center flex">
               <p className="text-base pt-1">{dataAverageRatingById[0].average_rating}</p>
               <Rating name="half-rating-read" value={parseFloat(dataAverageRatingById[0].average_rating)} precision={0.1} readOnly size="large" />
             </div>
-            <br />
-            <br />
             <table className="w-full md:ml-5">
               <tbody>
                 <tr>
@@ -202,19 +230,16 @@ export default function PackageIdPage({ params }: any) {
                 </tr>
               </tbody>
             </table>
-            <br />
-            <h2 className="font-semibold">Description</h2>
+            <h4 className="font-semibold">Description</h4>
             <p className="text-justify">{dataPackageById[0].description}</p>
-            <br />
-            <h2 className="font-semibold">Service Include</h2>
-            <ul className="ml-5">
+            <h4 className="font-semibold">Service Include</h4>
+            <ul className="ml-8">
               {serviceInclude.map((item: { name: string }, index: number) => (
                 <li key={index} className="list-disc">{item.name}</li>
               ))}
             </ul>
-            <br />
-            <h2 className="font-semibold">Service Exclude</h2>
-            <ul className="ml-5">
+            <h4 className="font-semibold">Service Exclude</h4>
+            <ul className="ml-8">
               {serviceExclude.map((item: { name: string }, index: number) => (
                 <li key={index} className="list-disc">{item.name}</li>
               ))}
@@ -223,7 +248,7 @@ export default function PackageIdPage({ params }: any) {
               <FontAwesomeIcon className="mr-2" icon={faCirclePlay} />Play Video
             </div>
           </div>
-          {dataPackageActivityById && (
+          {/* {dataPackageActivityById && (
             <div className="py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
               <h1 className="text-center text-xl font-semibold">Package Activity</h1>
               {Array.from(new Set(dataPackageActivityById.map((activity: { day: number }) => activity.day)))
@@ -232,7 +257,6 @@ export default function PackageIdPage({ params }: any) {
                   <div key={dayIndex} className="mb-3">
                     <h2 className="text-lg font-semibold">Day {dayIndex + 1}</h2>
 
-                    {/* Menampilkan aktivitas untuk setiap hari */}
                     {dataPackageActivityById
                       .filter((activity: { day: number }) => activity.day === day)
                       .map((activity: { object_id: string, description: string, activity: number, activity_name: string }, index: number) => (
@@ -242,9 +266,8 @@ export default function PackageIdPage({ params }: any) {
                       ))}
                   </div>
                 ))}
-
             </div>
-          )}
+          )} */}
           <div className="py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
             <h1 className="text-center text-xl font-semibold">Our Gallery</h1>
             <div className="flex justify-center items-center flex-wrap">
@@ -276,7 +299,7 @@ export default function PackageIdPage({ params }: any) {
             <MapPackage showLegend={showLegend}
               dataActivityDay={dataActivityDay} dataRouteActivity={dataRouteActivity} distances={distances} instructions={instructions}
               setDistances={setDistances} setInstructions={setInstructions} setDataActivityDay={setDataActivityDay} setDataRouteActivity={setDataRouteActivity}
-              jenisnya={jenisnya}            // userLocation={null} dataMapforType={null} 
+              jenisnya={jenisnya}             // userLocation={null} dataMapforType={null} 
             // objectAround={null} isManualLocation={false} setIsManualLocation={setIsManualLocationClicked}
             // setUserLocation={setUserLocation}
             />
@@ -295,7 +318,7 @@ export default function PackageIdPage({ params }: any) {
                 </button>
               </div>
             ))}
-            <div className="absolute right-5 sm:right-1/4 top-0">
+            <div className=" right-5 sm:right-1/4 top-">
               {isDropdownOpen && selectedDay && journeys.map((journey: { journeys: number }, index: number) => (
                 <div key={index} className=" p-1 border-solid border-2 border-blue-500 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-white mb-1" role="button"
                   onClick={() => handleRouteButtonClick(selectedDay, journey.journeys)}>
@@ -304,6 +327,38 @@ export default function PackageIdPage({ params }: any) {
               ))}
             </div>
           </div>
+          {dataPackageActivityById && (
+            <div className="py-4 rounded-lg mb-4 px-4">
+              <h1 className="text-center text-xl font-semibold">Package Activity</h1>
+              {Array.from(new Set(dataPackageActivityById.map((activity: { day: number }) => activity.day)))
+                .sort((a, b) => (a as number) - (b as number))// Mengurutkan hari-hari secara numerik
+                .map((day, dayIndex) => (
+                  <div key={dayIndex} className="mt-2 border outline-black rounded-lg p-2">
+                    <h2 className="text-lg font-semibold">Day {dayIndex + 1}</h2>
+
+                    {/* Menampilkan aktivitas untuk setiap hari */}
+                    {dataPackageActivityById
+                      .filter((activity: { day: number }) => activity.day === day)
+                      .map((activity: { object_id: string, description: string, activity: number, activity_name: string }, index: number) => (
+                        <div key={index} className="mb-1">
+                          <p>{activity.activity}. {activity.activity_name}: {activity.description}</p>
+                        </div>
+                      ))}
+                  </div>
+                ))}
+            </div>
+          )}
+          {/* <div className="flex justify-center mb-2">
+            {pkg.days.map((day: any, index: number) => (
+              <button
+                key={index}
+                onClick={() => handleDayClick(pkg.id, index, day.activities)}
+                className="px-4 py-2 mx-1 bg-blue-500 text-white rounded-lg"
+              >
+                Day {day.day}
+              </button>
+            ))}
+          </div> */}
           {distances !== null && distances.length !== 0 && (
             <div className="mt-20 px-5">
               <h2 className="text-center text-xl font-semibold mb-2">Directions</h2>

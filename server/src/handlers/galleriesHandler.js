@@ -3,6 +3,9 @@ const {
   galleriesWorshipController,
   galleriesCulinaryController,
   galleriesSouvenirController,
+  galleriesAttractionController,
+  galleriesHomestayController,
+  galleriesHomestayUnitController,
 } = require("../controllers/galleriesController");
 
 const galleriesGtpHandler = async (req, res) => {
@@ -54,7 +57,38 @@ const galleriesSouvenirHandler = async(req, res) => {
   } catch (error) {
     console.log(error);
   }
+
+}
+
+const galleriesAttractionHandler = async(req, res) => {
+  try {
+    const data = await galleriesAttractionController(req.params);
+
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const galleriesHomestayHandler = async(req, res) => {
+  try {
+    const data = await galleriesHomestayController(req.params);
+
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const galleriesHomestayUnitHandler = async(req, res) => {
+  try {
+    const data = await galleriesHomestayUnitController(req.params);
+
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 module.exports = { galleriesGtpHandler, galleriesFacilityHandler, galleriesCulinaryHandler, galleriesWorshipHandler
-  , galleriesSouvenirHandler,  };
+  , galleriesSouvenirHandler, galleriesAttractionHandler, galleriesHomestayHandler, galleriesHomestayUnitHandler, };

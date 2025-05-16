@@ -11,7 +11,7 @@ const loginHandler = async (req, res) => {
     
     return res.status(200).send({
         status:'success', 
-        id: login.id,
+        user_id: login.id,
         accessToken: login.accessToken,
         email: login.email,
         google: login.google,

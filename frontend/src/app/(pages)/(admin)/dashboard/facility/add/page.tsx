@@ -5,7 +5,7 @@ import FileInput from "@/components/fileInput";
 import MapInput from "@/components/maps/mapInput";
 import { faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import 'react-toastify/dist/ReactToastify.css';
+// import 'react-toastify/dist/ReactToastify.css';
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -182,7 +182,7 @@ export default function AddFacilityAdmin() {
           </div>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900">Gallery</label>
-            <FileInput onGalleryChange={handleGalleryChange} />
+            <FileInput fileType={"image"} onGalleryChange={handleGalleryChange} />
           </div>
           <div className="flex py-4 px-8 gap-4">
             <button className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700" onClick={submitHandler}>
@@ -200,7 +200,7 @@ export default function AddFacilityAdmin() {
           <div className="flex justify-around">
             <div className="px-8">
               <label className="block mt-2 text-sm font-medium text-gray-900 ">Latitude</label>
-              <input type="number" name='latutude' value={latitude ?? ''} placeholder={`eg. ${latitude !== null ? latitude : '-0.524313'}`} onChange={handleLatitudeChange}
+              <input type="number" name='lattude' value={latitude ?? ''} placeholder={`eg. ${latitude !== null ? latitude : '-0.524313'}`} onChange={handleLatitudeChange}
                 className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
             </div>
             <div className="px-8">

@@ -27,9 +27,10 @@ export default function ChatBox({ data, currentUser  }: ChatBoxProps) {
   const [receivedMessage, setReceivedMessage] = useState(null);
   const [inputMessage, setInputMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
-    const socket = io('ws://localhost:3002')
+    const socket = io(`${backendUrl}`)
     socket.emit('join-room', data.chat_room_id);
     setSocket(socket)
 

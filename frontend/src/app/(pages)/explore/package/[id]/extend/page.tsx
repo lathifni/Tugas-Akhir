@@ -1,6 +1,6 @@
 'use client'
 
-import { createExtendBooking, fetchListAllService, fetchListAllServicePackageById, fetchListDayPackageById, fetchPackageActivityById, fetchPackageById } from "@/app/(pages)/api/fetchers/package"
+import { fetchListAllService, fetchListAllServicePackageById, fetchListDayPackageById, fetchPackageActivityById, fetchPackageById } from "@/app/(pages)/api/fetchers/package"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { ClipLoader } from "react-spinners"
 import { useSession } from "next-auth/react"
@@ -262,7 +262,7 @@ export default function ExtendIdPage({ params }: any) {
         category: selectedServiceData[0].category,
         id: `${selectedServiceData[0].id}`,
         name: `${selectedServiceData[0].name}`,
-        package_id: "P0014",
+        package_id: params.id,
         price: Number(selectedServiceData[0].price),
         service_package_id: `${selectedServiceData[0].id}`,
         status: typeService,
@@ -309,6 +309,8 @@ export default function ExtendIdPage({ params }: any) {
           contact_person: dataPackageById[0].contact_person,
           description: dataPackageById[0].description,
           custom: 1,
+          package_name: dataPackageById[0].name,
+          user_name: session.user.name
         }]
       }))
       if (res.status == 201) router.push(`/explore/package/${res.data.data}/booking`);
@@ -390,7 +392,7 @@ export default function ExtendIdPage({ params }: any) {
                     </button>
                     <Link href={'/explore/package'}>
                       <button className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white">
-                        <FontAwesomeIcon icon={faCheck} /> I'm Sure</button>
+                        <FontAwesomeIcon icon={faCheck} /> Im Sure</button>
                     </Link>
                   </div>
                 </Dialog>
@@ -430,7 +432,7 @@ export default function ExtendIdPage({ params }: any) {
           <div className="flex flex-col xl:flex-row ">
             <div className="w-full h-full px-1 xl:w-7/12">
               <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
-                <h2 className="text-center text-lg font-semibold">Detail Package</h2>
+                <h2 className="text-center text-lg font-semibold">Activity</h2>
                 <button className="px-2 py-1 flex border-solid border-2 p-2 m-1 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white" onClick={() => setAddDayOpen(!addDayOpen)}>
                   <FontAwesomeIcon icon={faPlus} className="mr-2 mt-1" /> <p>Day</p>
                 </button>
@@ -442,11 +444,11 @@ export default function ExtendIdPage({ params }: any) {
                         <div key={dayIndex} className="mb-3">
                           <div className="flex justify-between border-t pt-3">
                             <h2 className="text-lg font-semibold">Day {dayIndex + 1}</h2>
-                            {dayIndex + 1 > maxDayPackage ? (
+                            {/* {dayIndex + 1 > maxDayPackage ? (
                               <button className="border-solid border-2 border-red-500 rounded-lg text-red-500 px-2 py-1 hover:text-white hover:bg-red-500" >
                                 <FontAwesomeIcon icon={faXmark} />
                               </button>
-                            ) : null}
+                            ) : null} */}
                           </div>
                           <button className="px-2 py-1 flex border-solid border-2 p-2 m-1 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white"
                             onClick={() => handleAddActivitiesButton(day)}>
@@ -578,8 +580,8 @@ export default function ExtendIdPage({ params }: any) {
           </div>
         </div>
         <Dialog open={addActivitiesOpen} fullWidth maxWidth='sm' className="text-center">
-          <DialogTitle className="text-blue-500">Add New Acttivities</DialogTitle>
-          <DialogContent>
+          <DialogTitle className="text-blue-500">Add New Activities</DialogTitle>
+          <DialogContent dividers>
             <h2>Activity Type</h2>
             <Select displayEmpty label="Activity type" value={fieldAcitivityType}
               onChange={(event) => {
@@ -587,9 +589,9 @@ export default function ExtendIdPage({ params }: any) {
               }}>
               <MenuItem disabled value=""><em>Activity type</em></MenuItem>
               <MenuItem value="CP">Culinary</MenuItem>
-              <MenuItem value="W">Worship</MenuItem>
+              <MenuItem value="WP">Worship</MenuItem>
               <MenuItem value="SP">Souvenir Place</MenuItem>
-              <MenuItem value="HO">Homestay</MenuItem>
+              {/* <MenuItem value="HO">Homestay</MenuItem> */}
               <MenuItem value="FC">Facility</MenuItem>
               <MenuItem value="A">Attraction</MenuItem>
               <MenuItem value="E">Event</MenuItem>
@@ -606,10 +608,16 @@ export default function ExtendIdPage({ params }: any) {
                   if (fieldAcitivityType === "CP") {
                     return object.type === "CP";
                   } else if (fieldAcitivityType === "WP") {
-                    return object.type === "W";
+                    return object.type === "WP";
                   } else if (fieldAcitivityType === "SP") {
                     return object.type === "SP";
-                  } else if (fieldAcitivityType === "E") return object.type === 'E'
+                  } else if (fieldAcitivityType === "E") {
+                    return object.type === 'E'
+                  } else if (fieldAcitivityType === 'A') {
+                    return object.type === 'A'
+                  } else if (fieldAcitivityType === 'FC') {
+                    return object.type === 'FC'
+                  }
                 })
                 .map((object: { id: string, name: string }) => (
                   <MenuItem key={object.id} value={object.id}>
@@ -634,28 +642,28 @@ export default function ExtendIdPage({ params }: any) {
           </DialogActions>
         </Dialog>
         <Dialog open={addDayOpen} fullWidth maxWidth='sm' className="text-center">
-          <Box m={3} p={1}>
+          <Box>
             <DialogTitle className="text-blue-500">Add New Day</DialogTitle>
-            <h2>Description for this Day</h2>
+            <p>Description for this Day</p>
             <TextField label="Description" variant="outlined" onChange={(event) => {
               setDescriptionNewDay(event.target.value)
             }} />
             <DialogTitle className="text-blue-500">Add First Activity</DialogTitle>
-            <h2>Activity Type</h2>
+            <p>Activity Type</p>
             <Select displayEmpty label="Activity type" value={fieldAcitivityType}
               onChange={(event) => {
                 setFieldAcitivityType(event.target.value);
               }}>
               <MenuItem disabled value=""><em>Activity type</em></MenuItem>
               <MenuItem value="CP">Culinary</MenuItem>
-              <MenuItem value="W">Worship</MenuItem>
+              <MenuItem value="WP">Worship</MenuItem>
               <MenuItem value="SP">Souvenir Place</MenuItem>
-              <MenuItem value="HO">Homestay</MenuItem>
+              {/* <MenuItem value="HO">Homestay</MenuItem> */}
               <MenuItem value="FC">Facility</MenuItem>
               <MenuItem value="A">Attraction</MenuItem>
               <MenuItem value="E">Event</MenuItem>
             </Select>
-            <h2>Choose Object</h2>
+            <p>Choose Object</p>
             <Select id="select" value={selectedObject}
               MenuProps={MenuProps}
               onChange={(event) => {
@@ -667,10 +675,16 @@ export default function ExtendIdPage({ params }: any) {
                   if (fieldAcitivityType === "CP") {
                     return object.type === "CP";
                   } else if (fieldAcitivityType === "WP") {
-                    return object.type === "W";
+                    return object.type === "WP";
                   } else if (fieldAcitivityType === "SP") {
                     return object.type === "SP";
-                  } else if (fieldAcitivityType === "E") return object.type === 'E'
+                  } else if (fieldAcitivityType === "E") {
+                    return object.type === 'E'
+                  } else if (fieldAcitivityType === 'A') {
+                    return object.type === 'A'
+                  } else if (fieldAcitivityType === 'FC') {
+                    return object.type === 'FC'
+                  }
                 })
                 .map((object: { id: string, name: string }) => (
                   <MenuItem key={object.id} value={object.id}>
@@ -679,7 +693,7 @@ export default function ExtendIdPage({ params }: any) {
                 ))}
             </Select >
             <br />
-            <h2>Description for this activites</h2>
+            <p>Description for this activites</p>
             <TextField label="Description" variant="outlined" onChange={(event) => {
               setDescriptionNewActivities(event.target.value)
             }} />
@@ -695,7 +709,8 @@ export default function ExtendIdPage({ params }: any) {
         </Dialog>
         <Dialog open={addServiceOpen} fullWidth maxWidth='sm' className="text-center">
           <Box m={3} p={1}>
-            <DialogTitle className="text-blue-500">Add Service</DialogTitle>
+          <DialogTitle className="text-blue-500">Add Service</DialogTitle>
+          <DialogContent dividers>
             <h2>Service</h2>
             <Select id="select" value={selectedService}
               MenuProps={MenuProps}
@@ -708,6 +723,7 @@ export default function ExtendIdPage({ params }: any) {
                 </MenuItem >
               ))}
             </Select >
+          </DialogContent>
             <div className="mt-5">
               <button className="border-solid border-2 p-2 m-1 border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white mr-5" onClick={() => setAddServiceOpen(!addServiceOpen)}>
                 <FontAwesomeIcon icon={faXmark} className="mr-2" />Cancel

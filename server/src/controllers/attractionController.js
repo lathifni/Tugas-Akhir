@@ -1,4 +1,4 @@
-const { estuaryGeomAttraction, trackingGeomAttraction, tripGeomAttraction, makamGeomAttraction, waterListGeomAttraction, cultureListGeomAttraction, listGeomAttractions } = require("../services/attraction")
+const { estuaryGeomAttraction, trackingGeomAttraction, tripGeomAttraction, makamGeomAttraction, waterListGeomAttraction, cultureListGeomAttraction, listGeomAttractions, getAttractionById } = require("../services/attraction")
 
 
 const listGeomAttractionController = async() => {
@@ -28,5 +28,9 @@ const cultureListGeomAttractionController = async() => {
   return await cultureListGeomAttraction()
 }
 
+const getAttractionByIdController = async(params) => {
+  return await getAttractionById(params)
+}
+
 module.exports = { listGeomAttractionController, estuaryGeomAttractionController, trackingGeomAttractionController, tripGeomAttractionController, makamGeomAttractionController, waterListGeomAttractionController,
-cultureListGeomAttractionController, }
+cultureListGeomAttractionController, getAttractionByIdController, }

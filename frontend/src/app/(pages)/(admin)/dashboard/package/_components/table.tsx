@@ -7,9 +7,12 @@ import { faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons';
 interface Props {
   columns: any[];
   data: any[];
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onRowDelete: (rowData: any) => void;
 }
 
-export default function TablePackageAdmin({ columns, data }: Props) {
+export default function TablePackageAdmin({ columns, data, isOpen, setIsOpen, onRowDelete }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [filtering, setFiltering] = useState('')
   const table = useReactTable({
@@ -25,6 +28,12 @@ export default function TablePackageAdmin({ columns, data }: Props) {
     onSortingChange: setSorting,
     onGlobalFilterChange: setFiltering
   })
+
+  const handlingDeleteButton = (data: any) => {
+    setIsOpen(!isOpen)
+    // setSelectedData(data);
+    onRowDelete(data);
+  }
 
   return (
     <div>
@@ -59,11 +68,9 @@ export default function TablePackageAdmin({ columns, data }: Props) {
                     <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />
                   </button>
                 </Link>
-                <Link href={`/dashboard/package/${row.original.id}`}>
-                  <button className='mx-2 border-2 border-red-500 p-2 rounded-lg text-red-500 hover:text-white hover:bg-red-500 '>
-                    <FontAwesomeIcon icon={faTrash} style={{ fontSize: '1.3em' }} />
-                  </button>
-                </Link>
+                <button className='mx-2 border-2 border-red-500 p-2 rounded-lg text-red-500 hover:text-white hover:bg-red-500' onClick={() => handlingDeleteButton(row.original)}>
+                  <FontAwesomeIcon icon={faTrash} style={{ fontSize: '1.3em' }} />
+                </button>
               </td>
             </tr>
           ))}

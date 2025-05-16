@@ -1,4 +1,4 @@
-const { listVillage, getUlakanVillage } = require("../services/village")
+const { listVillage, getUlakanVillage, getEstuaryGeom } = require("../services/village")
 
 const listVillageController = async() => {
   return await listVillage()
@@ -8,4 +8,8 @@ const getUlakanVillageController = async() => {
   return await getUlakanVillage()
 }
 
-module.exports = { listVillageController, getUlakanVillageController, }
+const getEstuaryGeomController = async() => {
+  return await getEstuaryGeom()
+}
+
+module.exports = { listVillageController, getUlakanVillageController, getEstuaryGeomController, }

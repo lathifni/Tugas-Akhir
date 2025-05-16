@@ -71,6 +71,8 @@ export default function ExtendIdPage({ params }: any) {
     queryKey: ['listAllObject'],
     queryFn: () => fetchListAllObject()
   })
+  console.log(dataListAllObject);
+  
   const { data: dataListAllServicePackage, isLoading: loadingAllServicePackage } = useQuery({
     queryKey: ['listAllReviewPackageById'],
     queryFn: () => fetchListAllService()
@@ -331,7 +333,7 @@ export default function ExtendIdPage({ params }: any) {
                     </button>
                     <Link href={'/explore/package'}>
                       <button className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white">
-                        <FontAwesomeIcon icon={faCheck} /> I'm Sure</button>
+                        <FontAwesomeIcon icon={faCheck} /> Im Sure</button>
                     </Link>
                   </div>
                 </Dialog>
@@ -534,9 +536,9 @@ export default function ExtendIdPage({ params }: any) {
               }}>
               <MenuItem disabled value=""><em>Activity type</em></MenuItem>
               <MenuItem value="CP">Culinary</MenuItem>
-              <MenuItem value="W">Worship</MenuItem>
+              <MenuItem value="WP">Worship</MenuItem>
               <MenuItem value="SP">Souvenir Place</MenuItem>
-              <MenuItem value="HO">Homestay</MenuItem>
+              {/* <MenuItem value="HO">Homestay</MenuItem> */}
               <MenuItem value="FC">Facility</MenuItem>
               <MenuItem value="A">Attraction</MenuItem>
               <MenuItem value="E">Event</MenuItem>
@@ -553,10 +555,16 @@ export default function ExtendIdPage({ params }: any) {
                   if (fieldAcitivityType === "CP") {
                     return object.type === "CP";
                   } else if (fieldAcitivityType === "WP") {
-                    return object.type === "W";
+                    return object.type === "WP";
                   } else if (fieldAcitivityType === "SP") {
                     return object.type === "SP";
-                  } else if (fieldAcitivityType === "E") return object.type === 'E'
+                  } else if (fieldAcitivityType === "E") {
+                    return object.type === 'E'
+                  } else if (fieldAcitivityType === 'A') {
+                    return object.type === 'A'
+                  } else if (fieldAcitivityType === 'FC') {
+                    return object.type === 'FC'
+                  }
                 })
                 .map((object: { id: string, name: string }) => (
                   <MenuItem key={object.id} value={object.id}>
@@ -595,9 +603,9 @@ export default function ExtendIdPage({ params }: any) {
               }}>
               <MenuItem disabled value=""><em>Activity type</em></MenuItem>
               <MenuItem value="CP">Culinary</MenuItem>
-              <MenuItem value="W">Worship</MenuItem>
+              <MenuItem value="WP">Worship</MenuItem>
               <MenuItem value="SP">Souvenir Place</MenuItem>
-              <MenuItem value="HO">Homestay</MenuItem>
+              {/* <MenuItem value="HO">Homestay</MenuItem> */}
               <MenuItem value="FC">Facility</MenuItem>
               <MenuItem value="A">Attraction</MenuItem>
               <MenuItem value="E">Event</MenuItem>
@@ -615,9 +623,13 @@ export default function ExtendIdPage({ params }: any) {
                     return object.type === "CP";
                   } else if (fieldAcitivityType === "WP") {
                     return object.type === "W";
-                  } else if (fieldAcitivityType === "SP") {
-                    return object.type === "SP";
-                  } else if (fieldAcitivityType === "E") return object.type === 'E'
+                  } else if (fieldAcitivityType === "E") {
+                    return object.type === 'E'
+                  } else if (fieldAcitivityType === 'A') {
+                    return object.type === 'A'
+                  } else if (fieldAcitivityType === 'FC') {
+                    return object.type === 'FC'
+                  }
                 })
                 .map((object: { id: string, name: string }) => (
                   <MenuItem key={object.id} value={object.id}>

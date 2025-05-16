@@ -1,7 +1,7 @@
 'use client'
 
 import { fetchReservationById } from "@/app/(pages)/api/fetchers/reservation";
-import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Rating } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -11,6 +11,15 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import { fetchBookedHomestay } from "@/app/(pages)/api/fetchers/homestay";
+import ReviewDialog from "./_components/reviewDialog";
+import useAxiosAuth from "../../../../../../libs/useAxiosAuth";
+import { Bounce, toast, ToastContainer } from "react-toastify";
+import EditReviewDialog from "./_components/editReviewDialog";
+import RefundDialog from "./_components/refundDialog";
+import RefundConfirmationDialog from "./_components/refundConfirmationDialog";
+import RefundDepositDialog from "./_components/refundDepositDialog";
+import CancelDialog from "./_components/cancelDialog";
+import Link from "next/link";
 
 interface Activity {
   day: string;
@@ -18,14 +27,20 @@ interface Activity {
   activity_name: string;
 }
 
-interface ReservationData {
-  activity: Activity[];
-}
+// interface ReservationData {
+//   activity: Activity[];
+// }
 
-export default function ReservationId({ params }: any) {
+export default function ReservationIdPage({ params }: any) {
   const [dataActivity, setDataActivity] = useState<{ day: string; activities: Activity[] }[]>([]);
   const [token, setToken] = useState('')
   const [totalPriceHomestay, setTotalPriceHomestay] = useState(0)
+  const [reviewIsOpen, setReviewIsOpen] = useState(false)
+  const [refundIsOpen, setRefundIsOpen] = useState(false)
+  const [cancelIsOpen, setCancelIsOpen] = useState(false)
+  const [refundDepositIsOpen, setRefundDepositIsOpen] = useState(false)
+  const [refundProofIsOpen, setRefundProofIsOpen] = useState(false)
+  const [editReviewIsOpen, setEditReviewIsOpen] = useState(false)
   const steps = ['Waiting Confirmation Date', 'Deposit', 'Full Payment', 'Enjoy Trip'];
   const getStatusStep = () => {
     switch (dataReservationById.reservation.status_id) {
@@ -41,8 +56,9 @@ export default function ReservationId({ params }: any) {
         return -1; // Status tidak valid, tampilkan semua langkah
     }
   };
+  const now = moment();
 
-  const { data: dataReservationById, isLoading: loadingReservation } = useQuery({
+  const { data: dataReservationById, isLoading: loadingReservation, refetch } = useQuery({
     queryKey: ['reservationbyId', params.id],
     queryFn: () => fetchReservationById(params.id),
     // staleTime: 10000
@@ -51,7 +67,9 @@ export default function ReservationId({ params }: any) {
     queryKey: ['bookedHomestay', params.id],
     queryFn: () => fetchBookedHomestay(params.id),
     // staleTime: 10000
-  })  
+  })
+  console.log(dataReservationById);
+  
 
   const rupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -77,11 +95,9 @@ export default function ReservationId({ params }: any) {
         },
         onError: (error: any) => {
           console.log(error);
-
         },
         onClose: () => {
-          console.log('di close Anda belum menyelesaikan pembayaran');
-
+          console.log('di close Anda belum menyelesaikan pembayaran')
         }
       })
     }
@@ -124,10 +140,77 @@ export default function ReservationId({ params }: any) {
     }
   }, []);
 
-  if (dataReservationById) {
+  const handleReviewSaved = async(data: any) => {
+    console.log(data);
+    data.id = params.id
+    const response = await useAxiosAuth.post('reservation/review', data)
+      if (response.data.status == 'success') {
+        toast.success('Success')
+        refetch()
+      }
+      // toast.warning(response.data.message)
+  }
+
+  const downloadInvoiceHandler = async() => {
+    try {
+      const response = await useAxiosAuth.post('reservation/invoice', {
+        dataReservationById, dataBookedHomestay
+      }, {
+        responseType: 'blob', // Important to handle it as binary data
+      });
+      
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create a temporary link to download the PDF
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'invoice.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const refundOnSave = async(data:any) => {
+    console.log(data);
+    
+    data.id = params.id
+    const response = await useAxiosAuth.post('reservation/refund', data)
+      if (response.data.status == 'success') {
+        toast.success('Success')
+        refetch()
+      }
+      // toast.warning(response.data.message)
+  }
+
+  const cancelOnSave = async(data:any) => {
+    data.id = params.id
+    const response = await useAxiosAuth.post('reservation/cancel', data)
+      if (response.data.status == 'success') {
+        toast.success('Success')
+        refetch()
+      }
+  }
+
+  const refundConfirmationSave = async(data:any) => {
+    data.id = params.id
+    const response = await useAxiosAuth.put('reservation/refund/confirmation', data)
+      if (response.data.status == 'success') {
+        toast.success('Success')
+        refetch()
+      }
+  }
+
+  if (dataReservationById && dataBookedHomestay) {
     const activeStep = getStatusStep();
     return (
-      <div className="flex flex-col xl:flex-row m-1 sm:m-3 lg:m-5">
+      <div className="flex flex-col xl:flex-row m-1 sm:m-3 lg:m-4">
         <div className="w-full h-full px-1 xl:w-1/2">
           {dataReservationById && (
             <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
@@ -135,34 +218,33 @@ export default function ReservationId({ params }: any) {
               <h1 className="text-center text-xl font-bold">Reservation Package</h1>
               <table className="w-full mt-5 text-lg">
                 <tbody>
-                  <tr className="w-fit">
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Package Name</td>
-                    <td className="font-normal">{dataReservationById.reservation.name}</td>
+                  <tr className="">
+                    <td className="font-semibold whitespace-no-wrap">Package Name </td>
+                    <td>{dataReservationById.reservation.name}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Package Type</td>
-                    <td className="font-normal">{dataReservationById.reservation.type_name}</td>
+                    <td className="font-semibold whitespace-no-wrap">Package Type </td>
+                    <td>{dataReservationById.reservation.type_name}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Request Date</td>
-                    {/* <td className="font-normal">{new Date(dataReservationById.reservation.request_date).toDateString()}</td> */}
-                    <td className="font-normal">{moment(dataReservationById.reservation.request_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}</td>
+                    <td className="font-semibold whitespace-no-wrap">Request Date </td>
+                    <td>{moment(dataReservationById.reservation.request_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Days Package</td>
+                    <td className="font-semibold whitespace-no-wrap">Days Package </td>
                     {dataReservationById.reservation.max_day > 1 ? (
-                      <td className="font-normal">{dataReservationById.reservation.max_day} Days</td>
+                      <td>{dataReservationById.reservation.max_day} Days</td>
                     ) :
-                      <td className="font-normal">{dataReservationById.reservation.max_day} Day</td>}
+                      <td>{dataReservationById.reservation.max_day} Day</td>}
                   </tr>
                   <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Check-in</td>
-                    {/* <td className="font-normal">{new Date(dataReservationById.reservation.check_in).toDateString()}</td> */}
-                    <td className="font-normal">{moment(dataReservationById.reservation.check_in).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}</td>
+                    <td className="font-semibold whitespace-no-wrap">Check-in </td>
+                    {/* <td>{new Date(dataReservationById.reservation.check_in).toDateString()}</td> */}
+                    <td>{moment(dataReservationById.reservation.check_in).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Check-out</td>
-                    <td className="font-normal">
+                    <td className="font-semibold whitespace-no-wrap">Check-out </td>
+                    <td>
                       {(() => {
                         const checkInDate = moment(dataReservationById.reservation.check_in);
                         const checkOutDate = checkInDate.clone(); // Clone checkInDate to prevent mutation
@@ -176,55 +258,100 @@ export default function ReservationId({ params }: any) {
                       })()}
                     </td>
                   </tr>
-                  {/* <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Minimal Capacity</td>
-                    <td className="font-normal">{dataReservationById.reservation.min_capacity} people</td>
-                  </tr> */}
                   <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Total People</td>
-                    <td className="font-normal">{dataReservationById.reservation.total_people} People</td>
+                    <td className="font-semibold whitespace-no-wrap">Total People </td>
+                    <td>{dataReservationById.reservation.total_people} People</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Base Price Package</td>
-                    <td className="font-normal">{rupiah(dataReservationById.reservation.price)}</td>
+                    <td className="font-semibold whitespace-no-wrap">Base Price Package </td>
+                    <td>{rupiah(dataReservationById.reservation.price)}</td>
                   </tr>
                   <tr>
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Price Total</td>
-                    <td className="font-normal">{rupiah(dataReservationById.reservation.total_price)}
+                    <td className="font-semibold whitespace-no-wrap">Price Total </td>
+                    <td>{rupiah(dataReservationById.reservation.total_price)}
                       <span className="italic text-slate-600"> *Based on the activities and services added</span>
                     </td>
                   </tr>
+                  <tr>
+                    <td className="font-semibold whitespace-no-wrap">Rating </td>
+                    <td>
+                      {dataReservationById.reservation.rating > 0 ? (
+                         <Rating
+                         name="read-only-rating"
+                         value={dataReservationById.reservation.rating}
+                         readOnly
+                       />
+                      ) : (
+                        <span className="italic text-slate-500">No rating given</span>
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="font-semibold whitespace-no-wrap">Review </td>
+                    <td>
+                      {dataReservationById.reservation.review ? (
+                        dataReservationById.reservation.review
+                      ) : (
+                        <span className="italic text-slate-500">No review provided</span>
+                      )}
+                    </td>
+                  </tr>
                   <tr className="w-fit">
-                    <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Status</td>
+                    <td className="font-semibold whitespace-no-wrap">Status </td>
                     <td className="font-semibold">{dataReservationById.reservation.status}</td>
                   </tr>
-                  {dataReservationById.reservation.status_id === 2 ? (
+                  {now.diff(dataReservationById.reservation.request_date, 'hours')<24 && dataReservationById.reservation.status_id === 2 ? (
                     <tr>
-                      <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap"></td>
-                      <td className="font-normal">
+                      <td className="font-semibold whitespace-no-wrap"></td>
+                      <td>
                         <button className="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onClick={payNowButtonHandler}>Pay Deposit Now</button>
                       </td>
                     </tr>
                   ): null}
-                  {dataReservationById.reservation.status_id === 3 ? (
+                  {now.diff(dataReservationById.reservation.deposit_date, 'hours')<24 && dataReservationById.reservation.status_id === 3 ? (
                     <tr>
-                      <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap"></td>
-                      <td className="font-normal">
+                      <td className="font-semibold whitespace-no-wrap"></td>
+                      <td>
                         <button className="bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700" onClick={payNowButtonHandler}>Pay Full Payment Now</button>
                       </td>
                     </tr>
                   ): null}
                 </tbody>
               </table>
-              {/* <Stepper activeStep={dataReservationById.reservation.status_id - 1}>
-                {steps.map((label, index) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper> */}
+              {(dataReservationById.reservation.status_id == 8 
+              && dataReservationById.reservation.proof_refund != null
+              && dataReservationById.reservation.refund_check == null) && (
+                <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
+                  onClick={() => setRefundProofIsOpen(true)}>Refund Proof / Check</button>
+              )}
+              <div className="py-2">
+                {dataReservationById.reservation.rating > 0 ? (
+                  // If rating exists, show Edit Review button
+                  <button 
+                    className="px-3 py-2 rounded-lg bg-green-500 text-white hover:bg-green-700"
+                    onClick={() => setEditReviewIsOpen(true)}
+                  >
+                    Edit Review
+                  </button>
+                ) : (
+                  // If no rating, and status_id is 4, show Review button
+                  dataReservationById.reservation.status_id === 4 && (
+                    // <button 
+                    //   className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700"
+                    //   onClick={() => setReviewIsOpen(true)}
+                    // >
+                    //   Review
+                    // </button>
+                    <Link href={`/explore/reservation/${params.id}/review`}>
+                      <button className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700">
+                        Review
+                      </button>
+                    </Link>
+                  )
+                )}
+              </div>
               <Stepper activeStep={activeStep}>
-                {steps.map((label, index) => (
+                {steps.map((label) => (
                   <Step key={label}>
                     <StepLabel>{label}</StepLabel>
                   </Step>
@@ -236,23 +363,118 @@ export default function ReservationId({ params }: any) {
                 </AccordionSummary>
                 <AccordionSummary>
                   <div>
+                    {dataReservationById.reservation.payment_date != null && (
+                      <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
+                      onClick={()=> downloadInvoiceHandler()}
+                      >Download Invoice</button>
+                    )}
                     <table className="ml-2">
                       <tbody>
-                        <tr className="w-fit">
-                          <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Deposit Date</td>
-                          <td className="font-normal">{moment(dataReservationById.reservation.deposit_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}</td>
+                      <tr className="w-fit">
+                          <td className="font-semibold whitespace-no-wrap">Total Reservation Amount</td>
+                          <td className="font-normal">
+                            {rupiah(dataReservationById.reservation.total_price+totalPriceHomestay)}
+                          </td>
                         </tr>
                         <tr className="w-fit">
-                          <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Payment Date</td>
-                          <td className="font-normal">{moment(dataReservationById.reservation.payment_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}</td>
+                          <td className="font-semibold whitespace-no-wrap">Deposit Reservation</td>
+                          <td className="font-normal">
+                            {rupiah(dataReservationById.reservation.deposit)}
+                          </td>
                         </tr>
                         <tr className="w-fit">
-                          <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Refund Date</td>
-                          <td className="font-normal">{dataReservationById.reservation.refund_date}</td>
+                          <td className="font-semibold whitespace-no-wrap">Deposit Date</td>
+                          <td className="font-normal">
+                            {dataReservationById.reservation.deposit_date ? (
+                              moment(dataReservationById.reservation.deposit_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')
+                            ) : (
+                              <span className="italic text-gray-500"> Not available</span>
+                            )}
+                          </td>
                         </tr>
+                        {dataReservationById.reservation.payment_date && (
+                          <tr className="w-fit">
+                            <td className="font-semibold whitespace-no-wrap">Payment Date</td>
+                            <td className="font-normal">
+                              {moment(dataReservationById.reservation.payment_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}
+                            </td>
+                          </tr>
+                        )}
+                        {dataReservationById.reservation.cancel_date && (
+                          <tr className="w-fit">
+                            <td className="font-semibold whitespace-no-wrap">Cancel Date</td>
+                            <td className="font-normal">
+                              {moment(dataReservationById.reservation.cancel_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}
+                            </td>
+                          </tr>
+                        )}
+                        {dataReservationById.reservation.status_id == 8 && (
+                        <tr className="w-fit">
+                          <td className="font-semibold whitespace-no-wrap">Account Refund</td>
+                          <td className="font-normal">
+                            {dataReservationById.reservation.account_refund}
+                          </td>
+                        </tr>
+                      )}
+                        {dataReservationById.reservation.refund_date && (
+                          <tr className="w-fit">
+                            <td className="font-semibold whitespace-no-wrap">refund Date</td>
+                            <td className="font-normal">
+                              {moment(dataReservationById.reservation.refund_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}
+                            </td>
+                          </tr>
+                        )}
+                        {dataReservationById.reservation.status_id == 10 && (
+                          <tr className="w-fit">
+                            <td className="font-semibold whitespace-no-wrap" colSpan={2}>
+                              <div className="mb-4">
+                                <label className="block mb-2">Image Refund Proof</label>
+                                <div className="bg-gray-100 border-2 border-blue-500 border-dashed rounded-lg">
+                                  <img className="p-8" src={`/photos/refund/${dataReservationById.reservation.proof_refund}`} alt='gallery_proof_refund' />
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
-                    <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700">Refund</button>
+                    {/* {dataReservationById.reservation.payment_date != null && (
+                      (() => {
+                        // Calculate if today is within 3 days before the check-in date
+                        const checkInDate = moment(dataReservationById.reservation.check_in);
+                        const today = moment();
+                        const daysDifference = checkInDate.diff(today, 'days');
+
+                        // Button will be shown only if payment_date exists and is within 3 days before check-in
+                        return daysDifference >= 3 ? (
+                          <button
+                            className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
+                            onClick={() => setRefundIsOpen(true)}
+                          >
+                            Refund
+                          </button>
+                        ) : null;
+                      })()
+                    )} */}
+                    {(dataReservationById.reservation.payment_date != null &&
+                      dataReservationById.reservation.cancel_date == null
+                    ) && (
+                      <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
+                        onClick={() => setRefundIsOpen(true)}>Cancel & Refund</button>
+                    )}
+                    {(dataReservationById.reservation.deposit_date != null &&
+                      dataReservationById.reservation.payment_date == null &&
+                      dataReservationById.reservation.cancel_date == null
+                    ) && (
+                      <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
+                        onClick={() => setRefundDepositIsOpen(true)}>Cancel & Refund</button>
+                    )}
+                    {(dataReservationById.reservation.deposit_date == null &&
+                      dataReservationById.reservation.cancel_date == null) && (
+                      <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
+                        onClick={() => setCancelIsOpen(true)}>Cancel
+                      </button>
+                    )}
                   </div>
                 </AccordionSummary>
               </Accordion>
@@ -350,6 +572,34 @@ export default function ReservationId({ params }: any) {
             </table>
           </div>
         </div>
+        <ReviewDialog isOpen={reviewIsOpen} setIsOpen={setReviewIsOpen} onSave={handleReviewSaved} />
+        <EditReviewDialog isOpen={editReviewIsOpen} setIsOpen={setEditReviewIsOpen} onSave={handleReviewSaved} 
+          data={{
+            rating: dataReservationById.reservation.rating, 
+            review: dataReservationById.reservation.review
+          }}
+        />
+        <RefundDialog isOpen={refundIsOpen} setIsOpen={setRefundIsOpen} 
+          onSave={refundOnSave} totalRefund={(totalPriceHomestay+dataReservationById.reservation.total_price)*0.5} />
+        <RefundDepositDialog isOpen={refundDepositIsOpen} setIsOpen={setRefundDepositIsOpen} 
+          onSave={refundOnSave} totalRefund={(dataReservationById.reservation.deposit)*0.5} />
+        <CancelDialog isOpen={cancelIsOpen} setIsOpen={setCancelIsOpen} 
+          onSave={cancelOnSave}/>
+        <RefundConfirmationDialog isOpen={refundProofIsOpen} setIsOpen={setRefundProofIsOpen}
+          onSave={refundConfirmationSave} gallery={dataReservationById.reservation.proof_refund} />
+        <ToastContainer
+          position="top-center"
+          autoClose={3500}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
       </div>
     )
   }

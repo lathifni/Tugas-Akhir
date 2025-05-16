@@ -3,6 +3,7 @@
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function Redirect() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function Redirect() {
   
   useEffect(() => {
     const redirect = async() => {
-      const res = await axios.get(`http://localhost:3000/reservation/callback/redirect?dp_id=${order_id}`)
+      const res = await axios.get(`${backendUrl}/reservation/callback/redirect?dp_id=${order_id}`)
       console.log(res.data.data);
       const idReservation = res.data.data.id
       

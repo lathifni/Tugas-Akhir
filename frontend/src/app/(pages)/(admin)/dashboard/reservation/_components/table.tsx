@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, SortingState } from '@tanstack/react-table'
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faComment, faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   columns: any[];
@@ -57,6 +57,11 @@ export default function TableReservationAdmin({ columns, data }: Props) {
                 <Link href={`/dashboard/reservation/${row.original.id}`}>
                   <button className='mx-2 border-2 border-blue-500 p-2 rounded-lg text-blue-500 hover:text-white hover:bg-blue-500 '>
                     <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />
+                  </button>
+                </Link>
+                <Link href={`/dashboard/reservation/${row.original.id}/comment`}>
+                  <button className='mx-2 border-2 border-green-500 p-2 rounded-lg text-green-500 hover:text-white hover:bg-green-500 '>
+                    <FontAwesomeIcon icon={faComment} style={{ fontSize: '1.3em' }} />
                   </button>
                 </Link>
               </td>

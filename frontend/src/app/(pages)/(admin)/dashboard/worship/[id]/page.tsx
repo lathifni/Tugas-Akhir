@@ -12,7 +12,7 @@ import Link from "next/link";
 import MapEdit from "@/components/maps/mapEdit";
 import { fetchGalleriesWorship } from "@/app/(pages)/api/fetchers/galleries";
 import FileEdit from "@/components/fileEdit";
-import 'react-toastify/dist/ReactToastify.css';
+// import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/navigation'
 import { fetchWorshipById } from "@/app/(pages)/api/fetchers/worhsip";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -222,11 +222,11 @@ export default function WorshipIdPage({ params }: any) {
           </div>
             <div className="px-8">
               <label className="block mt-2 text-sm font-medium text-gray-900">Gallery Saved</label>
-              <FileEdit galleries={galleriesWorship} folder="worship" onDeleteImage={handleDeleteImage} />
+              <FileEdit galleries={galleriesWorship} folder="worship" onDeleteImage={handleDeleteImage} fileType={"image"}/>
             </div>
             <div className="px-8">
               <label className="block mt-2 text-sm font-medium text-gray-900">Gallery</label>
-              <FileInput onGalleryChange={handleGalleryChange} />
+              <FileInput fileType={"image"} onGalleryChange={handleGalleryChange} />
             </div>
             <div className="flex py-4 px-8 gap-4">
               <button className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700" onClick={submitHandler}>

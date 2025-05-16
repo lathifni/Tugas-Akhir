@@ -1,4 +1,5 @@
-const { getAllBasePackageController, getListAllServicePackageByIdController, getPackageByIdController, getAverageRatingPackageByIdController, getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController, getListDayPackageByIdController, getListAllServicePackageController, getLatestIdPackageController, createExtendBookingControoler, createExtendBookingController, listAllPackageController, listAllServicePackageController, getServiceByIdController, postServiceController, deleteServiceController } = require("../controllers/packageController");
+const { getAllBasePackageController, getListAllServicePackageByIdController, getPackageByIdController, getAverageRatingPackageByIdController, getListPackageActivityByIdController, getListAllGalleryPackageByIdController, getListAllReviewPackageByIdController, getListDayPackageByIdController, getListAllServicePackageController, getLatestIdPackageController, createExtendBookingControoler, createExtendBookingController, listAllPackageController, listAllServicePackageController, getServiceByIdController, postServiceController, deleteServiceController, createNewPackageController, allPackageInformationByIdController, updatePackageInformationController, deletePackageByIdController, exploreOurPackageController, getAllPackageActivityByIdController, exploreMyPackageController, exploreBrowsePackageController } = require("../controllers/packageController");
+const { allPackageType } = require("../services/package");
 
 const getAllBasePackageHandler = async(req, res) => {
   try {
@@ -43,6 +44,16 @@ const getAverageRatingPackageByIdHandler = async(req, res) => {
 const getListPackageActivityByIdHandler = async(req, res) => {
   try {
     const list = await getListPackageActivityByIdController(req.params)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const getAllPackageActivityByIdHandler = async(req, res) => {
+  try {
+    const list = await getAllPackageActivityByIdController(req.params)
 
     return res.status(200).send({ status:'success', data:list })
   } catch (error) {
@@ -160,7 +171,90 @@ const deleteServiceHandler = async(req, res) => {
   }
 }
 
+const allPackageTypeHandler = async(req, res) => {
+  try {
+    const data = await allPackageType()
+    
+    return res.status(200).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const createNewPackageHandler = async(req, res) => {
+  try {    
+    const data = await createNewPackageController(req.body)
+
+    return res.status(201).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const allPackageInformationByIdHandler = async(req, res) => {
+  try {
+    const data = await allPackageInformationByIdController(req.params)
+
+    return res.status(201).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const updatePackageInformationHandler = async(req, res) => {
+  try {
+    const data = await updatePackageInformationController(req.body)
+
+    return res.status(200).send({ status:'success' })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const deletePackageByIdHandler = async(req, res) => {
+  try {
+    const data = await deletePackageByIdController(req.params)
+
+    return res.status(201).send({ status:'success' })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const exploreOurPackageHandler = async(req, res) => {
+  try {
+    const data = await exploreOurPackageController(req.params)
+
+    return res.status(201).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const exploreBrowsePackageHandler = async(req, res) => {
+  try {
+    const data = await exploreBrowsePackageController(req.params)
+
+    return res.status(201).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const exploreMyPackageHandler = async(req, res) => {
+  try {
+    const data = await exploreMyPackageController(req.params)
+
+    return res.status(201).send({ status:'success', data:data })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = { getAllBasePackageHandler, getPackageByIdHandler, getListAllServicePackageByIdHandler, getAverageRatingPackageByIdHandler,
 getListPackageActivityByIdHandler, getListAllGalleryPackageByIdHandler, getListAllReviewPackageByIdHandler, getListDayPackageByIdHandler, 
 getListAllServicePackageHandler, getLatestIdPackageHandler, createExtendBookingHandler, listAllPackageHandler, listAllServicePackageHandler,
-getServiceByIdHandler, postServiceHandler, deleteServiceHandler, }
+getServiceByIdHandler, postServiceHandler, deleteServiceHandler, allPackageTypeHandler, createNewPackageHandler,
+allPackageInformationByIdHandler, updatePackageInformationHandler, deletePackageByIdHandler, exploreOurPackageHandler
+, getAllPackageActivityByIdHandler, exploreMyPackageHandler, exploreBrowsePackageHandler, 
+ }

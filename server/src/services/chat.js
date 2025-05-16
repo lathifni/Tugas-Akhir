@@ -53,8 +53,8 @@ const addNewChatWithAdmin = async(params) => {
           SELECT chat_room_id
           FROM member_chat_room
           WHERE user_id = ${params.user_id}
-    )
-);`
+      )
+    );`
   );
   return rows;
 }
@@ -63,6 +63,18 @@ const getLatestIdChatRoom = async() => {
   const [rows] = await promisePool.query(
     `SELECT MAX(CAST(SUBSTRING(id, 2) AS UNSIGNED)) AS max_id_number FROM chat_room WHERE id LIKE 'C%';`
   );  
+  return rows[0];
+}
+
+const checkMemberRoomChatAvailable = async(params) => {
+  const [rows] = await promisePool.query(
+    `SELECT mc1.chat_room_id as idChatRoom
+     FROM member_chat_room mc1
+     JOIN member_chat_room mc2
+     ON mc1.chat_room_id = mc2.chat_room_id
+     WHERE mc1.user_id = ? AND mc2.user_id = ?;`,
+    [params.user_id, params.target_user_id]
+  );
   return rows[0];
 }
 
@@ -85,5 +97,5 @@ const getNewChat = async(params) => {
 }
 
 module.exports = { createChat, userChats, findChat, addNewChatWithAdmin, getLatestIdChatRoom
-  , createNewChatRoom, createNewMemberChatRoom, 
+  , createNewChatRoom, createNewMemberChatRoom, checkMemberRoomChatAvailable,
  };

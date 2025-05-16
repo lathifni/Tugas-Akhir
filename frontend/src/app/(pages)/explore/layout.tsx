@@ -12,10 +12,10 @@ export default function ExploreLayout({
 }) {
   return (
     //tadi h-full
-    <div className="h-screen flex">
+    <div className="h screen flex">
       {/* <SideBar/> */}
       <NavigationTest/>
-      <main className="flex-1 h-full overflow-y-auto bg-slate-200">
+      <main className="flex-1 h-full overflow-y-auto bg-slate-200"> 
         <ExploreHeader/>
         {children}
       </main>

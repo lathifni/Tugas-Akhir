@@ -1,7 +1,7 @@
 import { fetchListAdminChat } from "@/app/(pages)/api/fetchers/chat";
-import { faTrash, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Dialog } from "@mui/material";
+import { Dialog, DialogContent } from "@mui/material";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -9,9 +9,6 @@ interface Props {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     user_id: number;
     onSelectAdmin: (adminId: number) => void;
-    // rowDelete: { name: string, id: string };
-    // setNotification: React.Dispatch<React.SetStateAction<{ message: string; type: string; } | null>>;
-    // onSuccessfulDelete: () => void;
 }
 
 interface ListAdmin {
@@ -40,9 +37,9 @@ export default function AddChatDialog({ isOpen, setIsOpen, user_id, onSelectAdmi
     };
 
     return (
-        <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
-            <div className="p-6">
-                <h2 className="text-xl font-semibold text-center mb-4">Select an Admin to Chat</h2>
+        <Dialog open={isOpen} maxWidth="lg" sx={{ "& .MuiDialog-paper": { width: "35%", maxWidth: "none" } }}>
+            <h2 className="text-xl font-semibold text-center mb-4">Select an Admin to Chat</h2>
+            <DialogContent dividers>  
                 {Array.isArray(listAdmin) && listAdmin.length > 0 ? (
                     <ul className="list-none p-0">
                         {listAdmin.map((admin) => (
@@ -52,7 +49,7 @@ export default function AddChatDialog({ isOpen, setIsOpen, user_id, onSelectAdmi
                                 onClick={() => handleSelectAdmin(admin.user_id)}  // Mengirim user_id ketika diklik
                             >
                                 <img
-                                    src={admin.user_image !== 'default.jpg' ? admin.user_image : '/path/to/default.jpg'}
+                                    src={admin.user_image !== 'default.jpg' ? admin.user_image : '/photos/user.jpg'}
                                     alt={admin.fullname}
                                     className="w-10 h-10 rounded-full mr-4"
                                 />
@@ -63,14 +60,14 @@ export default function AddChatDialog({ isOpen, setIsOpen, user_id, onSelectAdmi
                 ) : (
                     <p className="text-center text-gray-500">No admins available to chat.</p>
                 )}
-                <div className="text-center mt-4">
-                    <button
-                        className="px-4 py-1 m-4 text-white rounded-lg bg-blue-500 hover:bg-blue-400"
-                        onClick={() => setIsOpen(false)}
-                    >
-                        <FontAwesomeIcon icon={faXmark} /> Close
-                    </button>
-                </div>
+            </DialogContent>
+            <div className="text-center">
+                <button
+                    className="px-4 py-1 m-4 text-white rounded-lg bg-blue-500 hover:bg-blue-400"
+                    onClick={() => setIsOpen(false)}
+                >
+                    <FontAwesomeIcon icon={faXmark} /> Close
+                </button>
             </div>
         </Dialog>
     );

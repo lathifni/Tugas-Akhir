@@ -226,4 +226,6 @@ const MapEdit = forwardRef(({ onCoordinateChange, onGeometryChange, geom }: MapE
   )
 })
 
+MapEdit.displayName = 'MapEdit';
+
 export default MapEdit;

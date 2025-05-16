@@ -3,8 +3,9 @@
 import { fetchGeomGtp } from "@/app/(pages)/api/fetchers/gtp";
 import { Loader } from "@googlemaps/js-api-loader"
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Legend } from "./mapHelper";
+import { fetchEstuaryGeom } from "@/app/(pages)/api/fetchers/vilage";
 
 interface dataActivityDay {
     id: string;
@@ -12,6 +13,7 @@ interface dataActivityDay {
     activity_type: string;
     activity_lat: number;
     activity_lng: number;
+    activity: string;
 }
 
 interface dataRouteActivity {
@@ -36,7 +38,7 @@ interface MapPackageProps {
 interface UserLocation {
     lat: number;
     lng: number;
-}
+}   
 
 interface Step {
     distance?: {
@@ -65,6 +67,10 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
         queryKey: ['geomGtp'],
         queryFn: fetchGeomGtp
     })
+    const { data: geomEstuary, isLoading: loadingEstuary } = useQuery({
+        queryKey: ['geomEstuary'],
+        queryFn: fetchEstuaryGeom
+    })    
 
     const initMap = async (gtpData: any[], dataActivityDay: dataActivityDay[] | null, dataRouteActivity: dataRouteActivity[] | null) => {
         const { Map } = await loader.importLibrary('maps')
@@ -112,6 +118,7 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
 
         map = new Map(mapRef.current as HTMLDivElement, mapOptions)
         const digitasiGtp = new google.maps.Data()
+        const digitasiEstuary = new google.maps.Data()
 
         if (gtpData && Array.isArray(gtpData)) {
             gtpData.forEach((item: { geom: string }) => {
@@ -132,12 +139,30 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
             });
         }
 
-        const addMarker = (position: google.maps.LatLng, icon: string) => {
+        if (geomEstuary) {
+            console.log(geomEstuary);
+            digitasiEstuary.addGeoJson({
+                type: 'Feature',
+                geometry: geomEstuary[0].geom
+            });
+            digitasiEstuary.setStyle({
+                fillColor: '#A0522D', // Warna coklat sedang
+                strokeWeight: 3,
+                strokeColor: '#8B4513', // Warna coklat gelap untuk garis tepi
+                fillOpacity: 0.8, // Kurangi opacity agar lebih transparan
+                clickable: false
+            });
+            digitasiEstuary.setMap(map);
+        }
+
+        const addMarker = (position: google.maps.LatLng, icon: string, activity:string) => {
             const marker = new google.maps.Marker({
                 position: position,
                 map: map, // map adalah referensi ke peta
                 animation: google.maps.Animation.DROP,
-                icon: `/icon/${icon}.png`
+                // icon: `/icon/${icon}.png`,
+                label: `${activity}`,
+                
             });
 
             markersRef.current.push(marker);
@@ -163,6 +188,8 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
             const bounds = new google.maps.LatLngBounds();
             bounds.extend(start);
             bounds.extend(end);
+            console.log('test di bound to route');
+            
             map?.fitBounds(bounds);
         };
 
@@ -187,29 +214,69 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
             dataActivityDay.forEach((item: dataActivityDay) => {
                 if (item.activity_type === 'EV') {
                     const pos = new google.maps.LatLng(item.activity_lat, item.activity_lng)
-                    addMarker(pos, 'event')
+                    addMarker(pos, 'event', item.activity)
                 } else if (item.activity_type === 'CP') {
                     const pos = new google.maps.LatLng(item.activity_lat, item.activity_lng)
-                    addMarker(pos, 'culinary')
-                } else if (item.activity_type === 'WO') {
+                    addMarker(pos, 'culinary', item.activity)
+                } else if (item.activity_type === 'WP') {
                     const pos = new google.maps.LatLng(item.activity_lat!, item.activity_lng)
-                    addMarker(pos, 'worship')
+                    addMarker(pos, 'worship', item.activity)
                 } else if (item.activity_type === 'HO') {
                     const pos = new google.maps.LatLng(item.activity_lat!, item.activity_lng)
-                    addMarker(pos, 'homestay')
+                    addMarker(pos, 'homestay', item.activity)
                 } else if (item.activity_type === 'SP') {
                     const pos = new google.maps.LatLng(item.activity_lat!, item.activity_lng)
-                    addMarker(pos, 'souvenir')
+                    addMarker(pos, 'souvenir', item.activity)
                 } else {
                     const pos = new google.maps.LatLng(item.activity_lat!, item.activity_lng)
-                    addMarker(pos, 'event')
+                    addMarker(pos, 'event', item.activity)
                 }
             })
             setDistances([])
             setInstructions([])
+            
+            if (dataRouteActivity == null) {
+                const directionsService = new google.maps.DirectionsService();
+                const start = new google.maps.LatLng(
+                    dataActivityDay[0].activity_lat,
+                    dataActivityDay[0].activity_lng
+                );
+                const end = new google.maps.LatLng(
+                    dataActivityDay[dataActivityDay.length-1].activity_lat,
+                    dataActivityDay[dataActivityDay.length-1].activity_lng
+                );
+                const waypoints = dataActivityDay.slice(1, -1).map((activity) => ({
+                    location: new google.maps.LatLng(activity.activity_lat, activity.activity_lng),
+                    stopover: true
+                }));
+                const request: google.maps.DirectionsRequest = {
+                    origin: start,
+                    destination: end,
+                    waypoints: waypoints,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    optimizeWaypoints: false,
+                };
+      
+                directionsService.route(request, function (
+                    result: google.maps.DirectionsResult | null,
+                    status: google.maps.DirectionsStatus
+                ) {
+                    if (status === google.maps.DirectionsStatus.OK && result !== null) {
+                        const directionsRenderer = new google.maps.DirectionsRenderer({ map: map, suppressMarkers: true, });
+                        directionsRenderer.setDirections(result);
+                        routeRenderersRef.current.push(directionsRenderer);
+                        const myRoute = result.routes[0].legs[0];
+                        // setDistancesAndInstructions(myRoute);
+                        boundToRoute(start, end);
+                    } else {
+                        console.error("Directions request failed due to: " + status);
+                    }
+                });
+            }
         }
+        
         if (dataRouteActivity !== null && Array.isArray(dataRouteActivity)) {
-            clearMarkers();
+            clearMarkers();                   
             const directionsService = new google.maps.DirectionsService();
             let start: google.maps.LatLng, end: google.maps.LatLng;
             start = new google.maps.LatLng(dataRouteActivity[0].start.lat, dataRouteActivity[0].start.lng);
@@ -245,6 +312,8 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
 
     useEffect(() => {
         initMap(gtpData, dataActivityDay, dataRouteActivity)
+        console.log(dataActivityDay);
+        
     }, [gtpData, dataActivityDay, dataRouteActivity, jenisnya])
 
     return (

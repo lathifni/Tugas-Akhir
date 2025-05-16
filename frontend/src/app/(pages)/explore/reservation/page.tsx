@@ -3,21 +3,43 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react"
 import { fetchListReservationByUserId } from "../../api/fetchers/reservation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import React, { useState } from "react";
+import { Columns } from "./_components/column";
+import TableReservationExplore from "./_components/table";
+import DeleteDialogReservation from "./_components/deleteDialog";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 
-export default function Reservation() {
+export default function ReservationPage() {
   const { data: session, status, update } = useSession()
+  const [isOpen, setIsOpen] = useState(false)
+  const [rowDelete, setRowDelete] = useState<any>({})
+  const [isOpenDelete, setIsOpenDelete] = useState(false)
+  const [notification, setNotification] = useState<{ message: string, type: string } | null>(null);
 
-  const { isError, isSuccess, isLoading, data: dataReservationByUserId, error } = useQuery({
+  const { isError, isSuccess, isLoading, data: dataReservationByUserId, error, refetch } = useQuery({
     queryKey: ['listReservationByUserId'],
     queryFn: () => fetchListReservationByUserId((session!.user.user_id).toString()),
     enabled: !!session
   })
+  console.log(dataReservationByUserId);
+
+  const handleDelete = (data: any) => {
+    // if (window.confirm("Are you sure you want to delete this reservation?")) {
+    //   // mutation.mutate(id);
+    // }
+    setRowDelete(data)
+    setIsOpenDelete(true);
+    if (notification?.type == 'error') return toast.error(notification.message)
+    return toast.success(notification?.message)
+  };
+
+  const columns = React.useMemo(
+    () => Columns(), []
+  );
 
   if (isLoading) return <p className="text-center">Loading ...</p>
-  if (dataReservationByUserId !== undefined && dataReservationByUserId.length === 0) {
+  if (dataReservationByUserId !== undefined && dataReservationByUserId.length === 0) {    
     return (
       <div className="flex flex-col justify-center items-center h-full">
         <p className="text-center text-xl">Oops, no reservations found for your account.</p>
@@ -29,38 +51,30 @@ export default function Reservation() {
   }
   if (dataReservationByUserId !== undefined) {
     return (
-      <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
-        <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
-          <h1 className='text-xl font-bold text-center mb-5'>List Reservation</h1>
-          <table className="w3-table-all w3-hoverable w3-card-2">
-            <thead >
-              <tr className="border-b border-gray-300 font-semibold text-lg">
-                <td className="py-3">#</td>
-                <td className="py-3">Package Name</td>
-                <td className="py-3">Request Date</td>
-                <td className="py-3">Check In</td>
-                <td className="py-3">Status</td>
-                <td className="py-3">Actions</td>
-              </tr>
-            </thead>
-            <tbody>
-              {dataReservationByUserId?.map((items: { id: string, name: string, request_date: string, check_in: string }, index: number) => (
-                <tr key={items.id}>
-                  <td className="py-3">{index}</td>
-                  <td className="py-3">{items.name}</td>
-                  <td className="py-3">{new Date(items.request_date).toDateString()}</td>
-                  <td className="py-3">{new Date(items.check_in).toDateString()}</td>
-                  <td className="py-3">Status</td>
-                  <td className="py-3">
-                    <Link href={`/explore/reservation/${items.id}`} >
-                      <FontAwesomeIcon icon={faCircleInfo} className="p-2 text-blue-500 border-solid border-2 m-1 border-blue-500 rounded-lg hover:text-white hover:bg-blue-500" />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="flex flex-col m-1 sm:m-2 lg:m-4">
+        <div className="w-full h-full px-1 py-5 mb-3 bg-white rounded-lg">
+          <h1 className='text-xl font-bold text-center mb-4'>List Reservation</h1>
+          <TableReservationExplore columns={columns} data={dataReservationByUserId} 
+            onDelete={handleDelete}// Oper handler ke komponen tabel 
+          />
+          <DeleteDialogReservation 
+            isOpen={isOpenDelete} setIsOpen={setIsOpenDelete} 
+            rowDelete={rowDelete} setNotification={setNotification} onSuccessfulDelete={refetch}
+          />
         </div>
+        <ToastContainer
+          position="top-center"
+          autoClose={4500}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
       </div>
     )
   }

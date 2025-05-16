@@ -44,8 +44,10 @@ export default function Souvenir () {
               </button>
             </Link>
           </div>
-          <TableSouvenirAdmin columns={columns} data={data} isOpen={false} setIsOpen={setIsOpenDelete} onRowDelete={handleRowDelete} />
-          <DeleteDialogSouvenir isOpen={isOpenDelete} setIsOpen={setIsOpenDelete} rowDelete={rowDelete} setNotification={setNotification} onSuccessfulDelete={refetch}/>
+          <TableSouvenirAdmin columns={columns} data={data} 
+            isOpen={isOpen} setIsOpen={setIsOpen} onRowDelete={handleRowDelete} />
+          <DeleteDialogSouvenir isOpen={isOpenDelete} setIsOpen={setIsOpenDelete} 
+            rowDelete={rowDelete} setNotification={setNotification} onSuccessfulDelete={refetch}/>
         </div>
         <ToastContainer
           position="top-center"

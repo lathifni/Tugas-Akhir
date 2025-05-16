@@ -9,6 +9,8 @@ import { io } from 'socket.io-client'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowLeft, faCommentMedical } from "@fortawesome/free-solid-svg-icons"
 import AddChatDialog from "./_components/addChatDialog"
+import { useSearchParams } from 'next/navigation'
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 interface ChatData {
   fullname: string;
@@ -25,16 +27,18 @@ export default function ChatPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isAddChatDialogOpen, setIsAddChatDialogOpen] = useState(false)
   const [selectedAdminId, setSelectedAdminId] = useState<number | null>(null);
+  const searchParams = useSearchParams(); // Use useSearchParams hook
+  const id = searchParams.get('id');
 
   useEffect(() => {
     const getChats = async () => {
       try {
-        if (session) {
+        if (session) {          
           const userId = session.user.user_id;
           const data = await fetchUserChats(userId)
           setChats(data)
 
-          const socket = io('ws://localhost:3002')
+          const socket = io(`${backendUrl}`)
           socket.emit('new-user-add', userId)
           setSocket(socket)
         }
@@ -45,6 +49,12 @@ export default function ChatPage() {
     getChats()
   }, [session])
 
+  useEffect(() => {
+    if (id != undefined && session && chats) {
+      handleSelectAdmin(parseInt(id))
+    }
+  }, [id, session])
+
   const handleOpenChat = (chat:any) => {
     setCurrentChat(chat);
     setIsChatOpen(true); // Menampilkan chatbox pada layar kecil
@@ -54,7 +64,7 @@ export default function ChatPage() {
     setIsChatOpen(false); // Menampilkan kembali daftar percakapan pada layar kecil
   };
 
-  const handleSelectAdmin = async (adminId: number) => {
+  const handleSelectAdmin = async (adminId: number) => {    
     setSelectedAdminId(adminId);
     const dataNewRoomChat = {
       user_id: session?.user.user_id,
@@ -98,7 +108,7 @@ export default function ChatPage() {
         )}
         <button
           className="absolute bottom-4 right-4 w-20 h-20 md:w-12 md:h-12 rounded-full bg-blue-500 text-white shadow-xl flex items-center justify-center"
-        onClick={() => setIsAddChatDialogOpen(!isAddChatDialogOpen)}
+          onClick={() => setIsAddChatDialogOpen(!isAddChatDialogOpen)}
         >
           <FontAwesomeIcon icon={faCommentMedical} className="text-2xl" />
         </button>

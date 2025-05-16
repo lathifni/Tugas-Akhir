@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, SortingState } from '@tanstack/react-table'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faComment, faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   columns: any[];
   data: any[];
+  jenis: string;
+  onInfoClick: (rowData: any) => void; // New prop for info click
+  onChatClick: (rowData: any) => void; // New prop for chat click
+  onDeleteClick: (rowData: any) => void; // New prop for delete click
 }
 
-export default function TableUsers({ columns, data }: Props) {
+export default function TableUsers({ columns, data, jenis, onInfoClick, onChatClick, onDeleteClick, }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [filtering, setFiltering] = useState('')
   const table = useReactTable({
@@ -50,6 +56,28 @@ export default function TableUsers({ columns, data }: Props) {
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
+              <td className='px-1 py-2'>
+                {/* Common Info Button */}
+                <button className='mx-2 border-2 border-blue-500 p-2 rounded-lg text-blue-500 hover:text-white hover:bg-blue-500'
+                  onClick={() => onInfoClick(row.original)}>
+                  <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />
+                </button>
+
+                {/* Conditional Buttons based on "jenis" */}
+                {jenis === 'customer' ? (
+                  // Show chat icon for customer
+                  <button className='mx-2 border-2 border-green-500 p-2 rounded-lg text-green-500 hover:text-white hover:bg-green-500'
+                    onClick={() => onChatClick(row.original.id)}>
+                    <FontAwesomeIcon icon={faComment} style={{ fontSize: '1.3em' }} />
+                  </button>
+                ) : (
+                  // Show trash icon for admin
+                  <button className='mx-2 border-2 border-red-500 p-2 rounded-lg text-red-500 hover:text-white hover:bg-red-500'
+                    onClick={() => onDeleteClick(row.original)}>
+                    <FontAwesomeIcon icon={faTrash} style={{ fontSize: '1.3em' }} />
+                  </button>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -60,7 +88,6 @@ export default function TableUsers({ columns, data }: Props) {
         <strong className='mx-2'>
           Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
         </strong>
-
         <button className='px-2 py-1 bg-slate-300 rounded-lg m-1 disabled:bg-gray-200 hover:bg-slate-500 hover:text-white disabled:cursor-not-allowed' disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>Next Page</button>
         <button className='px-2 py-1 bg-slate-300 rounded-lg m-1 hover:bg-slate-500 hover:text-white' onClick={() => table.setPageIndex(table.getPageCount() - 1)}>Last Page</button>
       </div>

@@ -7,24 +7,38 @@ import { MdFoggy } from 'react-icons/md';
 import { RiDrizzleFill } from 'react-icons/ri';
 import { WiHumidity } from "react-icons/wi";
 import { FaWind } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import { fetchWeatherForecast } from "../../api/fetchers/integration";
 
 export default function WeatherForecast() {
   const [forecast, setForecast] = useState<any>(null);
   const [selectedDay, setSelectedDay] = useState<string>("");
 
+  const { isError, isSuccess, isLoading, data, error } = useQuery({
+    queryKey: ['fetchWeatherForecast'],
+    queryFn: () => fetchWeatherForecast(),
+    refetchOnWindowFocus: false
+  })
+
   useEffect(() => {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=-0.711577&longitude=100.195636&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,weather_code,wind_speed_10m`;
 
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        setForecast(data);
-        console.log(data);
+    // fetch(url)
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     // setForecast(data);
+    //     console.log(data);
         
-        setSelectedDay(new Date(data.hourly.time[0]).toDateString());
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+    //     setSelectedDay(new Date(data.hourly.time[0]).toDateString());
+    //   })
+    //   .catch((error) => console.error("Error fetching data:", error));
+    if (data) {
+      setForecast(data)
+      console.log(data);
+      
+      setSelectedDay(data.days[0])
+    }
+  }, [data]);
 
   if (!forecast) {
     return <div>Loading...</div>;
@@ -75,12 +89,12 @@ export default function WeatherForecast() {
     return <IoIosCloudy />; // Default icon if no match
   };
 
-  const forecastTime: string[] = forecast.hourly.time as string[];
-  const days: string[] = [
-    ...new Set(
-      forecastTime.map((time: string) => new Date(time).toDateString())
-    ),
-  ];
+  // const forecastTime: string[] = forecast.hourly.time as string[];
+  // const days: string[] = [
+  //   ...new Set(
+  //     forecastTime.map((time: string) => new Date(time).toDateString())
+  //   ),
+  // ];
 
   const handleDayChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedDay(event.target.value);
@@ -102,93 +116,95 @@ export default function WeatherForecast() {
     }
   };
 
-  const filteredForecast = forecast.hourly.time.reduce(
+  const filteredForecast = forecast.forecast.hourly.time.reduce(
     (acc: any, time: string, index: number) => {
       const day = new Date(time).toDateString();
       if (day === selectedDay) {
         acc.push({
           time: time,
-          temperature: forecast.hourly.temperature_2m[index],
-          weatherCode: forecast.hourly.weather_code[index],
-          humidity: forecast.hourly.relative_humidity_2m[index],
-          wind: forecast.hourly.wind_speed_10m[index],
-          precipitation: forecast.hourly.precipitation_probability[index],
+          temperature: forecast.forecast.hourly.temperature_2m[index],
+          weatherCode: forecast.forecast.hourly.weather_code[index],
+          humidity: forecast.forecast.hourly.relative_humidity_2m[index],
+          wind: forecast.forecast.hourly.wind_speed_10m[index],
+          precipitation: forecast.forecast.hourly.precipitation_probability[index],
         });
       }
       return acc;
     },
     []
   );
-
-  return (
-    <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
-      <div className="w-full h-full px-2 py-4 bg-white rounded-lg">
-        <h1 className="text-2xl font-bold text-center mb-2">Weather Forecast</h1>
-        {/* Dropdown for small screens (until lg) */}
-        <div className="block xl:hidden mb-4">
-          <select
-            value={selectedDay}
-            onChange={handleDayChange}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          >
-            {days.map((day: string) => (
-              <option key={day} value={day}>
+  
+  if (forecast) {
+    return (
+      <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">
+        <div className="w-full h-full px-2 py-4 bg-white rounded-lg">
+          <h1 className="text-2xl font-bold text-center mb-2">Weather Forecast</h1>
+          {/* Dropdown for small screens (until lg) */}
+          <div className="block xl:hidden mb-4">
+            <select
+              value={selectedDay}
+              onChange={handleDayChange}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              {data.days.map((day: string) => (
+                <option key={day} value={day}>
+                  {day}
+                </option>
+              ))}
+            </select>
+          </div>
+  
+          {/* Tabs for large screens (xl and up) */}
+          <div className="hidden xl:flex justify-center mb-4">
+            {forecast.days.map((day: string) => (
+              <button
+                key={day}
+                onClick={() => handleTabClick(day)}
+                className={`px-4 py-2 mx-2 border-b-2 ${
+                  selectedDay === day ? "border-green-500" : "border-transparent"
+                }`}
+              >
                 {day}
-              </option>
+              </button>
             ))}
-          </select>
-        </div>
-
-        {/* Tabs for large screens (xl and up) */}
-        <div className="hidden xl:flex justify-center mb-4">
-          {days.map((day: string) => (
-            <button
-              key={day}
-              onClick={() => handleTabClick(day)}
-              className={`px-4 py-2 mx-2 border-b-2 ${
-                selectedDay === day ? "border-green-500" : "border-transparent"
-              }`}
-            >
-              {day}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {filteredForecast.map((item: any, index: number) => (
-            <div
-              key={index}
-              className={`p-2 rounded-lg shadow-md ${getBackgroundColor(
-                item.time
-              )}`} // Apply background based on time
-            >
-              <p className="text-lg font-bold text-center">
-                {new Date(item.time).toLocaleTimeString("id-ID", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
-                WIB
-              </p>
-              <div className="flex justify-center items-center text-7xl">
-                {getWeatherIcon(item.weatherCode)}
+          </div>
+  
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {filteredForecast?.map((item: any, index: number) => (
+              <div
+                key={index}
+                className={`p-2 rounded-lg shadow-md ${getBackgroundColor(
+                  item.time
+                )}`} // Apply background based on time
+              >
+                <p className="text-lg font-bold text-center">
+                  {new Date(item.time).toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}{" "}
+                  WIB
+                </p>
+                <div className="flex justify-center items-center text-7xl">
+                  {getWeatherIcon(item.weatherCode)}
+                </div>
+                <p className="text-center">{getWeatherDescription(item.weatherCode)}</p>
+                <p className="text-xl my-2 font-bold text-center">
+                  {item.temperature}°C
+                </p>
+                <div className="flex justify-center items-center">
+                  <WiHumidity className="text-white text-4xl"/> {item.humidity}%
+                </div>
+                <div className="flex justify-center items-center">
+                  <FaWind className="text-yellow-300 text-2xl mr-1"/> {item.wind} km/h
+                </div>
+                <p className="text-lg text-center">
+                  Precipitation {item.precipitation}%
+                </p>
               </div>
-              <p className="text-center">{getWeatherDescription(item.weatherCode)}</p>
-              <p className="text-xl my-2 font-bold text-center">
-                {item.temperature}°C
-              </p>
-              <div className="flex justify-center items-center">
-                <WiHumidity className="text-white text-4xl"/> {item.humidity}%
-              </div>
-              <div className="flex justify-center items-center">
-                <FaWind className="text-yellow-300 text-2xl mr-1"/> {item.wind} km/h
-              </div>
-              <p className="text-lg text-center">
-                Precipitation {item.precipitation}%
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }

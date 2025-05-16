@@ -12,8 +12,10 @@ import { faAdd, faCheck, faInfo, faTrash } from "@fortawesome/free-solid-svg-ico
 import AddUnitHomestayDialog from "./_components/addUnitHomestayDialog";
 import GuideHomestayDialog from "./_components/guideHomestayDialog";
 import { Bounce, ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+// import 'react-toastify/dist/ReactToastify.css';
 import Reservation from "../../reservation/page";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Activity {
   day: string;
@@ -42,6 +44,7 @@ export default function DetailReservationIdPage({ params }: any) {
   const [listHomestay, setListHomestay] = useState<ListHomestay[]>([])
   const [selectedHomestays, setSelectedHomestays] = useState<ListHomestay[]>([]);
   const [totalPriceHomestay, setTotalPriceHomestay] = useState(0)
+  const router = useRouter();
 
   const { data: dataReservationById, isLoading: loadingReservation } = useQuery({
     queryKey: ['reservationbyId', params.id],
@@ -116,7 +119,14 @@ export default function DetailReservationIdPage({ params }: any) {
       selectedHomestays: selectedHomestays,
       totalPriceHomestay: totalPriceHomestay
     }
-    await bookingHomestayByIdReservationMutation(data)
+    // await bookingHomestayByIdReservationMutation(data)
+    // return router.push(`/explore/reservation`);
+    bookingHomestayByIdReservationMutation(data).then(() => {
+      console.log("Booking completed!");
+    }).catch((error) => {
+      console.error("Booking failed", error);
+    });
+    return router.push(`/explore/reservation`);
   }
 
   if (dataReservationById) {    
@@ -304,7 +314,9 @@ export default function DetailReservationIdPage({ params }: any) {
               </tbody>
             </table>
             <div className="flex justify-end gap-4 mt-4">
-              <button type="button" className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-700" >Continue Without Homestay</button>
+              <Link href={"/explore/reservation"}>
+                <button type="button" className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-700" >Continue Without Homestay</button>
+              </Link>
               <button type="button" className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700" onClick={handleBookingHomestay}>
                 <FontAwesomeIcon icon={faCheck}/> Save Booking Homestay
               </button>

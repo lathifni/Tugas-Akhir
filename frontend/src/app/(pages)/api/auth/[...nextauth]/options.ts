@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const options: NextAuthOptions = {
    pages: {
@@ -26,7 +27,7 @@ export const options: NextAuthOptions = {
             password: { label: "Password", type: "password" },
          },
          async authorize(credentials) {
-            const res = await fetch('http://localhost:3000/auth/login', {
+            const res = await fetch(`${backendUrl}/auth/login`, {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify({
@@ -47,7 +48,7 @@ export const options: NextAuthOptions = {
          if (account?.provider == 'google' && profile) {
             const requestLogin = await fetch(
                // 'https://8lcx6qm9-3000.asse.devtunnels.ms/oauth2/google/frontend',
-               'http://localhost:3000/oauth2/google/frontend',
+               `${backendUrl}/oauth2/google/frontend`,
                {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -66,7 +67,9 @@ export const options: NextAuthOptions = {
                { refreshToken: responseDataLogin.refreshToken },
                { user_image: responseDataLogin.user_image },
                { role: responseDataLogin.role },
-               { user_id: responseDataLogin.user_id }
+               { user_id: responseDataLogin.user_id },
+               { google: responseDataLogin.google },
+               { phone: responseDataLogin.phone }
             );
          }
          return { ...token, ...user};

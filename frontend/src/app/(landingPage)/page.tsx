@@ -26,7 +26,7 @@ const slides = [
     },
 ];
 
-export default function Home() {
+export default function LandingPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     Modal.setAppElement('#root');

@@ -3,18 +3,18 @@
 import { fetchPackageById } from "@/app/(pages)/api/fetchers/package";
 import { faInfo } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { Checkbox, TextField } from "@mui/material"
+import { Checkbox } from "@mui/material"
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { format } from 'date-fns';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import axios from "axios";
 import ReadGuide from "./_components/readGuide";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation'
-// import { postReservationTransaction } from "@/app/(pages)/api/fetchers/reservation";
+import useAxiosAuth from "../../../../../../../libs/useAxiosAuth";
+import { AxiosError } from 'axios';
+import { axiosAuth } from "@/libs/axios";
 
 export default function BookingIdPage({ params }: any) {
   const [readCheck, setReadCheck] = useState(false)
@@ -24,6 +24,10 @@ export default function BookingIdPage({ params }: any) {
   const [totalDeposit, setTotalDeposit] = useState(0)
   const [dateCheckIn, setDateCheckIn] = useState('')
   const [dateCheckOut, setDateCheckOut] = useState('')
+  const [codeReferral, setCodeReferral] = useState('')
+  const [idUserReferral, setIdUserReferral] = useState('')
+  const [weatherWarnings, setWeatherWarnings] = useState<string[]>([]);
+  const [waterWarnings, setWaterWarnings] = useState<string[]>([]);
   const [note, setNote] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const { data: session } = useSession();
@@ -33,11 +37,7 @@ export default function BookingIdPage({ params }: any) {
     queryKey: ['PackageById', params.id],
     queryFn: () => fetchPackageById(params.id)
   })
-  // const { isLoading, error, data:dataReservation } = useQuery({
-  //   queryKey: ['reservationTransaction'],
-  //   queryFn: postReservationTransaction
-  // });
-
+  
   const currentTime = new Date();
   const threeDaysLater = new Date(currentTime);
   threeDaysLater.setDate(currentTime.getDate() + 3);
@@ -47,7 +47,9 @@ export default function BookingIdPage({ params }: any) {
     setReadCheck(!readCheck)
   }
 
-  const readDateHandleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const readDateHandleChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
+    setWeatherWarnings([])
+    setWaterWarnings([])
     const inputDate = new Date(event.target.value);
     const daysToAdd = parseInt(dataPackageById[0].max_day)
     const formattedDateInput = format(inputDate, "yyyy-MM-dd HH:mm:ss");
@@ -58,7 +60,11 @@ export default function BookingIdPage({ params }: any) {
 
     newDate.setDate(newDate.getDate() + daysToAdd - 1);
     const formattedDate = format(newDate, "yyyy-MM-dd HH:mm:ss")
+    const check_weather = await axiosAuth.get(`integration/weather/${formattedDateInput}/${formattedDate}`)
+    const check_water = await axiosAuth.get(`integration/water/${formattedDateInput}/${formattedDate}`)
 
+    setWaterWarnings(check_water.data.data)
+    setWeatherWarnings(check_weather.data.data.warnings);
     setDateCheckOut(formattedDate)
   }
 
@@ -69,6 +75,9 @@ export default function BookingIdPage({ params }: any) {
 
       const formattedCurrentDate = format(currentDate, "yyyy-MM-dd HH:mm:ss");
       if (session?.user) {
+        if (codeReferral !== '' && idUserReferral==''){
+          return toast.warning('Code referral has not been verified yet. Please verify it or clear the field.');
+        }
         const data = {
           user_id: session.user.user_id,
           package_id: params.id,
@@ -77,15 +86,12 @@ export default function BookingIdPage({ params }: any) {
           total_people: totalPeople,
           total_price: totalPricePackage,
           deposit: totalDeposit,
-          note: note
+          note: note,
+          idUserReferral: idUserReferral,
+          package_name: dataPackageById[0].name,
+          user_name: session.user.name
         }
-        const config = {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-        const res = await axios.post('http://localhost:3000/reservation/process-transaction', data, config)
-
+        const res = await useAxiosAuth.post('reservation/process-transaction', data)
         if (res.status == 201) {
           if (dataPackageById[0].max_day > 1) {
             toast.success("Successful!");
@@ -150,18 +156,41 @@ export default function BookingIdPage({ params }: any) {
     }
   }, [totalOrderPackage, dataPackageById]);
 
+  const verifyButtonHandler = async () => {
+    if (codeReferral == '') {
+      return toast.warning('Code referral cannot be null');
+    }
+    try {
+      const res = await useAxiosAuth.get(`referral/verify/${codeReferral}`);
+      if (res.status == 200) {
+        setIdUserReferral(res.data.data.id);
+        console.log(res.data.data);
+        return toast.success('Code referral is available');
+      }
+    } catch (error: unknown) {
+      // Periksa apakah error adalah AxiosError
+      if (error instanceof AxiosError) {
+        if (error.response && error.response.status == 400) {
+          return toast.warning(error.response.data.msg);
+        }
+      }
+      console.log(error);
+      toast.error('An unexpected error occurred');
+    }
+  };  
+
   if (dataPackageById) {
     return (
-      <div className="mx-60 bg-white rounded-lg">
-        <div className="flex flex-col p-5 shadow-xl ">
-          <h1 className="font-bold text-lg text-center">Reservation of Package</h1>
-          <div className="italic text-white bg-red-500 rounded-lg w-fit mt-5 py-1 px-3 hover:bg-red-700 select-none" role="button" onClick={() => setIsOpen(!isOpen)}>
+      <div className="mx-2 lg:mx-20 pb-10">
+        <div className="flex flex-col p-4 shadow-xl bg-white rounded-lg">
+          <h1 className="font-bold text-2xl text-center">Reservation of Package</h1>
+          <button className="italic text-white bg-red-500 rounded-lg w-fit py-2 px-4 hover:bg-red-700 select-none" onClick={() => setIsOpen(!isOpen)}>
             <FontAwesomeIcon icon={faInfo} /> Read this guide
-          </div>
+          </button>
           <ReadGuide readGuideOpen={isOpen} setReadGuideOpen={setIsOpen} />
           <div className="italic select-none">
             <FormControlLabel control={
-              <Checkbox checked={readCheck} onChange={readCheckHandleChange} size="small" required />
+              <Checkbox checked={readCheck} onChange={readCheckHandleChange} size="small" required/>
             }
               label="I have read this guide"
             />
@@ -169,45 +198,124 @@ export default function BookingIdPage({ params }: any) {
           <div>
             <h2 className="font-medium text-lg">Information</h2>
             <p className="ml-5">Packaged : {dataPackageById[0].name}</p>
-            <p className="ml-5">Minimal Capacity : {dataPackageById[0].min_capacity}</p>
+            <p className="ml-5">Minimal Capacity : {dataPackageById[0].min_capacity} People</p>
             <p className="ml-5">Day: {dataPackageById[0].max_day}</p>
             <p className="ml-5">Price : {rupiah(dataPackageById[0].price)}</p>
           </div>
           <div>
             <h2 className="font-medium text-lg">Booking</h2>
-            <div className="relative w-fit ml-5">
-              <p>Check-in</p>
+            {weatherWarnings.length > 0 && (
+              <div className="">
+                <h2 className="font-medium text-lg">Weather Forecasting</h2>
+                <ul className="ml-5">
+                  {weatherWarnings.map((warning, index) => (
+                    <div
+                    key={index}
+                    className={`italic text-white rounded-lg w-fit py-2 px-4 mb-2 select-none ${
+                      warning === "The weather is good" ? "bg-green-500" : "bg-red-500"
+                    }`}
+                    >
+                      <li key={index}>{warning}</li>
+                    </div>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {waterWarnings.length > 0 && (
+              <div>
+                <h2 className="font-medium text-lg">Water Forecasting</h2>
+                <ul className="ml-5">
+                  {waterWarnings.map((warning, index) => (
+                    <div
+                    key={index}
+                    className={`italic text-white rounded-lg w-fit py-2 px-4 mb-2 select-none ${
+                      warning === "All water information forecast is good, but stay careful near the beach!" ? "bg-green-500" : "bg-red-500"
+                    }`}
+                    >
+                      <li key={index}>{warning}</li>
+                    </div>
+                  ))}
+                </ul>
+                {/* Hanya tampilkan detail warning jika semua warning tidak hanya pesan default */}
+                {waterWarnings.length > 1 || !waterWarnings.includes("All water information forecast is good, but stay careful near the beach!") ? (
+                  <div className="px-4 bg-yellow-100 border border-yellow-400 rounded text-justify">
+                    <h2 className="text-lg font-semibold text-yellow-700">Warnings</h2>
+                    <ul className="list-disc pl-5 text-yellow-700">
+                      <li>
+                        Avoid coastal areas when wave heights exceed 0.5 meters, as conditions may become hazardous, especially for small boats, surfers, and swimmers.
+                      </li>
+                      <li>
+                        Wave periods below 8 seconds may indicate choppy, unstable sea conditions, making activities like swimming and boating more challenging.
+                      </li>
+                      <li>
+                        Wind waves above 0.1 meters can create additional turbulence on the water surface, leading to dangerous conditions for smaller vessels and swimmers.
+                      </li>
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            )}
+            <div className="relative w-fit">
+              <label className="block mt-2 text-sm font-medium text-gray-900 ">Check-In</label>
               {/* <Datetime value={new Date()} className="appearance-none shadow border rounded-lg w-fit py-1 px-2" /> */}
               {/* <CalendarClock className="absolute right-3 top-7 w-10" /> */}
               <input className="appearance-none shadow border rounded-lg w-fit py-1 px-2" onChange={readDateHandleChange} type="datetime-local"
                 min={formattedDate + 'T00:00'}
               />
             </div>
-            <div className="relative w-fit ml-5 select-none">
-              <p>Check-out</p>
+            <div className="relative w-fit select-none">
+              <label className="block mt-2 text-sm font-medium text-gray-900 ">Check-Out</label>
               {/* <Datetime value={new Date()} className="appearance-none shadow border rounded-lg w-fit py-1 px-2" />
               <CalendarClock className="absolute right-3 top-7 w-10" /> */}
               <input className="appearance-none shadow border rounded-lg w-fit py-1 px-2" defaultValue={dateCheckOut} type="datetime-local" readOnly
               />
             </div>
           </div>
-          <p className="mt-3">Total People</p>
-          <TextField id="outlined-basic" required variant="outlined" onChange={totalPeopleHandleChange} size="small" type="number" />
-          <p className="mt-3">Total Order Package</p>
-          <TextField id="outlined-basic" value={totalOrderPackage + ' Pcs'} variant="outlined" size="small" />
-          <p className="mt-3">Note</p>
-          <TextField id="outlined-basic" variant="outlined" size="small" onChange={(event) => setNote(event.target.value)} />
-          <p className="mt-3">Total Price Package</p>
-          <TextField id="outlined-basic" value={rupiah(totalPricePackage)} variant="outlined" size="small" />
-          <p className="mt-3">Deposit</p>
-          <TextField id="outlined-basic" value={rupiah(totalDeposit)} variant="outlined" size="small" />
-          <div className="flex items-center mt-5">
-            <button type="button" className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700 ml-auto disabled:" onClick={saveReservationButtonHandler}>Save Reservation</button>
+          <div className="">
+            <label className="block mt-2 text-sm font-medium text-gray-900 ">Total People</label>
+            <input type="number" name='type_of_tourism' onChange={totalPeopleHandleChange}
+              className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+          </div>
+          <div className="">
+            <label className="block mt-2 text-sm font-medium text-gray-900 ">Total Order Package</label>
+            <input name='total_order_package' onChange={totalPeopleHandleChange} value={totalOrderPackage + ' Pcs'}
+              className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required  />
+          </div>
+          <div className="">
+            <label className="block mt-2 text-sm font-medium text-gray-900 ">Note</label>
+            <input name='note' onChange={(event) => setNote(event.target.value)}
+              className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+          </div>
+          <div className="">
+            <label className="block mt-2 text-sm font-medium text-gray-900 ">Total Price Package</label>
+            <input name='note' value={rupiah(totalPricePackage)}
+              className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required readOnly  />
+          </div>
+          <div className="">
+            <label className="block mt-2 text-sm font-medium text-gray-900 ">Deposit</label>
+            <input name='note' value={rupiah(totalDeposit)}
+              className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required readOnly  />
+          </div>
+          <div>
+            <label className="block mt-2 text-sm font-medium text-gray-900 ">Code Referral (Optional)</label>
+            <div className="flex items-center">
+              <input name='code_referral' onChange={(e) => setCodeReferral(e.target.value)}
+                className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+              <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-lg" onClick={verifyButtonHandler}>Verify</button>
+            </div>
+          </div>
+          <div className="flex py-4 gap-4">
+            <button className="px-3 py-2 rounded-lg bg-red-500 text-white hover:bg-red-700" onClick={() => router.back()}>
+              Cancel
+            </button>
+            <button className="px-3 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700" onClick={saveReservationButtonHandler}>
+            Save Reservation
+            </button>
           </div>
         </div>
         <ToastContainer
           position="top-center"
-          autoClose={3500}
+          autoClose={4500}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick

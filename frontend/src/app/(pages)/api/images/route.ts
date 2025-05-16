@@ -1,8 +1,6 @@
-import { NextApiRequest } from "next";
-import formidable from "formidable";
 import path from "path";
 import fs from "fs/promises";
-import {  NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export const config = {
   api: {
@@ -10,16 +8,16 @@ export const config = {
   },
 };
 
-export const POST = async (request: any) => {
+export const POST = async (request: any) => {  
   const formData = await request.formData();
   let category: string | undefined;
   const images: File[] = [];
   const fileNames: string[] = [];
 
-  for (const [name, value] of formData.entries()) {
+  for (const [name, value] of formData.entries()) {    
     if (name === "category") category = value as string;
     else if (name.startsWith("images[")) {
-      images.push(value as File);
+      images.push(value as File);         
     }
   }
 

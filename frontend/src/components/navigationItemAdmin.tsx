@@ -3,7 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react";
-import { faBed, faCalendarCheck, faCartShopping, faComment, faFileCircleCheck, faHouse, faList, faListUl, faMosque, faPuzzlePiece, faSquarePollHorizontal, faTemperature0, faUsers, faUtensils } from '@fortawesome/free-solid-svg-icons'
+import { faBed, faBullhorn, faCalendarCheck, faCartShopping, faComment, faFileCircleCheck, faGrip, faHouse, faLink, faList, faListUl, faMosque, faPuzzlePiece, faSquarePollHorizontal, faTemperature0, faUsers, faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons"
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
@@ -36,9 +36,15 @@ export default function NavigationItemAdmin() {
     <>
       <div className={`relative duration-500 select-none text-gray-200`} >
         <ul className="pt-6 px-3 font-medium text-lg">
+          <Link href={"/dashboard"}>
+            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faGrip} style={{ fontSize: '1.3em' }} />
+              <span className="flex-1">Dashboard</span>
+            </li>
+          </Link>
           <Link href={"/explore"}>
             <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
-              <FontAwesomeIcon icon={faHouse} style={{ fontSize: '1.3em' }} />
+              <FontAwesomeIcon icon={faHouse} style={{ fontSize: '1.1em' }} />
               <span className="flex-1">Home</span>
             </li>
           </Link>
@@ -50,7 +56,7 @@ export default function NavigationItemAdmin() {
           </Link>
           <Link href={'/dashboard/users'}>
             <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
-              <FontAwesomeIcon icon={faUsers} style={{ fontSize: '1.3em' }} />
+              <FontAwesomeIcon icon={faUsers} style={{ fontSize: '1em' }} />
               <span className="flex-1">Manage Users</span>
             </li>
           </Link>
@@ -89,10 +95,22 @@ export default function NavigationItemAdmin() {
               <span className="flex-1">Manage Homestay</span>
             </li>
           </Link>
+          <Link href={'/dashboard/referral'}>
+            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faLink} />
+              <span className="flex-1">Manage Referral</span>
+            </li>
+          </Link>
           <Link href={'/dashboard/information'}>
             <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
               <FontAwesomeIcon icon={faFileCircleCheck} />
               <span className="flex-1">General Information</span>
+            </li>
+          </Link>
+          <Link href={'/dashboard/announcement'}>
+            <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`} >
+              <FontAwesomeIcon icon={faBullhorn} />
+              <span className="flex-1">Manage Announcement</span>
             </li>
           </Link>
           <li className={`transition ease-in-out duration-500 flex rounded-md p-2 cursor-pointer hover:bg-blue-600 items-center gap-x-4 mb-2`}

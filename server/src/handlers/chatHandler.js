@@ -1,4 +1,4 @@
-const { userChatsController, createChatController, findChatController, whatsAppClientController, sendMessage, createRoomChatController, whatsAppClientControllerLamaaa } = require("../controllers/chatController");
+const { userChatsController, createChatController, findChatController, sendMessage, createRoomChatController, whatsAppClientControllerTestBaru } = require("../controllers/chatController");
 const { addNewChatWithAdmin } = require("../services/chat");
 
 const createChatHandler = async(req, res) => {
@@ -32,8 +32,10 @@ const findChatHandler = async(req, res) => {
 
 const whatsAppClientHandler = async(req, res) => {
   try {
-    const qrCode = await whatsAppClientControllerLamaaa()
+    // const qrCode = await whatsAppClientControllerLamaaa()
     // const qrCode = await whatsAppClientController()
+    // const qrCode = await whatsAppClientControllerTestBaru()
+    const qrCode = await whatsAppClientControllerTestBaru()
 
     // console.log(qr);
 
@@ -48,6 +50,8 @@ const sendWhatsAppMessageHandler = async (req, res) => {
   console.log('di sendMessage');
   
   try {
+    console.log('di dalam trynya send wa msg');
+    
     await sendMessage(req.body)
 
     res.status(200).json({ status: 'success', informasi: 'testttt' })

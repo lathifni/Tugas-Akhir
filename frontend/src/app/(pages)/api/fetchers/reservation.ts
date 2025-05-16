@@ -33,5 +33,9 @@ export const confirmationDate = async(id:string) => {
 export const bookingHomestayByIdReservation = async(data: any) => {
   const res = await useAxiosAuth.post('/reservation/booking-homestay', data)
   console.log(res.data.data);
-  
+}
+
+export const fetchHomestayUnitByReservationId = async(id:string) => {
+  const res = await useAxiosAuth.get(`/reservation/homestay-unit/${id}`)
+  return res.data.data
 }

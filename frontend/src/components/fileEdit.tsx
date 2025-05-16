@@ -8,9 +8,10 @@ interface FileEdit {
   galleries: { url: string }[];
   folder: string;
   onDeleteImage: (url: string) => void;
+  fileType: 'image' | 'video';
 }
 
-export default function FileEdit({ galleries, folder, onDeleteImage }: FileEdit) {
+export default function FileEdit({ galleries, folder, onDeleteImage, fileType }: FileEdit) {
   const [images, setImages] = useState(galleries)
 
   const handleDelete = (url: string) => {
@@ -34,7 +35,13 @@ export default function FileEdit({ galleries, folder, onDeleteImage }: FileEdit)
                   <button className="absolute top-1 right-1 px-3 py-2 bg-red-500 rounded-full text-white" onClick={() => handleDelete(image.url)}>
                     <FontAwesomeIcon icon={faTrash} />
                   </button>
-                  <img className="p-8" src={`/photos/${folder}/${image.url}`} alt={image.url} />
+                  { fileType === 'image' ? (
+                    <img className="p-8" src={`/photos/${folder}/${image.url}`} alt={image.url} />
+                  ) : (
+                    <video className="p-8" controls>
+                      <source src={`/videos/${folder}/${image.url}`} />
+                    </video>
+                  )}
                 </div>
               ))
             )}

@@ -9,11 +9,12 @@ export default function DashboardLayout({
   return (
     <div className="h screen flex">
       <NavigationAdmin />
-      <main className="flex-1 overflow-y-auto bg-slate-200">
+      <main className="flex-1 h-full overflow-y-auto bg-slate-200">
         <ExploreHeader />
-        <div style={{ overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
+        {children}
+        {/* <div style={{ overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
           {children}
-        </div>
+        </div> */}
       </main>
     </div>
   )

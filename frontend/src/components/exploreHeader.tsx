@@ -53,16 +53,16 @@ export default function ExploreHeader() {
           {!session && (
             <div className='w-20 h-12 rounded-lg mr-5 flex items-center justify-center'>
               <Link href="/login">
-                <p className="p-1 text-white rounded-lg bg-blue-500 hover:bg-green-400">Login</p>
+                <p className="p-2 font-semibold text-white rounded-lg bg-blue-500 hover:bg-green-400">Login</p>
               </Link>
             </div>
           )}
           {dropdownOpen && (
             <div className="absolute mt-1 right-5 bg-white border rounded shadow-lg w-28 z-50" onMouseLeave={() => setDropdownOpen(false)}>
-              <Link href="/">
+              <Link href={`/explore/profile`}>
                 <button className="block w-full py-2 px-4 text-left hover:bg-gray-200">My Profile</button>
               </Link>
-              <button className="block w-full py-2 px-4 text-left hover:bg-gray-600" onClick={() => signOut({ callbackUrl: "/" })}>Logout</button>
+              <button className="block w-full py-2 px-4 text-left hover:bg-gray-200" onClick={() => signOut({ callbackUrl: "/" })}>Logout</button>
             </div>
           )}
         </div>

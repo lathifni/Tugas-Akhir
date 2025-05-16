@@ -13,7 +13,6 @@ import Link from "next/link";
 
 export default function FacilityAdmin() {
   const [notification, setNotification] = useState<{ message: string, type: string } | null>(null);
-  const [isOpen, setIsOpen] = useState(false)
   const [rowDelete, setRowDelete] = useState<any>({})
   const [isOpenDelete, setIsOpenDelete] = useState(false)
   const { data, error, refetch } = useQuery({

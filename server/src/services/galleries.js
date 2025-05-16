@@ -25,6 +25,21 @@ const galleriesSouvenir = async(params) => {
   return rows
 }
 
+const galleriesAttraction = async(params) => {
+  const [rows] = await promisePool.query(`SELECT url FROM gallery_attraction WHERE attraction_id='${params.id}'`)
+  return rows
+}
+
+const galleriesHomestay = async(params) => {
+  const [rows] = await promisePool.query(`SELECT url FROM gallery_homestay WHERE homestay_id='${params.id}'`)
+  return rows
+}
+
+const galleriesHomestayUnit = async(params) => {
+  const [rows] = await promisePool.query(`SELECT url FROM gallery_unit WHERE homestay_id='${params.id}'`)
+  return rows
+}
+
 const deleteGalleriesFacilityById = async(params) => {
   const [rows] = await promisePool.query(`DELETE FROM gallery_facility WHERE facility_id='${params.id}'`)
   return rows
@@ -65,6 +80,22 @@ const deleteGalleriesSouvenirById = async(params) => {
   return rows
 }
 
+const deleteGalleriesHomestayById = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_homestay WHERE homestay_id='${params.id}'`)
+  return rows
+}
+
+const deleteGalleriesUnitHomestayById = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_unit WHERE homestay_id='${params.id}'`)
+  return rows
+}
+
+const deleteGalleriesUnit = async(params) => {
+  const [rows] = await promisePool.query(`DELETE FROM gallery_unit 
+    WHERE homestay_id='${params.homestay_id}' AND unit_number='${params.unit_number}'`)
+  return rows
+}
+
 // const deleteGalleriesFacilityById = async(params) => {
 //   const [rows] = await promisePool.query(`DELETE FROM gallery_facility WHERE url='${params}'`)
 //   return rows
@@ -72,4 +103,5 @@ const deleteGalleriesSouvenirById = async(params) => {
 
 module.exports = { galleriesGtp, galleriesFacility, galleriesCulinary, galleriesWorship, deleteGalleriesFacilityById, deleteGalleriesFacilityByUrl
   ,deleteGalleriesCulinaryByUrl, deleteGalleriesCulinaryById, deleteGalleriesWorshipById, deleteGalleriesWorshipByUrl, deleteGalleriesSouvenirByUrl
-  , deleteGalleriesSouvenirById, galleriesSouvenir,  }
+  , deleteGalleriesSouvenirById, galleriesSouvenir, deleteGalleriesHomestayById, deleteGalleriesUnit
+  , galleriesAttraction, galleriesHomestay, galleriesHomestayUnit, deleteGalleriesUnitHomestayById, }

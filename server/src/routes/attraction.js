@@ -1,5 +1,5 @@
 var express = require('express');
-const { estuaryGeomAttractionHandler, trackingGeomAttractionHandler, tripGeomAttractionHandler, makamGeomAttractionHandler, waterListGeomAttractionHandler, cultureListGeomAttractionHandler, listGeomAttractionHandler } = require('../handlers/attractionHandler');
+const { estuaryGeomAttractionHandler, trackingGeomAttractionHandler, tripGeomAttractionHandler, makamGeomAttractionHandler, waterListGeomAttractionHandler, cultureListGeomAttractionHandler, listGeomAttractionHandler, getAttractionByIdHandler } = require('../handlers/attractionHandler');
 
 var router = express.Router();
 
@@ -10,5 +10,6 @@ router.get('/makam', makamGeomAttractionHandler)
 router.get('/water', waterListGeomAttractionHandler)
 router.get('/culture', cultureListGeomAttractionHandler)
 router.get('/geom', listGeomAttractionHandler)
+router.get('/:id', getAttractionByIdHandler)
 
 module.exports = router;

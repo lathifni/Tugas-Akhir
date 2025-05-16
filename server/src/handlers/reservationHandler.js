@@ -1,4 +1,4 @@
-const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController, getAllReservationController, confirmationDateController, bookingHomestayByReservationIdController } = require("../controllers/reservationController");
+const { createReservationController, getListReservationByUserIdController, getReservationByIdController, callbackRedirectController, callbackNotificationController, getAllReservationController, confirmationDateController, bookingHomestayByReservationIdController, createReviewController, createInvoiceController, refundController, refundAdminProofController, refundConfirmationController, cancelController, homestayUnitByReservationIdController, createReviewPackageController, createReviewHomestayController, deleteReservationByIdController } = require("../controllers/reservationController");
 
 const createReservationHandler = async (req, res) => {
   try {
@@ -16,6 +16,16 @@ const confirmationDateHandler = async(req, res) => {
     await confirmationDateController(req.params)
   
     return res.status(200).send({ status:'success' })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const homestayUnitByReservationIdHandler = async(req, res) => {
+  try {
+    const list = await homestayUnitByReservationIdController(req.params)
+
+    return res.status(200).send({ status:'success', data:list })
   } catch (error) {
     console.log(error);
   }
@@ -82,5 +92,92 @@ const bookingHomestayByReservationIdHandler = async(req, res) => {
   }
 }
 
-module.exports = { createReservationHandler, confirmationDateHandler, getListReservationByUserIdHandler, getReservationByIdHandler, callbacNotificationkHandler, callbackRedirectHandler, 
-getAllReservationHandler, bookingHomestayByReservationIdHandler,  };
+const createReviewPackageHandler = async(req, res) => {
+  try {
+    const save = await createReviewPackageController(req.body)
+
+    res.status(201).json({ status: 'success', data: save })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const createReviewHomestayHandler = async(req, res) => {
+  try {
+    const save = await createReviewHomestayController(req.body)
+
+    res.status(201).json({ status: 'success', data: save })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const createInvoiceHandler = async(req, res) => {
+  try {    
+    const pdfData = await createInvoiceController(req.body);
+
+    res.writeHead(200, {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="invoice.pdf"',
+      'Content-Length': pdfData.length,
+    });
+    res.end(pdfData);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const refundHandler = async(req, res) => {
+  try {
+    const save = await refundController(req.body)
+
+    res.status(201).json({ status: 'success', data: save })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const cancelHandler = async(req, res) => {
+  try {
+    const save = await cancelController(req.body)
+
+    res.status(201).json({ status: 'success', data: save })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const refundAdminProofHandler = async(req, res) => {
+  try {
+    const save = await refundAdminProofController(req.body)
+
+    res.status(201).json({ status: 'success', data: save })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const refundConfirmationHandler = async(req, res) => {
+  try {
+    const save = await refundConfirmationController(req.body)
+
+    res.status(201).json({ status: 'success', data: save })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const deleteReservationByIdHandler = async(req, res) => {
+  try {
+    const deleteRow = await deleteReservationByIdController(req.params)
+    if (deleteRow == 1) return res.status(200).send({ status:'success' })
+    else return res.status(400).send({ status:'failed to add data',  })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { createReservationHandler, confirmationDateHandler, getListReservationByUserIdHandler, getReservationByIdHandler
+  , callbacNotificationkHandler, callbackRedirectHandler, getAllReservationHandler, bookingHomestayByReservationIdHandler
+  , createReviewPackageHandler, createInvoiceHandler, refundHandler, refundAdminProofHandler, refundConfirmationHandler
+  , cancelHandler, homestayUnitByReservationIdHandler, createReviewHomestayHandler, deleteReservationByIdHandler, };

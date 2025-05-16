@@ -10,4 +10,9 @@ const getUlakanVillage = async() => {
   return rows
 }
 
-module.exports = { listVillage, getUlakanVillage, }
+const getEstuaryGeom = async() => {
+  const [rows] = await promisePool.query(`SELECT ST_AsGeoJSON(geom) AS geom FROM attraction WHERE id='A0004';`)
+  return rows
+}
+
+module.exports = { listVillage, getUlakanVillage, getEstuaryGeom, }

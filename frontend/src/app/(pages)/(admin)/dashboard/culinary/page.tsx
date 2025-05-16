@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Columns } from "./_components/column";
 import TableCulinaryAdmin from "./_components/table";
 import { fetchAllCulinary } from "@/app/(pages)/api/fetchers/culinary";
-import { ToastContainer, Bounce, toast } from "react-toastify";
+import { ToastContainer, Bounce } from "react-toastify";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -13,7 +13,6 @@ import DeleteDialogFacility from "../facility/_components/deleteDialog";
 
 export default function CulinaryAdmin () {
   const [notification, setNotification] = useState<{ message: string, type: string } | null>(null);
-  const [isOpen, setIsOpen] = useState(false)
   const [rowDelete, setRowDelete] = useState<any>({})
   const [isOpenDelete, setIsOpenDelete] = useState(false)
   const { data, error, refetch } = useQuery({

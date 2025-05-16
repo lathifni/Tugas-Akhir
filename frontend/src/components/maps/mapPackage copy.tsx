@@ -198,7 +198,7 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
                 } else if (item.activity_type === 'CP') {
                     const pos = new google.maps.LatLng(item.activity_lat, item.activity_lng)
                     addMarker(pos, 'culinary')
-                } else if (item.activity_type === 'WO') {
+                } else if (item.activity_type === 'WP') {
                     const pos = new google.maps.LatLng(item.activity_lat!, item.activity_lng)
                     addMarker(pos, 'worship')
                 } else if (item.activity_type === 'HO') {

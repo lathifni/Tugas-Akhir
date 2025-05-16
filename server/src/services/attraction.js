@@ -35,4 +35,12 @@ const cultureListGeomAttraction = async() => {
   return rows
 }
 
-module.exports = { listGeomAttractions, estuaryGeomAttraction, makamGeomAttraction, tripGeomAttraction, trackingGeomAttraction, waterListGeomAttraction, cultureListGeomAttraction }
+const getAttractionById = async(params) => {
+  const [rows] = await promisePool.query(
+    `SELECT id,name,type,category,price,video_url,description,ST_AsGeoJSON(geom_area) AS geom,
+    ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng FROM attraction WHERE id='${params.id}'`)
+  return rows[0]
+}
+
+module.exports = { listGeomAttractions, estuaryGeomAttraction, makamGeomAttraction, tripGeomAttraction, trackingGeomAttraction, waterListGeomAttraction
+  , cultureListGeomAttraction, getAttractionById }

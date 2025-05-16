@@ -105,22 +105,29 @@ const signInGoogleController = async (payload) => {
     try {
         const { name, email, picture } = payload
         const availableEmailAndGoogle = await checkAvailableEmailAndGoogle({email})
+        console.log(availableEmailAndGoogle, 'ini bukti available');
+        
         if (availableEmailAndGoogle) await createDataUserByGoogleOAuth({ email, fullname: name, user_image: picture, google: 1 })
     
         const user = await getUserByEmailAndGoogle({email})
-        const { id,user_image, role } = user
+        const { id,user_image, role, phone} = user
         console.log(id, 'ini id usernya ');
         const accessToken = jwt.sign({ id,email,google,user_image }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' })
         const refreshToken = jwt.sign({ id,email,google,user_image }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d'})
         await storeRefreshToken({ refreshToken, email, google:1 })
 
-        return { accessToken, refreshToken, id, email, user_image, name,  google:1, role }
+        return { accessToken, refreshToken, id, email, user_image, name,  google:1, role, phone }
     } catch (error) {
         console.log(error);
     }
 }
 
+const checkAccountGoogleController = async (payload) => {
+    console.log(payload);
+    
+}
+
 module.exports = {
     authUrlRegisterGoogleController, authUrlLoginGoogleController, callBackGoogleByPass, registerGoogleController, logoutGoogleController, loginGoogleController,
-    signInGoogleController
+    signInGoogleController, checkAccountGoogleController,
 }

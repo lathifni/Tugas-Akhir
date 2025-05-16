@@ -16,6 +16,8 @@ const reservation = require('./reservation')
 const chat = require('./chat')
 const messages = require('./messages')
 const facility = require('./facility')
+const referral = require('./referral')
+const integration = require('./integration')
 
 const router = {}
 
@@ -37,5 +39,7 @@ router.reservation = reservation
 router.chat = chat
 router.messages = messages
 router.facility = facility
+router.referral = referral
+router.integration = integration
 
 module.exports = router

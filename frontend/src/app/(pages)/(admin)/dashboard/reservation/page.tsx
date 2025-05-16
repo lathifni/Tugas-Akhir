@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import TableReservationAdmin from "./_components/table"
 import React from "react";
 
-export default function ReservationAdmin () {
+export default function ReservationAdminPage () {
   const { data, error } = useQuery({
     queryKey: ['dataAllReservation'],
     queryFn: fetchAllReservation
@@ -16,6 +16,8 @@ export default function ReservationAdmin () {
     () => Columns(), []
   );
 
+  console.log(data);
+  
   if (data) {
     return (
       <div className="flex flex-col lg:flex-row m-1 sm:m-3 lg:m-5">

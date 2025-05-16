@@ -46,11 +46,11 @@ const logoutGoogleHandler = async (req, res) => {
     return res.sendStatus(200)
 }
 
-const signInGoogle = async (req, res) => {
+const signInGoogleHandler = async (req, res) => {
     const payload = req.body.profile
     const signIn = await signInGoogleController(payload)
-    console.log(signIn.id, 'ini idnya');
-
+    console.log(signIn);
+    
     return res.status(200).send({
         status:'success', 
         user_id: signIn.id,
@@ -60,9 +60,17 @@ const signInGoogle = async (req, res) => {
         user_image: signIn.user_image,
         name: signIn.name,
         refreshToken: signIn.refreshToken,
-        role: signIn.role
+        role: signIn.role,
+        phone: signIn.phone,
     })
 }
 
-module.exports = { registerGoogleHandler, registerGoogleCallBackHandler, loginGoogleHandler, loginGoogleCallBackHandler,logoutGoogleHandler, signInGoogle }
+const checkAccountGoogle = async(req, res) => {
+    const payload = req.body.profile
+    const signIn = await signInGoogleController(payload)
+    console.log(signIn);
+}
+
+module.exports = { registerGoogleHandler, registerGoogleCallBackHandler, loginGoogleHandler, loginGoogleCallBackHandler
+    ,logoutGoogleHandler, signInGoogleHandler, checkAccountGoogle,  }
 

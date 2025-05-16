@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, SortingState } from '@tanstack/react-table'
+import { flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getFilteredRowModel, SortingState } from '@tanstack/react-table'
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons';

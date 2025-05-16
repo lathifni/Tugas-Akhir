@@ -80,7 +80,9 @@ export default function NavigationTest() {
     <>
       <aside
         ref={sideBarRef}
-        className='w-0 group/sidebar h-full bg-secondary overflow-y-auto relative flex lg:w-72 lg:block flex-col z-[99999] transition-all ease-in-out duration-300 bg-blue-500'
+        className='w-0 group/sidebar min-h-screen bg-secondary overflow-y-auto relative flex lg:w-72 lg:block flex-col z-[99999] transition-all ease-in-out duration-300 bg-blue-500'
+        //dibawah yang lama
+        // className='w-0 group/sidebar h-full bg-secondary overflow-y-auto relative flex lg:w-72 lg:block flex-col z-[99999] transition-all ease-in-out duration-300 bg-blue-500'
       >
         <div
           onClick={collapse}

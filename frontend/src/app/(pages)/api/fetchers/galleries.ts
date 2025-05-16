@@ -24,3 +24,18 @@ export const fetchGalleriesSouvenir = async (id:string) => {
   const res = await useAxiosAuth.get(`/galleries/souvenir/${id}`)
   return res.data.data
 }
+
+export const fetchGalleriesAttraction = async (id:string) => {
+  const res = await useAxiosAuth.get(`/galleries/attraction/${id}`)
+  return res.data.data
+}
+
+export const fetchGalleriesHomestay = async (id:string) => {
+  const res = await useAxiosAuth.get(`/galleries/homestay/${id}`)
+  return res.data.data
+}
+
+export const fetchGalleriesHomestayUnit = async (id:string) => {
+  const res = await useAxiosAuth.get(`/galleries/homestay/unit/${id}`)
+  return res.data.data
+}

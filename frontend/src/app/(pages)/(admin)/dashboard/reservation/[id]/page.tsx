@@ -13,6 +13,10 @@ import StepLabel from '@mui/material/StepLabel';
 import ConfirmationDateDialog from "./_components/confirmationDateDialog";
 import useAxiosAuth from "../../../../../../../libs/useAxiosAuth";
 import { fetchBookedHomestay } from "@/app/(pages)/api/fetchers/homestay";
+import { Bounce, toast, ToastContainer } from "react-toastify";
+import RefundProofDialog from "./_components/refundProofDialog";
+import axios from "axios";
+import { useSession } from "next-auth/react";
 
 interface Activity {
   day: string;
@@ -24,11 +28,13 @@ interface ReservationData {
   activity: Activity[];
 }
 
-export default function ReservationId({ params }: any) {
+export default function ReservationIdPage({ params }: any) {
   const [dataActivity, setDataActivity] = useState<{ day: string; activities: Activity[] }[]>([]);
   const [token, setToken] = useState('')
   const [totalPriceHomestay, setTotalPriceHomestay] = useState(0)
   const [isOpenDialog, setIsOpenDialog] = useState(false)
+  const [refundProofIsOpen, setRefundProofIsOpen] = useState(false)
+  const { data: session, status, update } = useSession()
   const steps = ['Waiting Confirmation Date', 'Deposit', 'Full Payment', 'Enjoy Trip'];
   const getStatusStep = () => {
     switch (dataReservationById.reservation.status_id) {
@@ -45,7 +51,7 @@ export default function ReservationId({ params }: any) {
     }
   };
 
-  const { data: dataReservationById, isLoading: loadingReservation } = useQuery({
+  const { data: dataReservationById, isLoading: loadingReservation, refetch } = useQuery({
     queryKey: ['reservationbyId', params.id],
     queryFn: () => fetchReservationById(params.id),
     // staleTime: 10000
@@ -68,6 +74,8 @@ export default function ReservationId({ params }: any) {
 
   const confirmation = async (value: string) => {
     const res = await useAxiosAuth.get(`/reservation/confirmationDate/${params.id}/${value}`)
+    refetch()
+    toast.success('Confirmation is success')
     console.log(res.data.data);
   }
 
@@ -107,7 +115,24 @@ export default function ReservationId({ params }: any) {
     }
   }, []);
 
-  if (dataReservationById) {
+  const refundProofOnSave = async(data:any) => {
+    const formData = new FormData()
+    const category = 'refund'
+    formData.append('category', category);
+    formData.append('images[0]', data.gallery[0]!.file)
+    const responseCover = await axios.post("/api/images", formData);
+    console.log(responseCover.data.data);
+    const dataProof = {
+      url: responseCover.data.data,
+      admin_refund: session?.user.user_id,
+      id: params.id
+    }
+    const response = await useAxiosAuth.put('reservation/refund/adminproof', dataProof)
+    console.log(response.data);
+    if (response.data.status == 'success') toast.success('Success upload refund proof')
+  }
+
+  if (dataReservationById && dataBookedHomestay) {
     const activeStep = getStatusStep();
     return (
       <div className="flex flex-col xl:flex-row m-1 sm:m-3 lg:m-5">
@@ -180,6 +205,16 @@ export default function ReservationId({ params }: any) {
                   </tr>
                 </tbody>
               </table>
+              {dataReservationById.reservation.status_id == 8 && (
+                <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
+                  onClick={() => setRefundProofIsOpen(true)}>
+                    {dataReservationById.reservation.refund_check === null
+                      ? 'Submit Refund Proof'
+                      : dataReservationById.reservation.refund_check === 0
+                      ? 'Resubmit Refund Proof'
+                      : null}
+                  </button>
+              )}
               {/* <Stepper activeStep={dataReservationById.reservation.status_id - 1}>
                 {steps.map((label, index) => (
                   <Step key={label}>
@@ -206,25 +241,76 @@ export default function ReservationId({ params }: any) {
                   Payment Detail
                 </AccordionSummary>
                 <AccordionSummary>
-                  <div>
-                    <table className="ml-2">
-                      <tbody>
+                  <table className="ml-2">
+                    <tbody>
+                      <tr className="w-fit">
+                        <td className="font-semibold whitespace-no-wrap">Total Reservation Include Homestay</td>
+                        <td className="font-normal">
+                          {rupiah(dataReservationById.reservation.total_price+totalPriceHomestay)}
+                        </td>
+                      </tr>
+                      <tr className="w-fit">
+                        <td className="font-semibold whitespace-no-wrap">Deposit Reservation</td>
+                        <td className="font-normal">
+                          {rupiah(dataReservationById.reservation.deposit)}
+                        </td>
+                      </tr>
+                      <tr className="w-fit">
+                        <td className="font-semibold whitespace-no-wrap">Deposit Date</td>
+                        <td className="font-normal">
+                          {dataReservationById.reservation.deposit_date ? (
+                            moment(dataReservationById.reservation.deposit_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')
+                          ) : (
+                            <span className="italic text-gray-500"> Not available</span>
+                          )}
+                        </td>
+                      </tr>
+                      {dataReservationById.reservation.payment_date && (
                         <tr className="w-fit">
-                          <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Deposit Date</td>
-                          <td className="font-normal">{moment(dataReservationById.reservation.deposit_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}</td>
+                          <td className="font-semibold whitespace-no-wrap">Payment Date</td>
+                          <td className="font-normal">
+                            {moment(dataReservationById.reservation.payment_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}
+                          </td>
                         </tr>
+                      )}
+                      {dataReservationById.reservation.cancel_date && (
                         <tr className="w-fit">
-                          <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Payment Date</td>
-                          <td className="font-normal">{moment(dataReservationById.reservation.payment_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}</td>
+                          <td className="font-semibold whitespace-no-wrap">Cancel Date</td>
+                          <td className="font-normal">
+                            {moment(dataReservationById.reservation.cancel_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}
+                          </td>
                         </tr>
+                      )}
+                      {dataReservationById.reservation.refund_date && (
                         <tr className="w-fit">
-                          <td className="font-semibold md:w-40 lg:w-80 whitespace-no-wrap">Refund Date</td>
-                          <td className="font-normal">{dataReservationById.reservation.refund_date}</td>
+                          <td className="font-semibold whitespace-no-wrap">refund Date</td>
+                          <td className="font-normal">
+                            {moment(dataReservationById.reservation.refund_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}
+                          </td>
                         </tr>
-                      </tbody>
-                    </table>
-                    <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700">Refund</button>
-                  </div>
+                      )}
+                      {dataReservationById.reservation.status_id == 8 && (
+                        <tr className="w-fit">
+                          <td className="font-semibold whitespace-no-wrap">Account Refund</td>
+                          <td className="font-normal">
+                            {dataReservationById.reservation.account_refund}
+                          </td>
+                        </tr>
+                      )}
+                      {dataReservationById.reservation.status_id == 8 && (
+                        <tr className="w-fit">
+                          <td colSpan={2} className="text-center">
+                            <button
+                              className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
+                              onClick={() => setRefundProofIsOpen(true)}
+                            >
+                              Submit Refund Proof
+                            </button>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </AccordionSummary>
               </Accordion>
               <Accordion>
@@ -321,6 +407,21 @@ export default function ReservationId({ params }: any) {
             </table>
           </div>
         </div>
+        <ToastContainer
+          position="top-center"
+          autoClose={3500}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
+        <RefundProofDialog isOpen={refundProofIsOpen} setIsOpen={setRefundProofIsOpen}
+          onSave={refundProofOnSave} account_refund={dataReservationById.reservation.account_refund}/>
       </div>
     )
   }
