@@ -105,13 +105,11 @@ const signInGoogleController = async (payload) => {
     try {
         const { name, email, picture } = payload
         const availableEmailAndGoogle = await checkAvailableEmailAndGoogle({email})
-        console.log(availableEmailAndGoogle, 'ini bukti available');
         
         if (availableEmailAndGoogle) await createDataUserByGoogleOAuth({ email, fullname: name, user_image: picture, google: 1 })
     
         const user = await getUserByEmailAndGoogle({email})
         const { id,user_image, role, phone} = user
-        console.log(id, 'ini id usernya ');
         const accessToken = jwt.sign({ id,email,google,user_image }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20s' })
         const refreshToken = jwt.sign({ id,email,google,user_image }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d'})
         await storeRefreshToken({ refreshToken, email, google:1 })

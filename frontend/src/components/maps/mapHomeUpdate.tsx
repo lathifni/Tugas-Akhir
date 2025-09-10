@@ -9,7 +9,6 @@ import useAxiosAuth from "../../../libs/useAxiosAuth"
 import { MapContentCulinaryPlaces, MapContentWorshipPlaces, MapContentSouvenirPlaces, MapContentHomestayPlaces, Legend, MapContentGeneral, MapContentAttraction, GtpInfoWindow, MapContentBrowseCulinaryPlaces, MapContentBrowseWorshipPlaces, MapContentBrowseSouvenirPlaces, MapContentBrowseHomestayPlaces } from "./mapHelper"
 import { createRoot } from 'react-dom/client';
 import { fetchListGeomKec, fetchListGeomKotaKab } from "@/app/(pages)/api/fetchers/kotaKabKec"
-import { boolean } from "zod"
 
 interface UserLocation {
   lat: number;
@@ -157,29 +156,44 @@ export default function MapHomeUpdate({
   const initMap = async (kotaKabData: any[], kecData: any[], villageData: any[], gtpData: any[]) => {
     const { Map } = await loader.importLibrary('maps')
     window.google = google;
+    // const mapOptions: google.maps.MapOptions = {
+    //   center: position,
+    //   zoom: 6,
+    //   styles: [
+    //     {
+    //       "featureType": "administrative",
+    //       "elementType": "labels",
+    //       "stylers": [
+    //         {
+    //           "visibility": "off"
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "featureType": "administrative.country",
+    //       "elementType": "labels",
+    //       "stylers": [
+    //         {
+    //           "visibility": "on"
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // }
     const mapOptions: google.maps.MapOptions = {
-      center: position,
-      zoom: 6,
-      styles: [
-        {
-          "featureType": "administrative",
-          "elementType": "labels",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "administrative.country",
-          "elementType": "labels",
-          "stylers": [
-            {
-              "visibility": "on"
-            }
-          ]
-        }
-      ]
+        center: position,
+        zoom: 6,
+        mapTypeId: 'satellite',
+        styles: [
+          {
+            "featureType": "all",
+            "elementType": "labels",
+            "stylers": [
+                { "visibility": "off" }
+            ]
+          }
+        ],
+        disableDefaultUI: true,
     }
 
     const infoWindow = new google.maps.InfoWindow();
@@ -196,66 +210,17 @@ export default function MapHomeUpdate({
     const negaraGeoJsons = ['N01', 'N02', 'N03', 'N06']
     // const negaraGeoJsons = ['N01', 'N02', 'N03', 'N04']
     const warnaNegara: Record<string, string> = {
-      N01: '#793FDF', // Warna untuk N01
-      N02: '#03C988', // Warna untuk N02
-      N03: '#FF5733', // Warna untuk N03
-      N06: '#FFC300', // Warna untuk N06
+      N01: '#ffffff', // Warna untuk N01
+      N02: '#ffffff', // Warna untuk N02
+      N03: '#ffffff', // Warna untuk N03
+      N06: '#ffffff', // Warna untuk N06
+      // N01: '#793FDF', // Warna untuk N01
+      // N02: '#03C988', // Warna untuk N02
+      // N03: '#FF5733', // Warna untuk N03
+      // N06: '#FFC300', // Warna untuk N06
     };
     const provinsiGeojsons = ['P01', 'P02','P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10']
 
-    // if (visibility.country) {
-    //   for (const negaraGeoJson of negaraGeoJsons) {
-    //     fetch(`maps/${negaraGeoJson}.geojson`)
-    //       .then(response => response.json())
-    //       .then(data => {
-    //         digitasiNegara.addGeoJson(data)
-    //         digitasiNegara.setStyle({
-    //           fillColor: '#793FDF',
-    //           strokeWeight: 0.5,
-    //           strokeColor: '#ffffff',
-    //           fillOpacity: 0.5,
-    //           clickable: true,
-    //           zIndex: 1
-    //         })
-    //         digitasiNegara.setMap(map)
-    //       })
-    //       .catch(error => console.error(error))
-    //   }
-      
-    // //   fetch('maps/N05.geojson')
-    // // .then(response => response.json())
-    // // .then(data => {
-    // //   digitasiGtp.addGeoJson(data); // Menambahkan GeoJSON ke peta
-
-    // //   digitasiGtp.setStyle({
-    // //     fillColor: '#03C988', // Ganti warna sesuai kebutuhan
-    // //     strokeWeight: 3,
-    // //     strokeColor: '#ffffff',
-    // //     fillOpacity: 0.5, // Atur transparansi sesuai kebutuhan
-    // //     clickable: false
-    // //   });
-
-    // //   digitasiGtp.setMap(map); // Menampilkan di peta
-
-    // //   // Menambahkan label langsung di peta
-    // //   const textLabel = new google.maps.Marker({
-    // //     position: { lat: 1.277968756621077, lng: 103.843894137210782 }, // Posisi label (sesuaikan dengan koordinat dari GeoJSON)
-    // //     map: map,
-    // //     title: 'Steps to reach Ulakan village'
-    // //   });
-      
-    // //   const infoWindow = new google.maps.InfoWindow({
-    // //     content: '<div style="font-size: 14px; font-weight: bold;">' +
-    // //              '1. Fly to Malaysia.<br>' +
-    // //              '2. Take a flight to Padang city, Indonesia.<br>' +
-    // //              '3. Rent a car or take a taxi to Nagari Ulakan village.' +
-    // //              '</div>'
-    // //   });
-      
-    // //   infoWindow.open(map, textLabel);
-    // // })
-    // // .catch(error => console.error('Error loading GeoJSON:', error));
-    // }
     if (visibility.country) {
       for (const negaraGeoJson of negaraGeoJsons) {
         fetch(`maps/${negaraGeoJson}.geojson`)
@@ -271,7 +236,7 @@ export default function MapHomeUpdate({
               fillColor: fillColor,
               strokeWeight: 0.6,
               strokeColor: '#ffffff',
-              fillOpacity: 0.3,
+              fillOpacity: 0.05,
               clickable: true,
               zIndex: 1,
             });
@@ -1329,7 +1294,7 @@ export default function MapHomeUpdate({
     name: string, id:string, position: google.maps.LatLng, icon: string | null,
     activity:string, type_attr: string|null, address: string|null, 
     contact_person: string|null, capacity: string | null,
-    lat: number, lng: number ) => {
+    lat: number, lng: number, price:string|null ) => {
     const markerOptions: google.maps.MarkerOptions = {
       position: position,
       map: map, // map is the reference to the map
@@ -1344,13 +1309,6 @@ export default function MapHomeUpdate({
 
     const marker = new google.maps.Marker(markerOptions);
     markersRef.current.push(marker);
-
-    // marker.addListener('click', () => {
-    //     marker.setAnimation(google.maps.Animation.BOUNCE)
-    //     setTimeout(() => {
-    //         marker.setAnimation(null)
-    //     }, 1700)
-    // });
     marker.addListener('click', () => {
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(() => {
@@ -1359,7 +1317,7 @@ export default function MapHomeUpdate({
 
       const container = document.createElement('div');
       const root = createRoot(container);
-      root.render(<MapContentGeneral id={id} icon={icon} name={name} address={address} capacity={capacity} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
+      root.render(<MapContentGeneral id={id} price={price} icon={icon} name={name} address={address} capacity={capacity} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container)
       }).open(map, marker)
@@ -1431,7 +1389,7 @@ export default function MapHomeUpdate({
         map[obj.id] = { 
           lat: obj.lat, lng: obj.lng, name:obj.name, id: obj.id,
           address:obj.address, capacity:obj.capacity, contact_person:obj.contact_person, 
-          type_attr:obj.type_attr };
+          type_attr:obj.type_attr, price:obj.price };
         return map;
       }, {});
 
@@ -1444,6 +1402,8 @@ export default function MapHomeUpdate({
       if (dayActivities.length > 0) {
         const dayActivitiesWithCoordinates = dayActivities.map(activity => {
           const coordinates = objectMap[activity.object_id] || { lat: null, lng: null };
+          console.log(coordinates);
+          
           return {
             ...activity,
             id:coordinates.id,
@@ -1453,40 +1413,40 @@ export default function MapHomeUpdate({
             address: coordinates.address,
             capacity: coordinates.capacity,
             contact_person: coordinates.contact_person,
-            type_attr: coordinates.type_attr
+            type_attr: coordinates.type_attr,
+            price: coordinates.price,
           };
         });
-        console.log('ini day selectnya',dayActivitiesWithCoordinates);
+        // console.log('ini day selectnya',dayActivitiesWithCoordinates);
         dayActivitiesWithCoordinates.forEach((activity) => {
-          // console.log(activity);
+          console.log(activity);
           
           if (activity.lat !== null && activity.lng !== null) {
             if (activity.type === 'EV') {
               const pos = new google.maps.LatLng(activity.lat, activity.lng)
-              addMarker(activity.name, activity.id, pos, 'event', activity.activity, activity.type_attr, null, null, null, activity.lat, activity.lng)
+              addMarker(activity.name, activity.id, pos, 'event', activity.activity, activity.type_attr, null, null, null, activity.lat, activity.lng,null)
             } else if (activity.type === 'CP') {
               const pos = new google.maps.LatLng(activity.lat, activity.lng)
-              addMarker(activity.name, activity.id, pos, 'culinary', activity.activity, null, activity.address, activity.contact_person, null, activity.lat, activity.lng)
+              addMarker(activity.name, activity.id, pos, 'culinary', activity.activity, null, activity.address, activity.contact_person, null, activity.lat, activity.lng,null)
             } else if (activity.type === 'WP') {
               const pos = new google.maps.LatLng(activity.lat!, activity.lng)
-              addMarker(activity.name, activity.id, pos, 'worship', activity.activity, null, activity.address, null, activity.capacity, activity.lat, activity.lng)
+              addMarker(activity.name, activity.id, pos, 'worship', activity.activity, null, activity.address, null, activity.capacity, activity.lat, activity.lng,null)
             } else if (activity.type === 'HO') {
-                const pos = new google.maps.LatLng(activity.lat!, activity.lng)
-                addMarker(activity.name, activity.id, pos, 'homestay', activity.activity, null, null, null, null, activity.lat, activity.lng)
+              const pos = new google.maps.LatLng(activity.lat!, activity.lng)
+              addMarker(activity.name, activity.id, pos, 'homestay', activity.activity, null, null, null, null, activity.lat, activity.lng,null)
             } else if (activity.type === 'SP') {
-                const pos = new google.maps.LatLng(activity.lat!, activity.lng)
-                addMarker(activity.name, activity.id, pos, 'souvenir', activity.activity, null, activity.address, activity.contact_person, null, activity.lat, activity.lng)
+              const pos = new google.maps.LatLng(activity.lat!, activity.lng)
+              addMarker(activity.name, activity.id, pos, 'souvenir', activity.activity, null, activity.address, activity.contact_person, null, activity.lat, activity.lng,null)
             } else if (activity.type === 'A') {
               const pos = new google.maps.LatLng(activity.lat!, activity.lng)
-              addMarker(activity.name, activity.id, pos, 'attraction', activity.activity, null, activity.address, activity.contact_person, null, activity.lat, activity.lng)
+              addMarker(activity.name, activity.id, pos, 'attraction', activity.activity, null, activity.address, activity.contact_person, null, activity.lat, activity.lng,activity.price)
             } else {
-                const pos = new google.maps.LatLng(activity.lat!, activity.lng)
-                addMarker(activity.name, activity.id, pos, null, activity.activity,null, null, null, null, activity.lat, activity.lng)
+              const pos = new google.maps.LatLng(activity.lat!, activity.lng)
+              addMarker(activity.name, activity.id, pos, null, activity.activity,null, null, null, null, activity.lat, activity.lng,null)
             }
           }
         });
         if (dayActivitiesWithCoordinates.length > 1) {
-          console.log(dayActivitiesWithCoordinates);
           
           const directionsService = new google.maps.DirectionsService();
 
@@ -1596,7 +1556,7 @@ export default function MapHomeUpdate({
           </div>
         )}
       </div>
-      <div ref={mapRef} className="text-slate-700 h-[500px] md:h-[700px] rounded-lg"></div>
+      <div ref={mapRef} className="text-slate-700 h-[500px] md:h-[550px] rounded-lg"></div>
     </div>
   )
 }

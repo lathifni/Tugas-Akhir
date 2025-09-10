@@ -6,8 +6,8 @@ import { ClipLoader } from "react-spinners"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faCartPlus, faCheck, faPencil, faPlus, faXmark } from "@fortawesome/free-solid-svg-icons"
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Select, TextField } from "@mui/material"
+import { faCartPlus, faCheck, faCircleCheck, faPencil, faPlus, faReply, faTrashCan, faTriangleExclamation, faXmark } from "@fortawesome/free-solid-svg-icons"
+import { Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, MenuItem, Select, TextField } from "@mui/material"
 import { fetchListAllObject } from "@/app/(pages)/api/fetchers/gtp"
 import Link from "next/link"
 import useAxiosAuth from "../../../../../../../libs/useAxiosAuth"
@@ -105,7 +105,6 @@ export default function CustomIdPage({ params }: any) {
       },
     },
   };
-  console.log(session?.user);
   
   const currentTime = new Date();
   const formattedDate = currentTime.toISOString().slice(0, 19).replace('T', ' ');
@@ -117,8 +116,10 @@ export default function CustomIdPage({ params }: any) {
     console.log(newDay, 'ini bagian newday');
 
     setAddDayOpen(!addDayOpen)
-    const dataSelectedObject = dataListAllObject.filter((object: { id: string, name: string, type: string, price: string, category: string }) => object.id == `${selectedObject}`)
-    const price = (dataSelectedObject[0].price).toString()
+    const dataSelectedObject = dataListAllObject.filter((object: { id: string, name: string, type: string, price: number, category: string }) => object.id == `${selectedObject}`)
+    const price = dataSelectedObject[0].price
+    console.log(price, 'di handleAddDay');
+    
     const newActivities = [{
       package_id: `${params.id}`,
       object_id: `${selectedObject}`,
@@ -160,8 +161,8 @@ export default function CustomIdPage({ params }: any) {
           }
         }
       });
-      const dataSelectedObject = dataListAllObject.filter((object: { id: string, name: string, type: string, price: string, category: string }) => object.id == `${selectedObject}`)
-
+      const dataSelectedObject = dataListAllObject.filter((object: { id: string, name: string, type: string, price: number, category: string }) => object.id == `${selectedObject}`)
+      
       const newActivity = maxActivities + 1;
       const newActivities = [{
         package_id: `${params.id}`,
@@ -183,6 +184,14 @@ export default function CustomIdPage({ params }: any) {
   }
 
   const handleRemoveActivites = (activityId: string, dayIndex: number) => {
+    const isConfirmed = window.confirm(
+      `Are you sure you want to remove the activities?`
+    );
+  
+    if (!isConfirmed) {
+      console.log('User cancelled the action.');
+      return; // Batalkan jika user memilih "No"
+    }
     const activitiesForDay = packageActivities.filter(activity => activity.day == dayIndex);
 
     // Hapus aktivitas dengan activityId dari array aktivitas yang terkait dengan hari yang dipilih
@@ -248,6 +257,14 @@ export default function CustomIdPage({ params }: any) {
   }
 
   const handleRemoveService = (id: string) => {
+    const isConfirmed = window.confirm(
+      `Are you sure you want to remove the service?`
+    );
+  
+    if (!isConfirmed) {
+      console.log('User cancelled the action.');
+      return; // Batalkan jika user memilih "No"
+    }
     const updatedServices = [...packageService];
 
     // Temukan indeks layanan yang sesuai dengan id
@@ -265,9 +282,7 @@ export default function CustomIdPage({ params }: any) {
 
   const saveBooking = async () => {
     if (dataPackageById && session && typeof window !== 'undefined') {
-      const extendPackageName = `${dataPackageById[0].name} extend by ${session.user.name} at ${formattedDate}`
-      console.log(extendPackageName);
-
+      const extendPackageName = `${dataPackageById[0].name} custom by ${session.user.name} at ${formattedDate}`
       const res = await useAxiosAuth.post('/package/createExtendBooking', ({
         packageDay: packageDay,
         packageActivities: packageActivities,
@@ -340,31 +355,82 @@ export default function CustomIdPage({ params }: any) {
                 <button className="text-white bg-green-500 px-3 py-1 rounded-lg hover:bg-green-600 mr-3" onClick={() => setBookingPackage(!bookingPackage)}>
                   <FontAwesomeIcon icon={faCartPlus} /> Booking this Package
                 </button>
-                <Dialog open={bookingPackage} className="text-center rounded-lg">
-                  <DialogTitle className="text-blue-500">Ready to booking package?</DialogTitle>
-                  <div>
-                    <button className="border-solid border-2 p-2 m-1 border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white mr-5" onClick={() => setBookingPackage(!bookingPackage)}>
-                      <FontAwesomeIcon icon={faXmark} className="mr-2" />Cancel
+                <Dialog 
+                  open={bookingPackage} 
+                  onClose={() => setBookingPackage(false)}
+                  // Menambahkan class untuk styling umum dialog
+                  className="text-center" 
+                >
+                  {/* 1. Judul yang jelas dengan ikon yang menarik */}
+                  <DialogTitle className="font-bold text-xl flex items-center justify-center">
+                    <FontAwesomeIcon icon={faCircleCheck} className="text-green-500 mr-2" />
+                    Confirm Your Booking
+                  </DialogTitle>
+
+                  {/* 2. Tambahkan teks konten untuk memberi konteks pada pengguna */}
+                  <DialogContent>
+                    <DialogContentText>
+                      You are about to finalize this package booking. Do you wish to proceed?
+                    </DialogContentText>
+                  </DialogContent>
+
+                  {/* 3. Gunakan DialogActions untuk layout tombol yang rapi */}
+                  <DialogActions className="p-4">
+                    {/* Tombol sekunder (Cancel) dibuat lebih netral */}
+                    <button
+                      className="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium"
+                      onClick={() => setBookingPackage(false)}
+                    >
+                      <FontAwesomeIcon icon={faXmark} className="mr-2" />
+                      Cancel
                     </button>
-                    <button className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white" onClick={() => saveBooking()}>
-                      <FontAwesomeIcon icon={faCartPlus} /> Booking</button>
-                  </div>
+
+                    {/* Tombol Aksi Utama (CTA) dibuat solid dan menonjol */}
+                    <button 
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold" 
+                      onClick={() => saveBooking()}
+                    >
+                      <FontAwesomeIcon icon={faCartPlus} className="mr-2" />
+                      Yes, Book Now
+                    </button>
+                  </DialogActions>
                 </Dialog>
                 <button className="text-white bg-red-500 px-3 py-1 rounded-lg hover:bg-red-600" onClick={() => setCancelDialog(!cancelDialog)}>
                   <FontAwesomeIcon icon={faXmark} /> Cancel
                 </button>
-                <Dialog open={cancelDialog} className="text-center rounded-lg">
-                  <DialogTitle className="text-blue-500">Cancel Package?</DialogTitle>
-                  <h2>All changes will be lost</h2>
-                  <div>
-                    <button className="border-solid border-2 p-2 m-1 border-red-500 rounded-lg text-red-500 hover:bg-red-500 hover:text-white mr-5" onClick={() => setCancelDialog(!cancelDialog)}>
-                      <FontAwesomeIcon icon={faPencil} className="mr-2" />Continue Extend Package
+                <Dialog open={cancelDialog} onClose={() => setCancelDialog(false)} className="text-center">
+                  {/* Gunakan DialogTitle untuk judul yang jelas */}
+                  <DialogTitle className="font-bold text-xl flex items-center justify-center">
+                    <FontAwesomeIcon icon={faTriangleExclamation} className="text-yellow-500 mr-2" />
+                    Discard Changes?
+                  </DialogTitle>
+
+                  {/* Gunakan DialogContent untuk isi pesan */}
+                  <DialogContent>
+                    <DialogContentText>
+                      All unsaved changes will be lost. Are you sure you want to continue?
+                    </DialogContentText>
+                  </DialogContent>
+
+                  {/* Gunakan DialogActions untuk layout tombol yang standar (biasanya di kanan) */}
+                  <DialogActions className="p-4">
+                    {/* Tombol aksi aman (Continue): Desainnya tidak mencolok */}
+                    <button 
+                      className="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100" 
+                      onClick={() => setCancelDialog(false)}
+                    >
+                      <FontAwesomeIcon icon={faReply} className="mr-2" />
+                      Keep Editing
                     </button>
+
+                    {/* Tombol aksi destruktif (Discard): WARNA MERAH untuk menegaskan resiko */}
                     <Link href={'/explore/package'}>
-                      <button className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white">
-                        <FontAwesomeIcon icon={faCheck} /> Im Sure</button>
+                      <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        <FontAwesomeIcon icon={faTrashCan} className="mr-2" />
+                        Discard
+                      </button>
                     </Link>
-                  </div>
+                  </DialogActions>
                 </Dialog>
               </div>
               <table className="w-full mt-5">

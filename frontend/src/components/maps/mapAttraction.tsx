@@ -45,6 +45,7 @@ export default function MapAttraction({ detailEventId, selectedAttractionId, use
   let dataAttarctionForMap: any
 
   if (detailEventId === null) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { data: data, isLoading: loadingGeomAttractions } = useQuery({
       queryKey: ['listGeomAttraction'],
       queryFn: fetchListGeomAttractions
@@ -52,6 +53,7 @@ export default function MapAttraction({ detailEventId, selectedAttractionId, use
     dataAttarctionForMap = data
     console.log(dataAttarctionForMap);
   } else {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { data: data, isLoading: loadingGeomAttractions } = useQuery({
       queryKey: ['listGeomAttraction'],
       queryFn: fetchListGeomAttractions,
@@ -162,7 +164,9 @@ export default function MapAttraction({ detailEventId, selectedAttractionId, use
           }, 1700)
           const container = document.createElement('div');
           const root = createRoot(container);
-          root.render(<MapContentAttraction id={id} name={name} type={type} price={price} explore={0} />)
+          root.render(<MapContentAttraction id={id} name={name} type={type} price={price} explore={0} lat={0} lng={0} onRouteClick={function (latObject: number, lngObject: number): void {
+            throw new Error("Function not implemented.");
+          } } />)
           // infoWindow.open(map, marker);
           new google.maps.InfoWindow({
             content: document.body.appendChild(container)

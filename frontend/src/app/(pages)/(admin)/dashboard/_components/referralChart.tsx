@@ -16,7 +16,7 @@ const ReferralChart: React.FC<ChartProps> = ({ data }) => {
   const labels = data.map(item => item.month_year);
   const total_reservations = data.map(item => parseInt(item.total_reservations));
   const total_referral_value = data.map(item => parseFloat(item.total_referral_value.replace(/,/g, ''))); // Mengonversi string ke angka dengan parseFloat
-  console.log(total_referral_value);
+  // console.log(total_referral_value);
   
   const chartData = {
     labels: labels,

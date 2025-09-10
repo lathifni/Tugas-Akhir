@@ -35,12 +35,44 @@ const whatsAppClientHandler = async(req, res) => {
     // const qrCode = await whatsAppClientControllerLamaaa()
     // const qrCode = await whatsAppClientController()
     // const qrCode = await whatsAppClientControllerTestBaru()
-    const qrCode = await whatsAppClientControllerTestBaru()
+    const result = await whatsAppClientControllerTestBaru()
 
-    // console.log(qr);
+    console.log(result);
+    
+    switch (result.status) {
+      case "connected":
+        return res.status(200).json({
+          success: true,
+          ...result,
+        });
 
-    // res.send()
-    res.status(200).json({ status: 'success', data: qrCode })
+      case "waiting_for_qr":
+        return res.status(202).json({ // Accepted - menunggu aksi user (scan QR)
+          success: true,
+          ...result,
+        });
+
+      case "initializing":
+        return res.status(202).json({
+          success: true,
+          ...result,
+        });
+
+      case "error":
+        return res.status(500).json({
+          success: false,
+          ...result,
+        });
+
+      default:
+        return res.status(500).json({
+          success: false,
+          status: "unknown",
+          message: "Terjadi kesalahan tidak diketahui",
+        });
+    }
+
+    // res.status(200).json({ status: 'success', data: qrCode })
   } catch (error) {
     console.log(error);
   }

@@ -17,5 +17,5 @@ export const createNewRoomChat = async(params:any) => {
 
 export const generateQrCodeWA = async() => {
   const res = await useAxiosAuth.get(`/chat/start`,)
-  return res.data.data
+  return res.data
 }

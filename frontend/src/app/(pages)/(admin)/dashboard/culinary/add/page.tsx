@@ -5,17 +5,48 @@ import FileInput from "@/components/fileInput";
 import MapInput from "@/components/maps/mapInput";
 import { faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import 'react-toastify/dist/ReactToastify.css';
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { ToastContainer, Bounce, toast } from "react-toastify";
 import useAxiosAuth from "../../../../../../../libs/useAxiosAuth";
 import { useRouter } from 'next/navigation'
+import { z } from 'zod';
+
+// huruf Unicode + spasi + apostrof ' + dash -
+const nameRegex = /^[\p{L}\p{M}\s'-]+$/u;
+// alamat: huruf/angka + tanda baca umum
+const addressRegex = /^[\p{L}\p{M}\d\s.,\-\/'()#]+$/u;
+const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+const culinarySchema = z.object({
+  name: z.string().min(1, 'Name cannot be empty')
+    .max(100, 'Max 100 characters')
+    .regex(nameRegex, "Only letters, spaces, apostrophes (') and dashes (-) allowed"),
+  address: z.string().min(1, 'Address cannot be empty')
+    .max(200, 'Max 200 characters')
+    .regex(addressRegex, 'Address contains invalid characters'),
+  contact_person: z.string().min(1, 'Contact person cannot be empty')
+    .max(100, 'Max 100 characters'),
+  open: z.string().regex(timeRegex, 'Open must be HH:mm'),
+  close: z.string().regex(timeRegex, 'Close must be HH:mm'),
+  capacity: z.string()
+    .min(1, 'Capacity cannot be empty')
+    .refine(v => /^\d+$/.test(v), 'Capacity must be a positive integer'),
+  description: z.string().min(1, 'Description cannot be empty').max(1000, 'Max 1000 characters'),
+  status: z.enum(['0','1'], { required_error: 'Status must be chosen' }),
+  gallery: z.array(z.any()).min(1, 'Gallery cannot be empty'),
+  geometry: z.any().refine(v => v != null, { message: 'Geometry cannot be null' }),
+}).refine((data) => {
+  // pastikan close > open
+  const [ho, mo] = data.open.split(':').map(Number);
+  const [hc, mc] = data.close.split(':').map(Number);
+  return ho*60 + mo < hc*60 + mc;
+}, { path: ['close'], message: 'Close time must be after Open time' });
 
 interface Image {
   name: string;
@@ -55,10 +86,15 @@ export default function AddCulinaryAdmin() {
     setGallery(newGallery);
   }
 
-  const handleCoordinateChange = (latitude: number | null, longitude: number | null) => {
-    setLatitude(latitude)
-    setLongitude(longitude)
-  };
+  const handleCoordinateChange = useCallback((latitude: number | null, longitude: number | null) => {
+    setLatitude(latitude);
+    setLongitude(longitude);
+  }, []); // Dependency array kosong karena setter dari useState sudah stabil
+
+  const handleGeometryChange = useCallback((geometry: any) => {
+    console.log("Geometry:", geometry);
+    setGeometry(geometry);
+  }, []); // Dependency array kosong karena setter dari useState sudah stabil
 
   const handleLatitudeChange = (event: any) => {
     setLatitude(event.target.value);
@@ -75,11 +111,6 @@ export default function AddCulinaryAdmin() {
     }
   }
 
-  const handleGeometryChange = (geometry: any) => {
-    console.log("Geometry:", geometry);
-    setGeometry(geometry)
-  }
-
   const handleDeletePolygon = () => {
     if (mapInputRef.current) {
       mapInputRef.current.deletePolygon();
@@ -90,16 +121,26 @@ export default function AddCulinaryAdmin() {
     e.preventDefault();
     
     let url: any
-    if (formDataInput.address === '') return toast.warn('address cannot be null');
-    if (formDataInput.name == '') return toast.warn('name cannot be null');
-    if (formDataInput.contact_person == '') return toast.warn('contact_person cannot be null');
-    if (formDataInput.capacity == '') return toast.warn('capacity culinary cannot be null')
-    if (formDataInput.open == '') return toast.warn('open culinary cannot be null')
-    if (formDataInput.close == '') return toast.warn('close culinary cannot be null')
-    if (formDataInput.description == '') return toast.warn('description culinary cannot be null')
-    if (formDataInput.status == '') return toast.warn('status culinary cannot be null')
-    if (geometry == null) return toast.warn('Geometry on Google Maps cannot be null')
-    if (gallery.length == 0) return toast.warn('Gallery cannot be null')
+    // if (formDataInput.address === '') return toast.warn('address cannot be null');
+    // if (formDataInput.name == '') return toast.warn('name cannot be null');
+    // if (formDataInput.contact_person == '') return toast.warn('contact_person cannot be null');
+    // if (formDataInput.capacity == '') return toast.warn('capacity culinary cannot be null')
+    // if (formDataInput.open == '') return toast.warn('open culinary cannot be null')
+    // if (formDataInput.close == '') return toast.warn('close culinary cannot be null')
+    // if (formDataInput.description == '') return toast.warn('description culinary cannot be null')
+    // if (formDataInput.status == '') return toast.warn('status culinary cannot be null')
+    // if (geometry == null) return toast.warn('Geometry on Google Maps cannot be null')
+    // if (gallery.length == 0) return toast.warn('Gallery cannot be null')
+    const parsed = culinarySchema.safeParse({
+      ...formDataInput,
+      gallery,
+      geometry,
+    });
+
+    if (!parsed.success) {
+      parsed.error.issues.forEach(i => toast.warn(i.message));
+      return;
+    }
 
     const formData = new FormData()
     const category = 'culinary'
@@ -174,7 +215,7 @@ export default function AddCulinaryAdmin() {
             </div>
             <div className="px-8">
               <label className="block mt-2 text-sm font-medium text-gray-900 ">Capacity</label>
-              <input type="number" name='capacity' onChange={handleChange} value={formDataInput.capacity}
+              <input type="number" name='capacity' onChange={handleChange} value={formDataInput.capacity} min={1}
                 className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
             </div>
             <div className="px-8">

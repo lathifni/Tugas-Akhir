@@ -68,7 +68,7 @@ const packageSchema = z.object({
   // package_day: z.array(z.object({
   // })).min(1, 'At least one day must be selected'),
   package_activities: z.array(z.any()).min(1, 'At least one activity must be selected'),
-  package_service: z.array(z.any()).min(1, 'At least one service must be selected'),
+  // package_service: z.array(z.any()).min(1, 'At least one service must be selected'),
   package_day: z.array(z.any()).min(1, 'At least one day must be selected'),
   cover: z.array(z.object({
     file: z.any(), // You can customize this if needed
@@ -121,7 +121,7 @@ export default function PackageNewPage() {
     queryKey: ['dataAllTypePackage'],
     queryFn: fetchAllPackageType
   })
-  console.log(dataListAllObject);
+  // console.log(dataListAllObject);
   
 
   const handleChange = (e: any) => {
@@ -376,8 +376,7 @@ export default function PackageNewPage() {
     setAddActivitiesOpen(!addActivitiesOpen)
     const isIdExist = packageActivities.some(activity => activity.object_id === `${selectedObject}` && activity.day.toString() == `${selectedAddDayActivities}`);
     // Jika id belum ada, tambahkan data layanan baru
-    if (!isIdExist) {
-      let maxActivities: number = 0;
+    let maxActivities: number = 0;
       packageActivities.forEach(activities => {
         if (activities.day === selectedAddDayActivities) {
           const activityInt = parseInt(activities.activity); // Konversi string ke integer
@@ -400,9 +399,33 @@ export default function PackageNewPage() {
         category: dataSelectedObject[0].category
       }];
       setPackageActivities([...packageActivities, ...newActivities]);
-    } else {
-      console.log("ID already exists, cannot add activities!");
-    }
+    // if (!isIdExist) {
+    //   let maxActivities: number = 0;
+    //   packageActivities.forEach(activities => {
+    //     if (activities.day === selectedAddDayActivities) {
+    //       const activityInt = parseInt(activities.activity); // Konversi string ke integer
+    //       if (activityInt > maxActivities) {
+    //         maxActivities = activityInt;
+    //       }
+    //     }
+    //   });
+    //   const dataSelectedObject = dataListAllObject.filter((object: { id: string, name: string, type: string, price: string, category: string }) => object.id == `${selectedObject}`)
+
+    //   const newActivity = maxActivities + 1;
+    //   const newActivities = [{
+    //     object_id: `${selectedObject}`,
+    //     description: `${descriptionNewActivites}`,
+    //     day: selectedAddDayActivities,
+    //     activity_type: `${dataSelectedObject[0].type}`,
+    //     activity_name: `${dataSelectedObject[0].name}`,
+    //     activity: newActivity.toString(),
+    //     price: dataSelectedObject[0].price,
+    //     category: dataSelectedObject[0].category
+    //   }];
+    //   setPackageActivities([...packageActivities, ...newActivities]);
+    // } else {
+    //   console.log("ID already exists, cannot add activities!");
+    // }
   }
   
   if (dataListAllObject && dataListAllServicePackage && dataAllTypePackage) {
@@ -621,7 +644,7 @@ export default function PackageNewPage() {
           </div>
         </div>
         <Dialog open={addActivitiesOpen} fullWidth maxWidth='sm' className="text-center">
-          <DialogTitle className="text-blue-500">Add New Acttivities</DialogTitle>
+          <DialogTitle className="text-blue-500">Add New Activities</DialogTitle>
           <DialogContent dividers>
             <p>Activity Type</p>
             <Select displayEmpty label="Activity type" value={fieldAcitivityType}

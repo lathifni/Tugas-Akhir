@@ -27,7 +27,7 @@ const addReferralProofController = async(params) => {
           .padStart(2, '0')}:${String(now.getSeconds())
             .padStart(2, '0')}`;
   params.datetime = currentDatetime,
-  await sendMessagePaymentReferral()
+  await sendMessagePaymentReferral(params)
   return addReferralProof(params)
 }
 

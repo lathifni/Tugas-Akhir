@@ -3,8 +3,15 @@ import { fetchGalleriesGtp } from "../../api/fetchers/galleries";
 import { useQuery } from "@tanstack/react-query";
 import { fetchInfoGtp } from "../../api/fetchers/gtp";
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCompass, faRoute } from "@fortawesome/free-solid-svg-icons";
 
-export default function GeneralInfo() {
+interface GeneralInfo {
+  onSearchAroundClick: () => void;
+  onCreatePlanClick: () => void; // <- ADD
+}
+
+export default function GeneralInfo({ onSearchAroundClick, onCreatePlanClick }:GeneralInfo) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { isLoading: loadingGalleries, data: dataGalleries } = useQuery({
     queryKey: ['galleriesGtp'],
@@ -109,6 +116,18 @@ export default function GeneralInfo() {
             </table>
           )}
         </div>
+      </div>
+      <div className="bg-blue-500 hover:bg-blue-600 rounded-lg text-white mt-2" onClick={onSearchAroundClick} role="button">
+        <button className="m-3">
+          <FontAwesomeIcon className="mr-2" icon={faCompass}/>
+          Search Object Around You
+        </button>
+      </div>
+      <div className="bg-green-500 hover:bg-green-600 rounded-lg text-white mt-2" onClick={onCreatePlanClick} role="button">
+        <button className="m-3">
+          <FontAwesomeIcon className="mr-2" icon={faRoute}/>
+          Create a Travel Plan
+        </button>
       </div>
     </div>
   )

@@ -79,7 +79,7 @@ export default function DashboardPage() {
   })
   const { data: session, status } = useSession();
   
-  console.log(dataReferralAnalysis);
+  // console.log(dataReferralAnalysis);
   
   if (dataDashboard && dataRevenue && dataPackageAnalysis && dataDayAnalysis && dataPeopleAnalysis && dataReferralAnalysis) {
     return (

@@ -46,18 +46,22 @@ export default function Ulakan() {
   const [instructions, setInstructions] = useState<string[]>([]);
 
   const queryMutiple = () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const resListGeomWorship = useQuery({
       queryKey: ['geomWorship'],
       queryFn: fetchListGeomWorship
     })
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const resListGeomCulinary = useQuery({
       queryKey: ['listGeomCulinary'],
       queryFn: fetchListGeomCulinary,
     })
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const resListGeomSouvenir = useQuery({
       queryKey: ['geomSouvenir'],
       queryFn: fetchListGeomSouvenir
     })
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const resListGeomHomestay = useQuery({
       queryKey: ['listGeomHomestay'],
       queryFn: fetchListGeomHomestay
@@ -179,23 +183,23 @@ export default function Ulakan() {
               isManualLocation={isManualLocationClicked} setUserLocation={setUserLocation}
               distances={distances} setDistances={setDistances}
               instructions={instructions} setInstructions={setInstructions} /> */}
-            <MapExploreUlakanCopy 
+            {/* <MapExploreUlakanCopy 
               userLocation={userLocation} objectAround={objectAroundState}
               dataMapforType={dataTypeMap} radius={radius}
               isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked} setUserLocation={setUserLocation}
               distances={distances} setDistances={setDistances}
               instructions={instructions} setInstructions={setInstructions} 
-              showLegend={showLegend} />
+              showLegend={showLegend} /> */}
           </div>
         </div>
-        {listExploreUlakan ? (
+        {/* {listExploreUlakan ? (
           <ExploreUlakanTableSection onSearchAroundClick={handleSection} onShowMapClick={handleShowMapClick} />
         ) : (
           <ObjectAroundSection
             onCloseClick={handleSection}
             onRadiusChange={handleRadiusChange}
             onStateChange={handleObjectAroundStateChange} />
-        )}
+        )} */}
       </div>
       {distances !== null && distances.length !== 0 && (
         <div className="flex flex-col lg:flex-row mx-1 sm:mx-3 lg:mx-5 mt-3 mb-10">

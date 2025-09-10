@@ -6,7 +6,7 @@ import { Loader } from "@googlemaps/js-api-loader"
 import { useQuery } from "@tanstack/react-query"
 import React, { useEffect, useRef } from "react"
 import useAxiosAuth from "../../../libs/useAxiosAuth"
-import { MapContentCulinaryPlaces, MapContentWorshipPlaces, MapContentSouvenirPlaces, MapContentHomestayPlaces, Legend, MapContentGeneral } from "./mapHelper"
+import { MapContentCulinaryPlaces, MapContentWorshipPlaces, MapContentSouvenirPlaces, MapContentHomestayPlaces, Legend, MapContentGeneral, MapContentAttraction } from "./mapHelper"
 import { createRoot } from 'react-dom/client';
 
 interface UserLocation {
@@ -15,6 +15,8 @@ interface UserLocation {
 }
 
 interface MapType {
+  attraction: boolean;
+  uniqueAttraction: boolean;
   culinaryPlaces: boolean;
   homestay: boolean;
   souvenirPlaces: boolean;
@@ -30,6 +32,7 @@ interface dataListGeom {
   status: number | null;
   lat: number;
   lng: number;
+  price: number;
 }
 
 interface MapExploreUlakanProps {
@@ -67,14 +70,18 @@ interface Step {
   instructions?: string;
 }
 
-let map: google.maps.Map | null = null;
+// let map: google.maps.Map | null = null;
 const loader = new Loader({
   apiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY as string,
   version: 'weekly'
 })
-const positionGtp = {
+const positionGtpLama = {
   lat: -0.7102134517843606,
   lng: 100.19420485758688
+}
+const positionGtp = {
+  lat: -0.7069612344853281, 
+  lng:100.19544485550248
 }
 let markerArray: any = {};
 let routeArray: any = [];
@@ -85,6 +92,8 @@ export default function MapExploreUlakanCopy({
   ,dayActivities, selectActivities, showLabels, setShowLabels, showTerrain, setShowTerrain
   , traffic, reachToObject
 }: MapExploreUlakanProps) {
+  const mapRefInstance = useRef<google.maps.Map | null>(null);
+  const trafficLayerRef = useRef<google.maps.TrafficLayer | null>(null);
   const mapRef = React.useRef<HTMLDivElement>(null)
   const legendRef = React.useRef<HTMLDivElement>(null);
   let locationMarkerRef = useRef<google.maps.Marker | null>(null);
@@ -105,6 +114,8 @@ export default function MapExploreUlakanCopy({
     queryKey: ['listAllObject'],
     queryFn: () => fetchListAllObject()
   })
+  console.log(dataListAllObject);
+  
   const { data: geomEstuary, isLoading: loadingEstuary } = useQuery({
       queryKey: ['geomEstuary'],
       queryFn: fetchEstuaryGeom
@@ -150,9 +161,12 @@ export default function MapExploreUlakanCopy({
             }
           ]
         }
-      ]
+      ],
+      mapTypeId: 'satellite',
+      // styles: [{ featureType: "all", elementType: "labels", stylers: [{ "visibility": "off" }] }]
     }
-    map = new Map(mapRef.current as HTMLDivElement, mapOptions)
+    mapRefInstance.current = new Map(mapRef.current as HTMLDivElement, mapOptions);
+    const map = mapRefInstance.current;
     const digitasiVillage = new google.maps.Data()
     const digitasiGtp = new google.maps.Data()
     const digitasiEstuary = new google.maps.Data()
@@ -169,9 +183,9 @@ export default function MapExploreUlakanCopy({
 
         digitasiVillage.setStyle({
           fillColor: '#ADFF2F',
-          strokeWeight: 0.5,
+          strokeWeight: 0.15,
           strokeColor: '#ffffff',
-          fillOpacity: 0.5,
+          fillOpacity: 0.15,
           clickable: false
         })
         digitasiVillage.setMap(map)
@@ -194,9 +208,9 @@ export default function MapExploreUlakanCopy({
 
         digitasiGtp.setStyle({
           fillColor: '#32CD32',
-          strokeWeight: 0.5,
+          strokeWeight: 0.15,
           strokeColor: '#ffffff',
-          fillOpacity: 0.5,
+          fillOpacity: 0.2,
           clickable: false
         })
         digitasiGtp.setMap(map)
@@ -215,17 +229,17 @@ export default function MapExploreUlakanCopy({
       });
       digitasiEstuary.setStyle({
           fillColor: '#A0522D', // Warna coklat sedang
-          strokeWeight: 3,
+          strokeWeight: 0.2,
           strokeColor: '#8B4513', // Warna coklat gelap untuk garis tepi
-          fillOpacity: 0.8, // Kurangi opacity agar lebih transparan
+          fillOpacity: 0.15, // Kurangi opacity agar lebih transparan
           clickable: false
       });
       digitasiEstuary.setMap(map);
     }
-    if (traffic) {
-      const trafficLayer = new google.maps.TrafficLayer();
-      trafficLayer.setMap(map); 
-    }
+    // if (traffic) {
+    //   const trafficLayer = new google.maps.TrafficLayer();
+    //   trafficLayer.setMap(map); 
+    // }
     if (reachToObject) {
       const singapore = { lat: 1.2854190117401771, lng: 103.8198 };  // Koordinat Singapura
       const malaysia = { lat: 3.1503614007038454, lng: 101.97940881384584 }
@@ -426,51 +440,6 @@ export default function MapExploreUlakanCopy({
         3. Rent a car or take a taxi from Padang to Nagari Ulakan village.
       `;
       createTextOverlay(map, bandaAceh, sumateraIslandSteps);
-      // function createTextOverlay(map:any, position:any, steps:any) {
-      //   const overlay = new google.maps.OverlayView();
-      
-      //   // Menentukan konten overlay
-      //   overlay.onAdd = function () {
-      //     const div = document.createElement('div');
-      //     div.style.position = 'absolute';
-      //     div.style.fontSize = '14px';
-      //     div.style.fontWeight = 'bold';
-      //     div.style.color = 'black';
-      //     div.style.backgroundColor = 'white';
-      //     div.style.padding = '10px';
-      //     div.style.borderRadius = '5px';
-      //     div.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
-      //     div.innerHTML = steps;
-      //     div.style.zIndex = '5';
-      
-      //     // Menambahkan div ke container map
-      //     const panes = this.getPanes();
-      //     panes?.overlayLayer.appendChild(div);
-      
-      //     // Fungsi untuk memposisikan overlay di atas peta
-      //     this.draw = function () {
-      //       const projection = this.getProjection();
-      //       const positionPixel = projection.fromLatLngToDivPixel(position);
-      //       div.style.left = `${positionPixel?.x}px`;
-      //       div.style.top = `${positionPixel?.y}px`;
-      //     };
-      //   };
-      
-      //   // Menambahkan overlay ke peta
-      //   overlay.setMap(map);
-      //   return overlay;
-      // }
-      
-      // // Fungsi untuk memanggil overlay dengan langkah-langkah
-      // const steps = `
-      //   <b>Steps to reach Nagari Ulakan:</b><br>
-      //   1. Fly to Malaysia or Singapore.<br>
-      //   2. Take a flight to Padang city, Indonesia.<br>
-      //   3. Rent a car or take a taxi to Nagari Ulakan village.
-      // `;
-      
-      // // Menambahkan overlay ke peta pada posisi tertentu
-      // createTextOverlay(map, { lat: 1.277968756621077, lng: 103.843894137210782 }, steps);
     }
   };
 
@@ -481,12 +450,8 @@ export default function MapExploreUlakanCopy({
     setInstructions(instructions);
   };
 
-  const handleRouteButtonClick = (lat: number, lng: number) => {
-    console.log('ni di route button');
-    
-    if (userLocation) {
-      console.log('ada lo user locationnya kok');
-      
+  const handleRouteButtonClick = (lat: number, lng: number) => {    
+    if (userLocation) {      
       routeArray.forEach((directionsRenderer: google.maps.DirectionsRenderer) => {
         directionsRenderer.setMap(null);
       });
@@ -496,7 +461,6 @@ export default function MapExploreUlakanCopy({
       let start: google.maps.LatLng, end: google.maps.LatLng;
       start = new google.maps.LatLng(userLocation.lat, userLocation.lng);
       end = new google.maps.LatLng(lat, lng)
-      console.log(end, 'nilai end nihhh');
       
       const request: google.maps.DirectionsRequest = {
         origin: start,
@@ -509,10 +473,10 @@ export default function MapExploreUlakanCopy({
         status: google.maps.DirectionsStatus
       ) {
         if (status === 'OK' && result !== null) {
-          const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+          const directionsRenderer = new google.maps.DirectionsRenderer({ map: mapRefInstance.current });
           directionsRenderer.setDirections(result);
           routeArray.push(directionsRenderer);
-          directionsRenderer.setMap(map);
+          directionsRenderer.setMap(mapRefInstance.current);
 
           const myRoute = result.routes[0].legs[0];
           setDistancesAndInstructions(myRoute);
@@ -526,7 +490,7 @@ export default function MapExploreUlakanCopy({
     const bounds = new google.maps.LatLngBounds();
     bounds.extend(start);
     bounds.extend(end);
-    map?.fitBounds(bounds);
+    mapRefInstance.current?.fitBounds(bounds);
   };
 
   const setShowLegendVisibility = () => {
@@ -536,6 +500,61 @@ export default function MapExploreUlakanCopy({
     }
   };
 
+  const generateMarkerUniqueAttraction = (item: dataListGeom) => {
+    const { id, name, address, contact_person, lat, lng, price } = item
+    const pos = new google.maps.LatLng(lat, lng)
+    const marker = new google.maps.Marker();
+
+    const markerOptions = {
+      position: pos,
+      map: mapRefInstance.current,
+      animation: google.maps.Animation.DROP,
+      icon: '/icon/attraction.png'
+    }
+    marker.setOptions(markerOptions)
+    marker.addListener('click', () => {
+      marker.setAnimation(google.maps.Animation.BOUNCE)
+      setTimeout(() => {
+        marker.setAnimation(null)
+      }, 1700)
+
+      const container = document.createElement('div');
+      const root = createRoot(container);
+      root.render(<MapContentAttraction id={id} name={name} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} type={""} price={price} explore={0} />);
+      new google.maps.InfoWindow({
+        content: document.body.appendChild(container)
+      }).open(mapRefInstance.current, marker)
+    });
+    markerArray[id] = marker
+  }
+  const generateMarkerAttraction = (item: dataListGeom) => {
+    const { id, name, address, contact_person, lat, lng, price } = item
+    const pos = new google.maps.LatLng(lat, lng)
+    const marker = new google.maps.Marker();
+
+    const markerOptions = {
+      position: pos,
+      map: mapRefInstance.current,
+      animation: google.maps.Animation.DROP,
+      icon: '/icon/attraction.png'
+    }
+    marker.setOptions(markerOptions)
+    marker.addListener('click', () => {
+      marker.setAnimation(google.maps.Animation.BOUNCE)
+      setTimeout(() => {
+        marker.setAnimation(null)
+      }, 1700)
+
+      const container = document.createElement('div');
+      const root = createRoot(container);
+      root.render(<MapContentAttraction id={id} name={name} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} type={""} price={price} explore={0} />);
+      new google.maps.InfoWindow({
+        content: document.body.appendChild(container)
+      }).open(mapRefInstance.current, marker)
+    });
+    markerArray[id] = marker
+  }
+
   const generateMarkerCulinaryPlaces = (item: dataListGeom) => {
     const { id, name, address, contact_person, status, lat, lng } = item
     const pos = new google.maps.LatLng(lat, lng)
@@ -543,7 +562,7 @@ export default function MapExploreUlakanCopy({
 
     const markerOptions = {
       position: pos,
-      map: map,
+      map: mapRefInstance.current,
       animation: google.maps.Animation.DROP,
       icon: status === 1 ? '/icon/cpgtp.png' : '/icon/culinary.png'
     }
@@ -559,7 +578,7 @@ export default function MapExploreUlakanCopy({
       if (contact_person) root.render(<MapContentCulinaryPlaces id={id} name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container)
-      }).open(map, marker)
+      }).open(mapRefInstance.current, marker)
     });
     markerArray[id] = marker
   }
@@ -571,7 +590,7 @@ export default function MapExploreUlakanCopy({
 
     const markerOptions = {
       position: pos,
-      map: map,
+      map: mapRefInstance.current,
       animation: google.maps.Animation.DROP,
       icon: '/icon/worship.png'
     }
@@ -586,7 +605,7 @@ export default function MapExploreUlakanCopy({
       if (capacity) root.render(<MapContentWorshipPlaces id={id} name={name} address={address} capacity={capacity} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container),
-      }).open(map, marker)
+      }).open(mapRefInstance.current, marker)
     });
     markerArray[id] = marker
   }
@@ -598,7 +617,7 @@ export default function MapExploreUlakanCopy({
 
     const markerOptions = {
       position: pos,
-      map: map,
+      map: mapRefInstance.current,
       animation: google.maps.Animation.DROP,
       icon: '/icon/souvenir.png'
     }
@@ -613,7 +632,7 @@ export default function MapExploreUlakanCopy({
       if (contact_person) root.render(<MapContentSouvenirPlaces id={id} name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container)
-      }).open(map, marker)
+      }).open(mapRefInstance.current, marker)
     });
     markerArray[id] = marker
   }
@@ -625,7 +644,7 @@ export default function MapExploreUlakanCopy({
 
     const markerOptions = {
       position: pos,
-      map: map,
+      map: mapRefInstance.current,
       animation: google.maps.Animation.DROP,
       icon: '/icon/homestay.png'
     }
@@ -640,14 +659,14 @@ export default function MapExploreUlakanCopy({
       if (contact_person) root.render(<MapContentHomestayPlaces id={id} name={name} address={address} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container)
-      }).open(map, marker)
+      }).open(mapRefInstance.current, marker)
     });
     markerArray[id] = marker
   }
 
   useEffect(() => {
     initMap(dataUlakanVillage, dataGeomGtp);
-  }, [dataGeomGtp, dataUlakanVillage, traffic, reachToObject])
+  }, [dataGeomGtp, dataUlakanVillage, reachToObject])
 
   useEffect(() => {
     setShowLegendVisibility();
@@ -681,32 +700,36 @@ export default function MapExploreUlakanCopy({
         dataMapforType.forEach((item: dataListGeom) => {
           generateSouvenirPlace(item)
         })
+      } else if (firstIdData.startsWith('A')) {
+        dataMapforType.forEach((item: dataListGeom) => {
+          generateMarkerUniqueAttraction(item)
+        })
       } else {
         dataMapforType.forEach((item: dataListGeom) => {
           generateHomestayPlace(item)
         })
-      }
-      if (Object.keys(markerArray).length > 0 && map) {
+      } 
+      if (Object.keys(markerArray).length > 0 && mapRefInstance.current) {
         const bounds = new google.maps.LatLngBounds();
         for (const i in markerArray) {
           const positionArray = markerArray[i].getPosition();
           if (positionArray) bounds.extend(positionArray);
         }
-        map.fitBounds(bounds);
+        mapRefInstance.current.fitBounds(bounds);
       }
     }
   }, [dataMapforType, userLocation])
 
   useEffect(() => {
     const fetchUserLocation = async () => {
-      if (userLocation !== null && map) {
+      if (userLocation !== null && mapRefInstance.current) {
         // console.log(isManualLocation, 'di userLocation');
         setIsManualLocation(false)
         if (locationMarkerRef.current !== null) locationMarkerRef.current.setMap(null);
         const newMarkerLocation = new google.maps.Marker();
         const markerOptions = {
           position: userLocation,
-          map: map,
+          map: mapRefInstance.current,
           animation: google.maps.Animation.DROP,
         }
         newMarkerLocation.setOptions(markerOptions)
@@ -715,10 +738,10 @@ export default function MapExploreUlakanCopy({
           content: `<p>You Are Here</p>`
         });
         newMarkerLocation.addListener('click', () => {
-          infoWindowLocMarkerRef.current?.open(map, newMarkerLocation);
+          infoWindowLocMarkerRef.current?.open(mapRefInstance.current, newMarkerLocation);
         });
         locationMarkerRef.current = newMarkerLocation
-        infoWindowLocMarkerRef.current?.open(map, locationMarkerRef.current)
+        infoWindowLocMarkerRef.current?.open(mapRefInstance.current, locationMarkerRef.current)
       }
     }
     fetchUserLocation()
@@ -744,7 +767,7 @@ export default function MapExploreUlakanCopy({
         clickListener = null;
       }
     };
-    if (isManualLocation === true && map) clickListener = map.addListener('click', handleMapClick);
+    if (isManualLocation === true && mapRefInstance.current) clickListener = mapRefInstance.current.addListener('click', handleMapClick);
 
     return () => {
       if (clickListener) {
@@ -755,7 +778,7 @@ export default function MapExploreUlakanCopy({
 
   useEffect(() => {
     const fetchObjectAroundRadius = async () => {
-      if (userLocation && map && locationMarkerRef.current && radius !== null) {
+      if (userLocation && mapRefInstance.current && locationMarkerRef.current && radius !== null) {
         Object.keys(markerArray).forEach((key) => {
           const marker = markerArray[key] as google.maps.Marker;
           marker.setMap(null);
@@ -764,7 +787,7 @@ export default function MapExploreUlakanCopy({
 
         if (circleRef.current !== null) circleRef.current.setMap(null)
         const circle = new google.maps.Circle({
-          map: map,
+          map: mapRefInstance.current,
           radius: radius,  // dalam meter
           fillColor: '#AA0000',
           fillOpacity: 0.3,
@@ -775,8 +798,8 @@ export default function MapExploreUlakanCopy({
         circleRef.current = circle
         circleRef.current.bindTo('center', locationMarkerRef.current, 'position')
 
-        infoWindowLocMarkerRef.current?.open(map, locationMarkerRef.current);
-        map.panTo(userLocation);
+        infoWindowLocMarkerRef.current?.open(mapRefInstance.current, locationMarkerRef.current);
+        mapRefInstance.current.panTo(userLocation);
         locationMarkerRef.current = locationMarkerRef.current;
 
         if (objectAround && radius) {
@@ -817,6 +840,22 @@ export default function MapExploreUlakanCopy({
               generateHomestayPlace(item)
             })
           }
+          if (objectAround.uniqueAttraction === true) {
+            const res = await useAxiosAuth.get(`/attraction/unique/listByRadius?lat=${lat}&lng=${lng}&radius=${radius}`)
+            const dataObject = res.data.data
+
+            dataObject.forEach((item: dataListGeom) => {
+              generateMarkerUniqueAttraction(item)
+            })
+          }
+          if (objectAround.attraction === true) {
+            const res = await useAxiosAuth.get(`/attraction/listByRadius?lat=${lat}&lng=${lng}&radius=${radius}`)
+            const dataObject = res.data.data
+
+            dataObject.forEach((item: dataListGeom) => {
+              generateMarkerAttraction(item)
+            })
+          }
         }
       }
     }
@@ -830,7 +869,7 @@ export default function MapExploreUlakanCopy({
     lat: number, lng: number ) => {
     const markerOptions: google.maps.MarkerOptions = {
       position: position,
-      map: map, // map is the reference to the map
+      map: mapRefInstance.current, // map is the reference to the map
       animation: google.maps.Animation.DROP,
       // label: `${activity}`,
     };
@@ -857,17 +896,17 @@ export default function MapExploreUlakanCopy({
 
       const container = document.createElement('div');
       const root = createRoot(container);
-      root.render(<MapContentGeneral id={id} icon={icon} name={name} address={address} capacity={capacity} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} />);
+      root.render(<MapContentGeneral id={id} icon={icon} name={name} address={address} capacity={capacity} contact_person={contact_person} lat={lat} lng={lng} onRouteClick={handleRouteButtonClick} price={null} />);
       new google.maps.InfoWindow({
         content: document.body.appendChild(container)
-      }).open(map, marker)
+      }).open(mapRefInstance.current, marker)
     });
     // updateBounds();
     const bounds = new google.maps.LatLngBounds();
     markersRef.current.forEach(marker => {
         bounds.extend(marker.getPosition() as google.maps.LatLng);
     });
-    map?.fitBounds(bounds);
+    mapRefInstance.current?.fitBounds(bounds);
   };
 
   const clearMarkers = () => {
@@ -878,21 +917,22 @@ export default function MapExploreUlakanCopy({
 };
 
   useEffect(() => {
-    if (map) {
-      const styles: google.maps.MapTypeStyle[] = [
-        {
-          featureType: 'administrative',
-          elementType: 'labels',
-          stylers: [{ visibility: showLabels ? 'on' : 'off' }],
-        },
-      ];
-  
-      map.setOptions({
-        styles: styles,
-        mapTypeId: showTerrain ? 'terrain' : 'roadmap',
-      });
-    }
-  }, [map, showLabels, showTerrain]);
+    const map = mapRefInstance.current;
+    if (!map) return;
+    map.setMapTypeId(showTerrain ? 'terrain' : 'satellite');
+  }, [showTerrain]);
+
+  // 2) Toggle Labels on/off global
+  useEffect(() => {
+    const map = mapRefInstance.current;
+    if (!map) return;
+
+    const labelStyles: google.maps.MapTypeStyle[] = showLabels
+      ? [] // biarkan default
+      : [{ elementType: 'labels', stylers: [{ visibility: 'off' }] }];
+
+    map.setOptions({ styles: labelStyles });
+  }, [showLabels]);
 
   useEffect(() => {
     clearMarkers();
@@ -995,7 +1035,7 @@ export default function MapExploreUlakanCopy({
               status: google.maps.DirectionsStatus
           ) {
               if (status === google.maps.DirectionsStatus.OK && result !== null) {
-                  const directionsRenderer = new google.maps.DirectionsRenderer({ map: map, suppressMarkers: true, });
+                  const directionsRenderer = new google.maps.DirectionsRenderer({ map: mapRefInstance.current, suppressMarkers: true, });
                   directionsRenderer.setDirections(result);
                   routeRenderersRef.current.push(directionsRenderer);
                   const myRoute = result.routes[0].legs[0];
@@ -1046,7 +1086,7 @@ export default function MapExploreUlakanCopy({
             status: google.maps.DirectionsStatus
           ) {
             if (status === 'OK' && result !== null) {
-              const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+              const directionsRenderer = new google.maps.DirectionsRenderer({ map: mapRefInstance.current });
               directionsRenderer.setDirections(result);
               routeRenderersRef.current.push(directionsRenderer);
               const myRoute = result.routes[0].legs[0];
@@ -1060,6 +1100,21 @@ export default function MapExploreUlakanCopy({
       }
     }
   }, [dayActivities,selectActivities,dataListAllObject, userLocation])
+  useEffect(() => {
+  const map = mapRefInstance.current; // pastikan kamu sudah pindahkan map ke useRef seperti saran sebelumnya
+  if (!map) return;
+
+  if (traffic) {
+    if (!trafficLayerRef.current) {
+      trafficLayerRef.current = new google.maps.TrafficLayer();
+    }
+    trafficLayerRef.current.setMap(map);
+  } else {
+    // Matikan tanpa destroy instance, biar cepat saat di-on lagi
+    trafficLayerRef.current?.setMap(null);
+  }
+}, [traffic]);
+
 
   return (
     <div className="relative">

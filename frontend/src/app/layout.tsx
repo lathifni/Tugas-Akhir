@@ -8,13 +8,15 @@ import '@fortawesome/fontawesome-svg-core/styles.css'
 import Footer from '@/components/footer'
 config.autoAddCss = false
 import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Green Talao Park',
   description: 'GTP Village',
-  icons: '/icon/logo.svg'
+  icons: '/icon/logo.svg',
+  manifest: "/manifest.json"
 }
 
 export default function RootLayout({
@@ -32,6 +34,7 @@ export default function RootLayout({
         <AuthProvider>
           <ReactQueryProvider>
             {children}
+            <ToastContainer/>
           </ReactQueryProvider>
         </AuthProvider>
       </body>

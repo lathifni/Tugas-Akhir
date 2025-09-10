@@ -363,7 +363,7 @@ export default function ReservationIdPage({ params }: any) {
                 </AccordionSummary>
                 <AccordionSummary>
                   <div>
-                    {dataReservationById.reservation.payment_date != null && (
+                    {dataReservationById.reservation.deposit_date != null && (
                       <button className="ml-2 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-700"
                       onClick={()=> downloadInvoiceHandler()}
                       >Download Invoice</button>

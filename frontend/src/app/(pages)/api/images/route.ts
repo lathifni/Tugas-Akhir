@@ -1,12 +1,73 @@
+// import path from "path";
+// import fs from "fs/promises";
+// import { NextResponse } from "next/server";
+
+// // 1. HAPUS 'export const config'. Tidak lagi dibutuhkan di App Router.
+
+// // 2. Gunakan tipe 'Request' yang benar dari bawaan web API
+// export const POST = async (request: Request) => {
+//   // 3. Bungkus semua logika dalam try...catch untuk error handling yang solid
+//   try {
+//     // 4. Gunakan .get() dan .getAll() untuk parsing FormData yang lebih rapi
+//     const formData = await request.formData();
+//     const category = formData.get("category") as string;
+//     const images = formData.getAll("images") as File[];
+
+//     // Validasi input dasar
+//     if (!category || images.length === 0) {
+//       return NextResponse.json(
+//         { msg: "Kategori dan gambar tidak boleh kosong." },
+//         { status: 400 }
+//       );
+//     }
+
+//     // 5. Buat direktori tujuan SEKALI SAJA di luar loop, jika belum ada.
+//     // `{ recursive: true }` akan membuat folder `photos` dan `category` jika belum ada.
+//     const uploadDir = path.join(process.cwd(), "public", "photos", category);
+//     await fs.mkdir(uploadDir, { recursive: true });
+
+//     // 6. Gunakan Promise.all untuk memproses semua file secara PARALEL (lebih cepat)
+//     const fileNames = await Promise.all(
+//       images.map(async (file) => {
+//         const buffer = await file.arrayBuffer();
+//         // Membuat nama file unik
+//         const fileName = `${Date.now()}_${file.name.replaceAll(" ", "_")}`;
+//         const filePath = path.join(uploadDir, fileName);
+
+//         // 7. WAJIB 'await' saat menulis file menggunakan fs dari "fs/promises"
+//         // await fs.writeFile(filePath, Buffer.from(buffer));
+//         await fs.writeFile(filePath, new Uint8Array(buffer));
+
+//         // Kembalikan nama file untuk dikumpulkan oleh Promise.all
+//         return fileName;
+//       })
+//     );
+
+//     return NextResponse.json(
+//       { msg: "Image upload successfully", data: fileNames },
+//       { status: 201 }
+//     );
+//   } catch (error) {
+//     console.error(error);
+//     return NextResponse.json(
+//       { msg: "Terjadi kesalahan pada server." },
+//       { status: 500 }
+//     );
+//   }
+// };
+
+
+
+//ni codingan lama
 import path from "path";
 import fs from "fs/promises";
 import { NextResponse } from "next/server";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
 
 export const POST = async (request: any) => {  
   const formData = await request.formData();
@@ -23,7 +84,9 @@ export const POST = async (request: any) => {
 
   for (let i = 0; i < images.length; i++) {
     const file = images[i];
-    const buffer = await file.arrayBuffer();
+    const arrayBuffer = await file.arrayBuffer();
+    // const buffer = await file.arrayBuffer();
+    const data = new Uint8Array(arrayBuffer); 
     const fileName = `${new Date().getTime()}_${file.name}`;
 
     try {
@@ -43,56 +106,10 @@ export const POST = async (request: any) => {
       fileName
     );
 
-    fs.writeFile(filePath, Buffer.from(buffer));
+    // fs.writeFile(filePath, Buffer.from(buffer));
+    await fs.writeFile(filePath, data);
 
     fileNames.push(fileName);
   }
   return NextResponse.json({ msg: "image upload successfully", data: fileNames  }, { status: 201 });
 };
-
-// const readFile = (
-//   req: NextApiRequest,
-//   saveLocally?: boolean
-// ): Promise<{ fields: formidable.Fields; files: formidable.Files }> => {
-//   const options: formidable.Options = {};
-//   if (saveLocally) {
-//     options.uploadDir = path.join(process.cwd(), "/public/images");
-//     options.filename = (name, ext, path, form) => {
-//       return Date.now().toString() + "_" + path.originalFilename;
-//     };
-//   }
-//   options.maxFileSize = 4000 * 1024 * 1024;
-//   const form = formidable(options);
-//   return new Promise((resolve, reject) => {
-//     form.parse(req, (err, fields, files) => {
-//       if (err) reject(err);
-//       resolve({ fields, files });
-//     });
-//   });
-// };
-
-// export const POST: NextApiHandler = async (req, res) => {
-//   try {
-//     await fs.readdir(path.join(process.cwd() + "/public", "/images"));
-//   } catch (error) {
-//     await fs.mkdir(path.join(process.cwd() + "/public", "/images"));
-//   }
-//   await readFile(req, true);
-//   res.json({ done: "ok" });
-// };
-
-// export async function POST(request: NextRequest) {
-//   const data = await request.formData()
-//   const file: File | null = data.get('file') as unknown as File
-//   try {
-//     await fs.readdir(path.join(process.cwd() + "/public", "/images"));
-//   } catch (error) {
-//     await fs.mkdir(path.join(process.cwd() + "/public", "/images"));
-//   }
-//   // await readFile(data, true);
-//   console.log(file);
-
-//   NextResponse.json({ done: "ok" });
-// }
-
-// export default handler;

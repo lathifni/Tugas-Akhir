@@ -1,7 +1,7 @@
 import { faCheck, faTrash, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dialog } from "@mui/material";
-import useAxiosAuth from "../../../../../../../../libs/useAxiosAuth";
+import useAxiosAuth from "../../../../../../../../../libs/useAxiosAuth";
 
 interface Props {
   isOpen: boolean;

@@ -70,10 +70,12 @@ export default function MapExploreUlakan({
   userLocation, dataMapforType, radius, isManualLocation, setUserLocation, objectAround, distances, setDistances, instructions, setInstructions
 }: MapExploreUlakanProps) {
   const queryMutiple = () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const resUlakanVillage = useQuery({
       queryKey: ['ulakanVillage'],
       queryFn: fetchUlakanVillage,
     })
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const resGeomGtp = useQuery({
       queryKey: ['geomGtp'],
       queryFn: fetchGeomGtp

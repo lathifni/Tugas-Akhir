@@ -1,7 +1,7 @@
 'use client'
 
 import { fetchReservationById } from "@/app/(pages)/api/fetchers/reservation";
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -24,17 +24,12 @@ interface Activity {
   activity_name: string;
 }
 
-interface ReservationData {
-  activity: Activity[];
-}
-
 export default function ReservationIdPage({ params }: any) {
   const [dataActivity, setDataActivity] = useState<{ day: string; activities: Activity[] }[]>([]);
-  const [token, setToken] = useState('')
   const [totalPriceHomestay, setTotalPriceHomestay] = useState(0)
   const [isOpenDialog, setIsOpenDialog] = useState(false)
   const [refundProofIsOpen, setRefundProofIsOpen] = useState(false)
-  const { data: session, status, update } = useSession()
+  const { data: session } = useSession()
   const steps = ['Waiting Confirmation Date', 'Deposit', 'Full Payment', 'Enjoy Trip'];
   const getStatusStep = () => {
     switch (dataReservationById.reservation.status_id) {
@@ -215,13 +210,6 @@ export default function ReservationIdPage({ params }: any) {
                       : null}
                   </button>
               )}
-              {/* <Stepper activeStep={dataReservationById.reservation.status_id - 1}>
-                {steps.map((label, index) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper> */}
               {[1, 2, 3, 4].includes(dataReservationById.reservation.status_id) && (
                 <Stepper activeStep={activeStep} className="my-2">
                   {steps.map((label) => (

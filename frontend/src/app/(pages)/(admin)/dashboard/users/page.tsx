@@ -39,7 +39,7 @@ export default function Users() {
     queryKey: ['dataAllCostumer'],
     queryFn: fetchAllCostumer
   })
-
+  
   const columns = React.useMemo(
     () => Columns(), []
   );
@@ -54,9 +54,9 @@ export default function Users() {
   }
 
   const handleInfoClick = (rowData: any) => {
-    console.log('Info clicked for: ', rowData);
     setInfoUserIsOpen(true)
     setDataInfoUser(rowData)
+    
     // Handle info click event
   };
 

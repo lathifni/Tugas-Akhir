@@ -1,9 +1,9 @@
-import { faBed, faCartShopping, faEye, faMosque, faRoad, faUtensils } from "@fortawesome/free-solid-svg-icons";
+import { faRoad } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { fetchExploreBrowsePackage, fetchExploreMyPackage, fetchExploreOurPackage } from "../../api/fetchers/package";
+import { fetchExploreBrowsePackage } from "../../api/fetchers/package";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 interface PackageSection {
   browseId: string
@@ -56,15 +56,17 @@ export default function BrowsePackage({ browseId, browseName, onShowMapClick, on
         dataBrowsePackage.map((pkg: any) => (
           <div key={pkg.id} className="px-2 text-center w-full rounded-lg hover:bg-slate-200">
             <hr className="my-4 border-t border-gray-300" />
-            <div className="mb-6 w-full flex items-center">
-              <img
-                src={`/photos/package/${pkg.cover_url}`}  
-                alt={pkg.name}
-                className="w-10 h-10 object-cover mr-4"
-              />
-              <h3 className="text-lg font-bold">{pkg.name}</h3>
-            </div>
-            <div className="flex justify-center mb-2">
+            <Link href={`/explore/package/${pkg.id}`}>
+              <div className="mb-6 w-full flex items-center">
+                <img
+                  src={`/photos/package/${pkg.cover_url}`}  
+                  alt={pkg.name}
+                  className="w-10 h-10 object-cover mr-4"
+                />
+                <h3 className="text-lg font-bold">{pkg.name}</h3>
+              </div>
+            </Link>
+            <div className="flex flex-wrap justify-center mb-2 gap-1">
               {pkg.days.map((day: any, index: number) => (
                 <button
                   key={index}
@@ -74,6 +76,9 @@ export default function BrowsePackage({ browseId, browseName, onShowMapClick, on
                   Day {day.day}
                 </button>
               ))}
+              <Link href={`/explore/package/${pkg.id}/booking`}>
+                <button className="px-4 py-2 mx-1 bg-green-500 text-white rounded-lg">Book Now</button>
+              </Link>
             </div>
             {activeDay[pkg.id] !== null && pkg.days[activeDay[pkg.id]!] && pkg.days[activeDay[pkg.id]!].activities && (
               <div className="mt-2">

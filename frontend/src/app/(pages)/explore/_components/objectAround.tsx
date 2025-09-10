@@ -14,6 +14,8 @@ interface Props {
 
 export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onStateChange }: Props) {
   const [state, setState] = useState({
+    uniqueAttraction: false,
+    attraction: false,
     culinaryPlaces: false,
     homestay: false,
     souvenirPlaces: false,
@@ -37,8 +39,8 @@ export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onSt
     if (onStateChange) onStateChange(updatedState); 
   };
 
-  const { culinaryPlaces, homestay, souvenirPlaces, worshipPlaces } = state;
-  const error = [culinaryPlaces, homestay, souvenirPlaces, worshipPlaces].filter((v) => v).length === 0
+  const { uniqueAttraction,attraction,culinaryPlaces, homestay, souvenirPlaces, worshipPlaces } = state;
+  const error = [ uniqueAttraction, attraction ,culinaryPlaces, homestay, souvenirPlaces, worshipPlaces].filter((v) => v).length === 0
 
   return (
     <div className="py-5 flex flex-col lg:w-1/3 items-center bg-white rounded-lg">
@@ -56,15 +58,21 @@ export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onSt
           <FormGroup>
             <FormControlLabel
               control={
-                <Checkbox checked={culinaryPlaces} onChange={handleChange} name="culinaryPlaces" />
+                <Checkbox checked={uniqueAttraction} onChange={handleChange} name="uniqueAttraction" />
               }
-              label="Culinary Places"
+              label="Unique Attraction"
             />
             <FormControlLabel
               control={
-                <Checkbox checked={homestay} onChange={handleChange} name="homestay" />
+                <Checkbox checked={attraction} onChange={handleChange} name="attraction" />
               }
-              label="Homestay"
+              label="Attraction"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox checked={culinaryPlaces} onChange={handleChange} name="culinaryPlaces" />
+              }
+              label="Culinary Places"
             />
             <FormControlLabel
               control={
@@ -78,6 +86,12 @@ export default function ObjectAroundSection({ onCloseClick, onRadiusChange, onSt
               }
               label="Worship Places"
             />
+              <FormControlLabel
+                control={
+                  <Checkbox checked={homestay} onChange={handleChange} name="homestay" />
+                }
+                label="Homestay"
+              />
           </FormGroup>
           <FormHelperText>*Choose min one</FormHelperText>
         </FormControl>

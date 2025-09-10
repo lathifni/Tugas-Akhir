@@ -676,7 +676,7 @@ export default function PackageIdEditPage({ params }: any) {
           </div>
         </div>
         <Dialog open={addActivitiesOpen} fullWidth maxWidth='sm' className="text-center">
-          <DialogTitle className="text-blue-500">Add New Acttivities</DialogTitle>
+          <DialogTitle className="text-blue-500">Add New Activities</DialogTitle>
           <DialogContent>
             <p>Activity Type</p>
             <Select displayEmpty label="Activity type" value={fieldAcitivityType}
@@ -793,7 +793,7 @@ export default function PackageIdEditPage({ params }: any) {
         </Dialog>
         <Dialog open={addServiceOpen} fullWidth maxWidth='sm' className="text-center">
           <Box m={1}>
-            <DialogTitle className="text-blue-500">Add Service</DialogTitle>
+            <DialogTitle className="text-blue-500">Add {typeService === 1 ? "Service" : "Non Service"}</DialogTitle>
             <p>Service</p>
             <Select id="select" value={selectedService}
               MenuProps={MenuProps}

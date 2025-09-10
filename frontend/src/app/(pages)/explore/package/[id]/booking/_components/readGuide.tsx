@@ -25,7 +25,7 @@ export default function ReadGuide({ readGuideOpen, setReadGuideOpen }: ReadGuide
           <h1 className="font-semibold">2.Customized Tour Package Reservations</h1>
           <ul className="list-disc pl-8">
             <li>
-              <p>Tourists can select the 'custom package' button to create the desired package</p>
+              <p>Tourists can select the custom package button to create the desired package</p>
             </li>
             <li>
               <p>Tourists are asked to fill in what activities, locations and services available in those activities</p>
@@ -40,7 +40,7 @@ export default function ReadGuide({ readGuideOpen, setReadGuideOpen }: ReadGuide
           <h1 className="font-semibold">3. Homestay Reservation</h1>
           <ul className="list-disc pl-8">
             <li>
-              <p>If tourists only want to make a homestay reservation without a tour package, they can fill in the 'custom reservation' form</p>
+              <p>If tourists only want to make a homestay reservation without a tour package, they can fill in the custom reservation form</p>
             </li>
             <li>
               <p>Tourists fill their activity day by selecting the desired homestay activity object</p>

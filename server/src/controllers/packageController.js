@@ -232,14 +232,24 @@ const createNewPackageController = async(params) => {
   await createPackageActivites(newActivites)
   }
 
+  // for (const service of package_service) {
+  // const newService = {
+  //   package_id: newId,
+  //   service_package_id: service.service_package_id,
+  //   status: service.status
+  // }
+  // await createPackageService(newService)
+  // }
+  if (Array.isArray(package_service) && package_service.length > 0) {
   for (const service of package_service) {
-  const newService = {
-    package_id: newId,
-    service_package_id: service.service_package_id,
-    status: service.status
+    const newService = {
+      package_id: newId,
+      service_package_id: service.service_package_id,
+      status: service.status
+    };
+    await createPackageService(newService);
   }
-  await createPackageService(newService)
-  }
+}
 
   let { lastIdNumberGallery } = await getLatestIdGalleryPackage();
   console.log(lastIdNumberGallery);
@@ -396,6 +406,8 @@ const exploreBrowsePackageController = async(params) => {
 const exploreMyPackageController = async(params) => {
   const packages = await exploreMyPackage(params);
   const result = {};
+  console.log(packages);
+  
 
   packages.forEach(pkg => {
     // Jika paket belum ada di result, tambahkan entry baru
@@ -420,6 +432,7 @@ const exploreMyPackageController = async(params) => {
         object_id: pkg.object_id // ID aktivitas
       });
     });
+// console.log(result.P0015.days[0].activities);
 
   return Object.values(result)
 }

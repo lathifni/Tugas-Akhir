@@ -43,6 +43,10 @@ export default function BookingIdPage({ params }: any) {
   threeDaysLater.setDate(currentTime.getDate() + 3);
   const formattedDate = threeDaysLater.toISOString().split("T")[0];
 
+  const twoWeeksLater = new Date(currentTime);
+  twoWeeksLater.setDate(currentTime.getDate() + 14);
+  const formattedMaxDate = twoWeeksLater.toISOString().split("T")[0];
+
   const readCheckHandleChange = () => {
     setReadCheck(!readCheck)
   }
@@ -105,7 +109,7 @@ export default function BookingIdPage({ params }: any) {
             toast.info("Redirecting You to Reservation");
             setTimeout(() => {
               router.push("/explore/reservation");
-            }, 1300);
+            }, 9000);
           }
         }
       }
@@ -260,7 +264,7 @@ export default function BookingIdPage({ params }: any) {
               {/* <Datetime value={new Date()} className="appearance-none shadow border rounded-lg w-fit py-1 px-2" /> */}
               {/* <CalendarClock className="absolute right-3 top-7 w-10" /> */}
               <input className="appearance-none shadow border rounded-lg w-fit py-1 px-2" onChange={readDateHandleChange} type="datetime-local"
-                min={formattedDate + 'T00:00'}
+                min={formattedDate + 'T00:00'} max={formattedMaxDate + 'T23:59'}
               />
             </div>
             <div className="relative w-fit select-none">

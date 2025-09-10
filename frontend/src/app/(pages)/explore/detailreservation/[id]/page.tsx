@@ -56,6 +56,7 @@ export default function DetailReservationIdPage({ params }: any) {
   const { mutateAsync: bookingHomestayByIdReservationMutation } = useMutation({
     mutationFn: bookingHomestayByIdReservation,
     onSuccess: () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       useQueryClient().invalidateQueries({ queryKey: ['bookingHomestayByIdReservation']})
     }
   })

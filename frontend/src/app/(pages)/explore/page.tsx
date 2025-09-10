@@ -1,15 +1,13 @@
 'use client'
 
-import MapHome from "@/components/maps/mapHome";
-import { ChevronDown, ChevronLeft, ChevronRight, Dot, Eye, Goal, MapPin, TrafficCone } from "lucide-react";
+import { ChevronDown, Eye, Goal, MapPin, TrafficCone } from "lucide-react";
 import { fetchGalleriesGtp } from "../api/fetchers/galleries";
 import { useQuery } from "@tanstack/react-query";
-import { fetchInfoGtp, fetchListAllActiveAnnouncement } from "../api/fetchers/gtp";
-import { useEffect, useState } from "react";
+import { fetchListAllActiveAnnouncement } from "../api/fetchers/gtp";
+import { useEffect, useRef, useState } from "react";
 import Footer from "@/components/footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBullhorn } from "@fortawesome/free-solid-svg-icons";
-import ListOurPackageSection from "./our-package/_components/listMyPackage";
 import GeneralInfo from "./_components/generalInfo";
 import Package from "./_components/package";
 import { fetchListGeomHomestay } from "../api/fetchers/homestay";
@@ -17,8 +15,11 @@ import { fetchListGeomSouvenir } from "../api/fetchers/souvenir";
 import { fetchListGeomCulinary } from "../api/fetchers/culinary";
 import { fetchListGeomWorship } from "../api/fetchers/worhsip";
 import ObjectAroundSection from "./_components/objectAround";
-import MapHomeUpdate from "@/components/maps/mapHomeUpdate";
 import BrowsePackage from "./_components/browsePackage";
+import { ToastContainer } from 'react-toastify';
+import MapHomeUpdateNewVer from "@/components/maps/mapHomeUpdateNewVer";
+import TravelPlanning from "./_components/travelPlanning";
+import { toast } from 'react-toastify';
 
 interface UserLocation {
   lat: number;
@@ -33,6 +34,7 @@ interface Visibility {
   village: boolean;
 }
 interface VisibilityObject {
+  uniqueAttraction: boolean;
   attraction: boolean;
   worshipPlace: boolean;
   culinaryPlace: boolean;
@@ -50,6 +52,8 @@ interface dataListGeom {
   lng: number;
 }
 interface MapType {
+  uniqueAttraction: boolean;
+  attraction: boolean;
   culinaryPlaces: boolean;
   homestay: boolean;
   souvenirPlaces: boolean;
@@ -62,6 +66,15 @@ interface WeatherData {
   icon: string;
   windSpeed: number;
 }
+const EMPTY_FILTERS: MapType = {
+  uniqueAttraction: false,
+  attraction: false,
+  culinaryPlaces: false,
+  homestay: false,
+  souvenirPlaces: false,
+  worshipPlaces: false,
+};
+type Waypoint = { id:string; name:string; lat:number; lng:number };
 
 export default function ExplorePage() {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -82,7 +95,7 @@ export default function ExplorePage() {
   const [isManualLocationClicked, setIsManualLocationClicked] = useState(false);
   const [isBrowseClicked, setIsBrowseClicked] = useState(false);
   const [radius, setRadius] = useState(0)
-  const [showLabels, setShowLabels] = useState<boolean>(true); // State untuk labels
+  const [showLabels, setShowLabels] = useState<boolean>(false); // State untuk labels
   const [showTerrain, setShowTerrain] = useState<boolean>(false); // State untuk terrain
   const [daySelectActivities, setDaySelectActivities] = useState<any[]>([]);
   const [selectActivities, setSelectActivities] = useState<{ start: any; end: any } | null>(null);
@@ -96,18 +109,27 @@ export default function ExplorePage() {
     // stepsInformation: false,
   });
   const [visibilityObject, setVisibilityObject] = useState<VisibilityObject>({
+    uniqueAttraction: false,
     attraction: false,
     worshipPlace: false,
     culinaryPlace: false,
     homestay: false,
     souvenirPlace: false,
   });
-  const [objectAroundState, setObjectAroundState] = useState<MapType>({
-    culinaryPlaces: false,
-    homestay: false,
-    souvenirPlaces: false,
-    worshipPlaces: false
-  });
+  // const [objectAroundState, setObjectAroundState] = useState<MapType>({
+  //   attraction: false,
+  //   culinaryPlaces: false,
+  //   homestay: false,
+  //   souvenirPlaces: false,
+  //   worshipPlaces: false
+  // });
+  const [objectAroundState, setObjectAroundState] = useState<MapType>(EMPTY_FILTERS);
+  const [activeMapMode, setActiveMapMode] = useState<'none' | 'browse' | 'radius' | 'route'>('none');
+  const [travelPlanning, setTravelPlanning] = useState(false);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
+  // const handleWaypointAdded = (w: Waypoint) => {
+  //   setWaypoints(prev => [...prev, w]);
+  // };
   const { data:announcements, error } = useQuery({
     queryKey: ['dataAllActiveAnnouncement'],
     queryFn: () => fetchListAllActiveAnnouncement()
@@ -120,45 +142,35 @@ export default function ExplorePage() {
     queryKey: ['galleriesGtp'],
       queryFn: fetchGalleriesGtp,
   })
-    const { isLoading: loadingListGeomCulinary, data: dataListGeomCulinary } = useQuery({
-      queryKey: ['listGeomCulinary'],
-      queryFn: fetchListGeomCulinary,
-    })
-    const { isLoading: loadingListGeomSouvenir, data: dataListGeomSouvenir } = useQuery({
-      queryKey: ['geomSouvenir'],
-      queryFn: fetchListGeomSouvenir
-    })
-    const { isLoading: loadingListGeomHomestay, data: dataListGeomHomestay } = useQuery({
-      queryKey: ['listGeomHomestay'],
-      queryFn: fetchListGeomHomestay
-    })
-  
-  // const queryMutiple = () => {
-  //   const resGalleries = useQuery({
-  //     queryKey: ['galleriesGtp'],
-  //     queryFn: fetchGalleriesGtp,
-  //   })
-  //   const resInfo = useQuery({
-  //     queryKey: ['infoGtp'],
-  //     queryFn: fetchInfoGtp
-  //   })
-  //   return [resGalleries, resInfo]
-  // }
+  const { isLoading: loadingListGeomCulinary, data: dataListGeomCulinary } = useQuery({
+    queryKey: ['listGeomCulinary'],
+    queryFn: fetchListGeomCulinary,
+  })
+  const { isLoading: loadingListGeomSouvenir, data: dataListGeomSouvenir } = useQuery({
+    queryKey: ['geomSouvenir'],
+    queryFn: fetchListGeomSouvenir
+  })
+  const { isLoading: loadingListGeomHomestay, data: dataListGeomHomestay } = useQuery({
+    queryKey: ['listGeomHomestay'],
+    queryFn: fetchListGeomHomestay
+  })
+  const objectKeys = Object.keys(visibilityObject) as (keyof VisibilityObject)[];
+  const totalObj = objectKeys.length;
+  const selectedObj = objectKeys.filter(k => visibilityObject[k]).length;
+  const isAllObjSelected = totalObj > 0 && selectedObj === totalObj;
 
-  // const [
-  //   { isLoading: loadingGalleries, data: dataGalleries },
-  //   { isLoading: loadingInfo, data: dataInfo }
-  // ] = queryMutiple()
-
-  // useEffect(() => {
-  //   if (dataGalleries) {
-  //     const interval = setInterval(() => {
-  //       setCurrentIndex(prevIndex => (prevIndex + 1) % dataGalleries.length);
-  //     }, 3000);
-  //     return () => clearInterval(interval);
-  //   }
-  //   // Membersihkan interval saat komponen di-unmount
-  // }, [dataGalleries]);
+  const setAllObjectVisibility = (val: boolean) => {
+    setVisibilityObject(
+      objectKeys.reduce((acc, k) => {
+        acc[k] = val;
+        return acc;
+      }, {} as VisibilityObject)
+    );
+  };
+  const toggleAllObject = () => setAllObjectVisibility(!isAllObjSelected);
+  const [detourType, setDetourType] = useState<'pre' | 'on' | null>(null);
+  const pendingDetourRef = useRef(false);
+  const GTP_GATE = { id: 'GTP_GATE', name: 'GTP Gate', lat: -0.709045, lng: 100.198671 };
 
   const fetchUserLocation = async (): Promise<void> => {
     try {
@@ -231,7 +243,43 @@ export default function ExplorePage() {
     }));
   };
 
+  const planningStartRef = useRef<UserLocation | null>(null);
+  useEffect(() => {
+    if (travelPlanning && !planningStartRef.current && userLocation) {
+      planningStartRef.current = userLocation;
+    }
+    if (!travelPlanning) {
+      planningStartRef.current = null;
+      setWaypoints([]); // opsional: reset daftar saat keluar planning
+    }
+  }, [travelPlanning, userLocation]);
+
+  const handleWaypointAdded = (w: Waypoint) => {
+    setWaypoints(prev => [...prev, w]);
+    setUserLocation({ lat: w.lat, lng: w.lng });
+    setActiveMapMode('radius');
+  };
+
+  // hapus waypoint terakhir
+  const handleWaypointRemove = (index: number) => {
+    setWaypoints(prev => {
+      const next = prev.slice(0, index); // buang item di index (biasanya terakhir)
+      // pusat radius = last dari next, atau kembali ke start planning, atau userLocation sekarang
+      const fallback = planningStartRef.current || userLocation;
+      const center = next.length ? next[next.length - 1] : fallback;
+      if (center) setUserLocation({ lat: center.lat, lng: center.lng });
+      return next;
+    });
+  };
+
+  const handleWaypointClear = () => {
+    setWaypoints([]);
+    const fallback = planningStartRef.current || userLocation;
+    if (fallback) setUserLocation({ lat: fallback.lat, lng: fallback.lng });
+  };
+
   const togglePackageSection = () => {
+    setTravelPlanning(false);  // <-- ADD
     setBrowseId(null)
     setPackageSection(!packageSection);
   };
@@ -250,27 +298,101 @@ export default function ExplorePage() {
       end:end
     })
     setDaySelectActivities([])
+    setActiveMapMode('route')
     // You can use this data to create the route on Google Maps.
   };
 
   const handleDaySelect = (activities:any) => {
     setDaySelectActivities(activities);
+    setActiveMapMode('route')
     setSelectActivities(null)
     // console.log("Selected day's activities:", activities);
     // You can use these activities for Google Maps or other processing
   };
 
-  const handleSection = () => {
-    setListExploreUlakan(!listExploreUlakan);
-    setDataTypeMap(null)
-    setRadius(0)
+  // const ensureLocation = () => {
+  //   if (userLocation) return true;
+  //   toast.info('Please set your location first (use Current Location atau Set Manual Location).');
+  //   const dialog = document.getElementById('manualLocationDialog') as HTMLDialogElement | null;
+  //   dialog?.showModal(); // buka dialog manual location
+  //   return false;
+  // };
+  const hasUserLocation = () => {
+    return userLocation !== null;
   };
 
+  // 2. FUNGSI UNTUK MELAKUKAN AKSI (SIDE EFFECT)
+  // Fungsi ini HANYA boleh dipanggil dari dalam event handler.
+  const promptForLocation = () => {
+    toast.info('Please set your location first (use Current Location atau Set Manual Location).');
+    const dialog = document.getElementById('manualLocationDialog') as HTMLDialogElement | null;
+    dialog?.showModal(); // Buka dialog manual location
+  };
+
+  const handleSection = () => {
+    if (hasUserLocation()) {
+      // Jika lokasi ada, lanjutkan dengan logika utama
+      setObjectAroundState(EMPTY_FILTERS);
+      setTravelPlanning(false);
+      setListExploreUlakan(!listExploreUlakan);
+      setDataTypeMap(null)
+      setRadius(0)
+    } else {
+      // Jika lokasi tidak ada, panggil fungsi untuk melakukan aksi
+      promptForLocation();
+    }
+    // if (!ensureLocation()) return;   // <-- ADD
+    // setTravelPlanning(false);
+    // setListExploreUlakan(!listExploreUlakan);
+    // setDataTypeMap(null)
+    // setRadius(0)
+  };
+
+  const handleTravelPlanningSectionLama = () => {
+    // if (!ensureLocation()) return;   // <-- ADD
+    if (hasUserLocation()) {
+      // Jika lokasi ada, lanjutkan dengan logika utama
+      console.log('Location exists. Proceeding with radius search...');
+      setTravelPlanning(true);
+      setActiveMapMode('route');  // fokus ke fitur rute
+      setListExploreUlakan(false);
+      setPackageSection(false);
+      setDataTypeMap(null);
+      setRadius(0);
+    } else {
+      // Jika lokasi tidak ada, panggil fungsi untuk melakukan aksi
+      promptForLocation();
+    }
+  }
+  // === CHANGED: handleTravelPlanningSection
+  const handleTravelPlanningSection = () => {
+    if (hasUserLocation()) {
+      setTravelPlanning(true);
+      setActiveMapMode('route');
+      setListExploreUlakan(false);
+      setPackageSection(false);
+      setDataTypeMap(null);
+      setRadius(0);
+
+      // === ADD: buka dialog detour langsung
+      openDetourDialog();
+    } else {
+      // minta user set lokasi dulu
+      promptForLocation();
+      // === ADD: tandai bahwa setelah lokasi tersedia, tampilkan dialog detour
+      pendingDetourRef.current = true;
+    }
+  };
+
+
   const handleObjectAroundStateChange = (newState: any) => {
+    console.log(newState);
+    
     setObjectAroundState(newState);
   }
 
   const handleRadiusChange = (value: number) => {
+    setActiveMapMode('radius')
     setRadius(value)
   }
 
@@ -307,7 +429,9 @@ export default function ExplorePage() {
         culinaryPlace: true,
         homestay: true,
         souvenirPlace: true,
+        attraction: true,
       }));
+      setActiveMapMode('browse')
       dialogElement.close();
     }
   };
@@ -316,6 +440,28 @@ export default function ExplorePage() {
     const dialogElement = document.getElementById('browsePlace') as HTMLDialogElement;
     dialogElement.close();
   }
+  const openDetourDialog = () => {
+    const el = document.getElementById('detourTypeDialog') as HTMLDialogElement | null;
+    el?.showModal();
+  };
+  const closeDetourDialog = () => {
+    const el = document.getElementById('detourTypeDialog') as HTMLDialogElement | null;
+    el?.close();
+  };
+  const cancelDetourDialog = () => {
+    const el = document.getElementById('detourTypeDialog') as HTMLDialogElement | null;
+    el?.close();
+    // Kalau memang Cancel harus keluar dari Travel Planning, panggil handleSection di sini
+    handleSection();
+  };
+
+  // === ADD: handler pilihan detour
+  const handleChooseDetour = (type: 'pre' | 'on') => {
+    setDetourType(type);
+    closeDetourDialog();
+    // (opsional) lakukan sesuatu berdasar type, mis. aktifkan mode tertentu
+    // setActiveMapMode(type === 'pre' ? 'browse' : 'route');
+  };
 
   useEffect(() => {
     const apiKey = "0ec1b86edc77ddcf8f5b6722561e564b";
@@ -347,17 +493,7 @@ export default function ExplorePage() {
             humidity,
             icon: weatherIcon,
             windSpeed,
-          });
-
-          console.log("Weather Data:", {
-            description: weatherDescription,
-            temperature,
-            humidity,
-            icon: weatherIcon,
-            windSpeed,
-          });
-          console.log(mapWeather);
-          
+          });          
         } catch (error) {
           console.error("Error fetching weather data:", error);
         }
@@ -365,6 +501,44 @@ export default function ExplorePage() {
   
       fetchWeather();
   },[])
+
+  useEffect(() => {
+    if (pendingDetourRef.current && userLocation) {
+      pendingDetourRef.current = false;
+
+      // Pastikan state travel planning aktif setelah lokasi ada
+      setTravelPlanning(true);
+      setActiveMapMode('route');
+      setListExploreUlakan(false);
+      setPackageSection(false);
+      setDataTypeMap(null);
+      setRadius(0);
+
+      openDetourDialog();
+    }
+  }, [userLocation]);
+
+  useEffect(() => {
+    if (!travelPlanning || !detourType) return;
+
+    if (detourType === 'pre') {
+      // pakai GTP Gate sebagai start → userLocation dipaksa ke GTP Gate
+      setUserLocation({ lat: GTP_GATE.lat, lng: GTP_GATE.lng });
+
+      // optional: seed waypoint pertama kalau kosong
+      // if (waypoints.length === 0) {
+      //   setWaypoints([{ id: GTP_GATE.id, name: GTP_GATE.name, lat: GTP_GATE.lat, lng: GTP_GATE.lng }]);
+      // }
+    } else {
+      // on-journey → start = My Location (biarkan userLocation apa adanya)
+      if (userLocation && waypoints.length === 0) {
+        // setWaypoints([{ id: 'MY_LOC', name: 'My Location', lat: userLocation.lat, lng: userLocation.lng }]);
+      }
+    }
+
+    // mode bantu radius biar fokus ke pusat start
+    // setActiveMapMode('radius');
+  }, [travelPlanning, detourType]); // (cukup detourType & travelPlanning)
 
   return (
     <>
@@ -436,39 +610,87 @@ export default function ExplorePage() {
               <div className="p-2 bg-blue-500 rounded-lg hover:bg-blue-600 text-white" title="How to Reach Object" role="button" onClick={reachToObjectHandler}>
                 How to Reach Object
               </div>
-              <div className="relative" title="Object" >
+              <div className="relative" title="Object">
+              {/* Grouped button: kiri = toggle all, kanan = chevron buka dropdown */}
+              <div className="inline-flex items-stretch rounded-lg overflow-hidden border border-blue-600 shadow-sm">
                 <button
-                  className="flex p-2 bg-blue-500 rounded-lg hover:bg-blue-600 text-white"
-                  onClick={() => setDropdownObjectVisible(!isDropdownObjectVisible)}
+                  type="button"
+                  className="flex items-center gap-2 p-2 bg-blue-500 text-white hover:bg-blue-700"
+                  onClick={toggleAllObject}
+                  aria-pressed={isAllObjSelected}
+                  title={isAllObjSelected ? 'Deselect all' : 'Select all'}
                 >
                   Object
-                  <ChevronDown
-                className={`${isDropdownObjectVisible && 'rotate-180'}`}
-              />
                 </button>
-                {/* Dropdown Content */}
-                {isDropdownObjectVisible && (
-                  <div className="absolute top-12 left-0 z-10 w-48 p-2 bg-white rounded-lg shadow-lg" onMouseLeave={() => setDropdownObjectVisible(false)}>
-                    <ul className="flex flex-col gap-2">
-                      {Object.keys(visibilityObject).map((key) => (
-                        <li key={key} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id={key}
-                            checked={visibilityObject[key as keyof VisibilityObject]}
-                            onChange={() =>
-                              handleCheckboxObjectChange(key as keyof VisibilityObject)
-                            }
-                            className="form-checkbox"
-                          />
-                          <label htmlFor={key} className="text-sm text-gray-800">
-                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
+
+                <button
+                  type="button"
+                  className="px-2 bg-blue-500 text-white hover:bg-blue-700 border-l border-blue-500"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDropdownObjectVisible(!isDropdownObjectVisible);
+                  }}
+                  aria-haspopup="menu"
+                  aria-expanded={isDropdownObjectVisible}
+                  title="Open options"
+                >
+                  <ChevronDown
+                    className={`${isDropdownObjectVisible ? 'rotate-180' : ''} transition-transform`}
+                  />
+                </button>
+              </div>
+              {/* Dropdown */}
+              {isDropdownObjectVisible && (
+                <div
+                  className="absolute top-12 left-0 z-10 w-56 p-2 bg-white rounded-lg shadow-lg border"
+                  role="menu"
+                  onMouseLeave={() => setDropdownObjectVisible(false)}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between px-2 pb-2 border-b">
+                    <span className="text-sm font-medium">Visibility</span>
+                    <span className="text-xs text-gray-500">
+                      {selectedObj === totalObj
+                        ? 'All on'
+                        : selectedObj === 0
+                        ? 'All off'
+                        : `${selectedObj} selected`}
+                    </span>
                   </div>
-                )}
+
+                  <ul className="max-h-64 overflow-auto py-2">
+                    {objectKeys.map((key) => (
+                      <li key={String(key)} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 rounded">
+                        <input
+                          type="checkbox"
+                          id={`obj-${String(key)}`}
+                          className="h-4 w-4"
+                          checked={!!visibilityObject[key]}
+                          onChange={() => handleCheckboxObjectChange(key)}
+                        />
+                        <label htmlFor={`obj-${String(key)}`} className="text-sm text-gray-800 cursor-pointer">
+                          {String(key).charAt(0).toUpperCase() + String(key).slice(1)}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="flex items-center justify-end gap-2 px-2 pt-2 border-t">
+                    <button
+                      className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
+                      onClick={() => setAllObjectVisibility(false)}
+                    >
+                      Disable all
+                    </button>
+                    <button
+                      className="text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                      onClick={() => setAllObjectVisibility(true)}
+                    >
+                      Enable all
+                    </button>
+                  </div>
+                </div>
+              )}
               </div>
               <div className="relative" title="Digitization" >
                 <button
@@ -522,20 +744,7 @@ export default function ExplorePage() {
             <span>Wind:{mapWeather?.windSpeed}m/s</span>
           </div>
           <div className="pb-4 md:mx-2">
-            {/* <MapHome userLocation={userLocation} 
-            objectAround={objectAroundState} dataMapforType={dataTypeMap} radius={radius}
-            isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked} setUserLocation={setUserLocation}
-            goToObject={goToObject} setGoToObject={setGoToObject} 
-            showLegend={showLegend} visibility={visibility}
-            reachToObject={reachToObject}
-            traffic={traffic} object={visibilityObject}
-            distances={distances} setDistances={setDistances}
-            instructions={instructions} setInstructions={setInstructions}
-            dayActivities={daySelectActivities} selectActivities={selectActivities}
-            // isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
-            // setUserLocation={setUserLocation}
-            /> */}
-            <MapHomeUpdate userLocation={userLocation} 
+            {/* <MapHomeUpdate userLocation={userLocation} 
             objectAround={objectAroundState} dataMapforType={dataTypeMap} radius={radius}
             isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked} setUserLocation={setUserLocation}
             goToObject={goToObject} setGoToObject={setGoToObject} 
@@ -549,12 +758,33 @@ export default function ExplorePage() {
             showTerrain={showTerrain} setShowTerrain={setShowTerrain}
             browsePlace={isBrowseClicked} setBrowseId={setBrowseId}
             setBrowseName={(setBrowseName)}
+            isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
+            setUserLocation={setUserLocation} /> */}
+            <MapHomeUpdateNewVer userLocation={userLocation} 
+            objectAround={objectAroundState} dataMapforType={dataTypeMap} radius={radius}
+            isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked} setUserLocation={setUserLocation}
+            goToObject={goToObject} setGoToObject={setGoToObject} 
+            showLegend={showLegend} visibility={visibility}
+            reachToObject={reachToObject}
+            traffic={traffic} object={visibilityObject}
+            distances={distances} setDistances={setDistances}
+            instructions={instructions} setInstructions={setInstructions}
+            dayActivities={daySelectActivities} selectActivities={selectActivities}
+            showLabels={showLabels} setShowLabels={setShowLabels}
+            showTerrain={showTerrain} setShowTerrain={setShowTerrain}
+            browsePlace={isBrowseClicked} setBrowseId={setBrowseId}
+            setBrowseName={(setBrowseName)}
+            activeMapMode={activeMapMode}
+            setActiveMapMode={setActiveMapMode}
+            isTravelPlanning={travelPlanning}
+            onWaypointAdded={handleWaypointAdded}
+            planningWaypoints={waypoints}
             // isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
             // setUserLocation={setUserLocation}
             />
           </div>
         </div>
-        {browseId !== null ? (
+        {/* {browseId !== null ? (
           <BrowsePackage browseId={browseId} browseName={browseName}
             onSearchAroundClick={handleSection} onShowMapClick={handleShowMapClick}
             onSelectActivity={handleSelectActivity}
@@ -572,8 +802,59 @@ export default function ExplorePage() {
               onStateChange={handleObjectAroundStateChange}
             />
           )
-        ): (
-          <GeneralInfo />
+        ): listExploreUlakan? (
+          <GeneralInfo 
+            onSearchAroundClick={handleSection}
+            onCreatePlanClick={handleTravelPlanningSection}
+          />
+          ):( 
+            <ObjectAroundSection 
+              onCloseClick={handleSection}
+              onRadiusChange={handleRadiusChange}
+              onStateChange={handleObjectAroundStateChange}
+            />
+          )
+        } */}
+        {travelPlanning ? (
+          <TravelPlanning 
+            onCloseClick={handleSection}
+            // onCloseClick={() => setTravelPlanning(false)}
+            onRadiusChange={handleRadiusChange}
+            onStateChange={handleObjectAroundStateChange}
+            waypoints={waypoints}
+            onRemove={handleWaypointRemove}
+            onClear={handleWaypointClear}
+            startLabel={detourType === 'pre' ? 'GTP Gate' : 'My Location'}
+          />
+        ) : browseId !== null ? (
+          <BrowsePackage browseId={browseId} browseName={browseName}
+            onSearchAroundClick={handleSection} onShowMapClick={handleShowMapClick}
+            onSelectActivity={handleSelectActivity}
+            onDaySelect={handleDaySelect}
+          />
+        ) : packageSection ? (
+          listExploreUlakan ? (
+            <Package onSearchAroundClick={handleSection} onShowMapClick={handleShowMapClick}
+              onSelectActivity={handleSelectActivity}
+              onDaySelect={handleDaySelect} />
+          ) : (
+            <ObjectAroundSection 
+              onCloseClick={handleSection}
+              onRadiusChange={handleRadiusChange}
+              onStateChange={handleObjectAroundStateChange}
+            />
+          )
+        ) : listExploreUlakan ? (
+          <GeneralInfo 
+            onSearchAroundClick={handleSection}
+            onCreatePlanClick={handleTravelPlanningSection}
+          />
+        ) : ( 
+          <ObjectAroundSection 
+            onCloseClick={handleSection}
+            onRadiusChange={handleRadiusChange}
+            onStateChange={handleObjectAroundStateChange}
+          />
         )}
       </div>
       {distances !== null && distances.length !== 0 && (
@@ -625,6 +906,32 @@ export default function ExplorePage() {
           </button>
         </div>
       </dialog>
+      {/* === ADD: Dialog pilih detour type */}
+      <dialog id="detourTypeDialog" className="bg-white p-12 mt-72 rounded-lg shadow-lg">
+        <h2 className="text-xl mb-4 text-center font-bold">Detour Destination</h2>
+        <p className="mb-4 text-center">Choose your detour type for this travel plan:</p>
+        <div className="mt-2 flex justify-center gap-3">
+          <button
+            onClick={() => handleChooseDetour('pre')}
+            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Pre-journey
+          </button>
+          <button
+            onClick={() => handleChooseDetour('on')}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded"
+          >
+            On-journey
+          </button>
+          <button
+            onClick={cancelDetourDialog}
+            className="bg-gray-200 hover:bg-red-500 hover:text-white text-gray-800 px-4 py-2 rounded"
+          >
+            Cancel
+          </button>
+        </div>
+      </dialog>
+      <ToastContainer />
     </>
   )
 }

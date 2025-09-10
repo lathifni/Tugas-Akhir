@@ -3,7 +3,7 @@ const promisePool = require("../../config/database");
 const getListReservationByUserId = async(params) => {
   const [rows] = await promisePool.query(
     `SELECT P.name,R.id,R.request_date,R.check_in,RS.status FROM reservation R JOIN package P ON R.package_id=P.id 
-    JOIN reservation_status RS ON RS.id=R.status_id WHERE R.user_id=${params.id}`
+    JOIN reservation_status RS ON RS.id=R.status_id WHERE R.user_id=${params.id} ORDER BY R.request_date DESC, R.status_id ASC`
   );
   return rows;
 }
@@ -91,7 +91,7 @@ const getActivityByReservationId = async(params) => {
 
 const getLatestIdReservation = async() => {
   // const [rows] = await promisePool.query(`SELECT MAX(CAST(SUBSTRING(id, 2) AS UNSIGNED)) AS lastIdNumber FROM reservation`);
-  const [rows] = await promisePool.query(`SELECT MAX(CAST(RIGHT(id, 4) AS UNSIGNED)) AS lastIdNumber FROM reservation WHERE id LIKE 'RTeestt%'`);
+  const [rows] = await promisePool.query(`SELECT MAX(CAST(RIGHT(id, 4) AS UNSIGNED)) AS lastIdNumber FROM reservation WHERE id LIKE 'R%'`);
   return rows[0];
 }
 
@@ -122,7 +122,7 @@ const updateAfterFullPaymentReservationInformation = async(params) => {
 
 
 const getReservationAfterDeposit = async(params) => {
-  const [rows] = await promisePool.query(`SELECT R.id,R.total_price,R.deposit,U.fullname,U.email,P.id AS 'package_id',P.name,R.request_date,R.check_in 
+  const [rows] = await promisePool.query(`SELECT R.id,R.total_price,R.deposit,U.fullname,U.email,U.phone,P.id AS 'package_id',P.name,R.request_date,R.check_in 
     FROM reservation AS R JOIN users AS U ON U.id=R.user_id JOIN package AS P ON P.id=R.package_id WHERE R.id='${params}'`);
   return rows[0];
 }
@@ -135,7 +135,7 @@ const allReservation = async() => {
 
 const getReservationAndUserById = async(params) => {
   const [rows] = await promisePool.query(
-    `SELECT R.*,RS.status,U.email,COALESCE(NULLIF(U.fullname,''), U.username) AS user_name,P.name,P.min_capacity,P.price,p.description,PT.type_name,MAX(CAST(PD.day AS UNSIGNED)) 
+    `SELECT R.*,RS.status,U.email,COALESCE(NULLIF(U.fullname,''), U.username) AS user_name,U.phone,P.name,P.min_capacity,P.price,p.description,PT.type_name,MAX(CAST(PD.day AS UNSIGNED)) 
     AS max_day FROM reservation AS R 
     JOIN package AS P ON R.package_id=P.id JOIN package_type AS PT ON PT.id=P.type_id JOIN package_day AS PD ON PD.package_id=R.package_id 
     JOIN reservation_status AS RS ON RS.id=R.status_id JOIN users AS U ON U.id=R.user_id WHERE R.id='${params.id}'`

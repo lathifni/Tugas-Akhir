@@ -12,6 +12,7 @@ interface MapContentGeneralProps {
   contact_person: string | null;
   capacity: string | null;
   onRouteClick: (latObject: number, lngObject: number) => void;
+  price: string|null;
 }
 
 interface MapContentCulinaryPlacesProps {
@@ -22,6 +23,7 @@ interface MapContentCulinaryPlacesProps {
   lat: number;
   lng: number;
   onRouteClick: (latObject: number, lngObject: number) => void;
+  onAddToRoute?: () => void; // <<< NEW (opsional)
 }
 
 interface MapContentBrowseCulinaryPlacesProps {
@@ -44,6 +46,7 @@ interface MapContentWorshipPlacesProps {
   lat: number;
   lng: number;
   onRouteClick: (latObject: number, lngObject: number) => void;
+  onAddToRoute?: () => void; // <<< NEW (opsional)
 }
 
 interface MapContentBrowseWorshipPlacesProps {
@@ -66,6 +69,7 @@ interface MapContentSouvenirPlacesProps {
   lat: number;
   lng: number;
   onRouteClick: (latObject: number, lngObject: number) => void;
+  onAddToRoute?: () => void; // <<< NEW (opsional)
 }
 
 interface MapContentBrowseSouvenirPlacesProps {
@@ -78,6 +82,7 @@ interface MapContentBrowseSouvenirPlacesProps {
   onRouteClick: (latObject: number, lngObject: number) => void;
   onBrowseRespond: (id:string, name:string) => void;
   browse: boolean | false;
+  onAddToRoute?: () => void; // <<< NEW (opsional)
 }
 
 interface MapContentHomestayPlacesProps {
@@ -88,6 +93,7 @@ interface MapContentHomestayPlacesProps {
   lat: number;
   lng: number;
   onRouteClick: (latObject: number, lngObject: number) => void;
+  onAddToRoute?: () => void; // <<< NEW (opsional)
 }
 
 interface MapContentBrowseHomestayPlacesProps {
@@ -123,18 +129,35 @@ interface MapAttractionContentProps {
   id: string;
   name: string;
   type: string;
+  // category: string;
   price: number;
   explore: number
   lat:number;
   lng:number;
   onRouteClick: (latObject: number, lngObject: number) => void;
+  onAddToRoute?: () => void; // <<< NEW (opsional)
 }
 
-export const MapContentGeneral: React.FC<MapContentGeneralProps> = ({id,name,icon,address,contact_person,capacity,lat,lng,onRouteClick}) => {
+interface MapAttractionBrowseContentProps {
+  id: string;
+  name: string;
+  type: string;
+  price: number;
+  explore: number
+  lat:number;
+  lng:number;
+  onRouteClick: (latObject: number, lngObject: number) => void;
+  onBrowseRespond: (id:string, name:string) => void;
+  browse: boolean | false;
+}
+
+export const MapContentGeneral: React.FC<MapContentGeneralProps> = ({id,name,icon,address,contact_person,capacity,lat,lng,onRouteClick,price}) => {
    const addressHref = `/explore/${icon}/${id}`
    const routeClickHandler = () => {
     onRouteClick(lat, lng)
   }
+  console.log(name, 'ini di MapContentGeneral');
+  
   return (
     <div className="p-2">
       <h1 className="font-semibold text-center text-lg mb-3">{name}</h1>
@@ -142,10 +165,13 @@ export const MapContentGeneral: React.FC<MapContentGeneralProps> = ({id,name,ico
         <p className="flex m-1 text-base justify-center"><Pin className="mr-2" />{address}</p>
       )}
       {contact_person && (
-        <p className="flex m-1 text-base justify-center"><Contact className="mr-2" />{contact_person}</p>
+        <p className="flex m-1 text-base justify-center"><User className="mr-2" />{contact_person}</p>
       )}
       {capacity && (
         <p className="flex m-1 text-base justify-center"><Contact className="mr-2" />{capacity}</p>
+      )}
+      {price && price != '0' && (
+        <p className="text-sm text-center p-1"><FontAwesomeIcon icon={faMoneyBill1Wave} className="mr-2" />{price}</p>
       )}
       <div className="flex justify-center text-lg">
         <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
@@ -159,7 +185,7 @@ export const MapContentGeneral: React.FC<MapContentGeneralProps> = ({id,name,ico
   )
 }
 
-export const MapContentCulinaryPlaces: React.FC<MapContentCulinaryPlacesProps> = ({ id, name, address, contact_person, lat, lng, onRouteClick }) => {
+export const MapContentCulinaryPlaces: React.FC<MapContentCulinaryPlacesProps> = ({ id, name, address, contact_person, lat, lng, onRouteClick, onAddToRoute }) => {  
   const addressHref = `/explore/culinary/${id}`
   const routeClickHandler = () => {
     onRouteClick(lat, lng)
@@ -169,11 +195,48 @@ export const MapContentCulinaryPlaces: React.FC<MapContentCulinaryPlacesProps> =
       <h1 className="font-semibold text-center text-lg mb-3">{name}</h1>
       <p className="flex m-1 text-base justify-center"><Pin className="mr-2" />{address}</p>
       <p className="flex m-1 text-base justify-center"><Contact className="mr-2" />{contact_person}</p>
-      <div className="flex justify-center text-lg">
+      {/* <div className="flex justify-center text-lg">
         <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
         <a href={addressHref} title="Info" target="_blank" >
           <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500" /></div>
         </a>
+      </div> */}
+      <div className="flex justify-center text-lg">
+        {/* Jika onAddToRoute ada => mode Travel Planning: tampilkan +Add + Info */}
+        {onAddToRoute ? (
+          <>
+            <button
+              type="button"
+              title="Add to Route"
+              onClick={onAddToRoute}
+              className="border-2 border-blue-500 rounded-lg px-3 py-2 m-1 text-blue-500 font-medium"
+            >
+              + Add
+            </button>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        ) : (
+          /* Default: tombol Route + Info */
+          <>
+            <div
+              role="button"
+              title="Route"
+              onClick={routeClickHandler}
+              className="border-2 border-blue-500 rounded-lg p-2 m-1"
+            >
+              <FontAwesomeIcon icon={faRoad} className="text-blue-500" />
+            </div>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        )}
       </div>
     </div>
   );
@@ -205,7 +268,7 @@ export const MapContentBrowseCulinaryPlaces: React.FC<MapContentBrowseCulinaryPl
   );
 };
 
-export const MapContentWorshipPlaces: React.FC<MapContentWorshipPlacesProps> = ({ id, name, address, capacity, lat, lng, onRouteClick }) => {
+export const MapContentWorshipPlaces: React.FC<MapContentWorshipPlacesProps> = ({ id, name, address, capacity, lat, lng, onRouteClick, onAddToRoute }) => {
   const addressHref = `/explore/worship/${id}`
   const routeClickHandler = () => {
     onRouteClick(lat, lng)
@@ -215,11 +278,48 @@ export const MapContentWorshipPlaces: React.FC<MapContentWorshipPlacesProps> = (
       <h1 className="font-semibold text-center text-lg mb-3">{name}</h1>
       <p className="flex m-1 text-base justify-center"><Pin className="mr-2" />{address}</p>
       <p className="flex m-1 text-base justify-center"><User className="mr-2" />{capacity}</p>
-      <div className="flex justify-center text-lg">
+      {/* <div className="flex justify-center text-lg">
         <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
         <a href={addressHref} title="Info" target="_blank" >
           <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500" /></div>
         </a>
+      </div> */}
+      <div className="flex justify-center text-lg">
+        {/* Jika onAddToRoute ada => mode Travel Planning: tampilkan +Add + Info */}
+        {onAddToRoute ? (
+          <>
+            <button
+              type="button"
+              title="Add to Route"
+              onClick={onAddToRoute}
+              className="border-2 border-blue-500 rounded-lg px-3 py-2 m-1 text-blue-500 font-medium"
+            >
+              + Add
+            </button>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        ) : (
+          /* Default: tombol Route + Info */
+          <>
+            <div
+              role="button"
+              title="Route"
+              onClick={routeClickHandler}
+              className="border-2 border-blue-500 rounded-lg p-2 m-1"
+            >
+              <FontAwesomeIcon icon={faRoad} className="text-blue-500" />
+            </div>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        )}
       </div>
     </div>
   )
@@ -271,7 +371,7 @@ export const MapContentSouvenirPlaces: React.FC<MapContentSouvenirPlacesProps> =
   )
 }
 
-export const MapContentBrowseSouvenirPlaces: React.FC<MapContentBrowseSouvenirPlacesProps> = ({ id, name, address, contact_person, lat, lng, onRouteClick, browse, onBrowseRespond }) => {
+export const MapContentBrowseSouvenirPlaces: React.FC<MapContentBrowseSouvenirPlacesProps> = ({ id, name, address, contact_person, lat, lng, onRouteClick, browse, onBrowseRespond, onAddToRoute}) => {
   const addressHref = `/explore/souvenir/${id}`
   const routeClickHandler = () => {
     onRouteClick(lat, lng)
@@ -284,7 +384,7 @@ export const MapContentBrowseSouvenirPlaces: React.FC<MapContentBrowseSouvenirPl
       <h1 className="font-semibold text-center text-lg mb-3">{name}</h1>
       <p className="flex m-1 text-base justify-center"><Pin className="mr-2" />{address}</p>
       <p className="flex m-1 text-base justify-center"><Contact className="mr-2" />{contact_person}</p>
-      <div className="flex justify-center text-lg">
+      {/* <div className="flex justify-center text-lg">
         <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
         <a href={addressHref} title="Info" target="_blank" >
           <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500" /></div>
@@ -292,12 +392,49 @@ export const MapContentBrowseSouvenirPlaces: React.FC<MapContentBrowseSouvenirPl
         {browse && (
         <div role="button" title="route" onClick={() => browseRespondHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg">Browse Place</div>
         )}
+      </div> */}
+      <div className="flex justify-center text-lg">
+        {/* Jika onAddToRoute ada => mode Travel Planning: tampilkan +Add + Info */}
+        {onAddToRoute ? (
+          <>
+            <button
+              type="button"
+              title="Add to Route"
+              onClick={onAddToRoute}
+              className="border-2 border-blue-500 rounded-lg px-3 py-2 m-1 text-blue-500 font-medium"
+            >
+              + Add
+            </button>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        ) : (
+          /* Default: tombol Route + Info */
+          <>
+            <div
+              role="button"
+              title="Route"
+              onClick={routeClickHandler}
+              className="border-2 border-blue-500 rounded-lg p-2 m-1"
+            >
+              <FontAwesomeIcon icon={faRoad} className="text-blue-500" />
+            </div>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        )}
       </div>
     </div>
   )
 }
 
-export const MapContentHomestayPlaces: React.FC<MapContentHomestayPlacesProps> = ({ id, name, address, contact_person, lat, lng, onRouteClick }) => {
+export const MapContentHomestayPlaces: React.FC<MapContentHomestayPlacesProps> = ({ id, name, address, contact_person, lat, lng, onRouteClick, onAddToRoute }) => {
   const addressHref = `/explore/homestay/${id}`
   const routeClickHandler = () => {
     onRouteClick(lat, lng)
@@ -307,11 +444,48 @@ export const MapContentHomestayPlaces: React.FC<MapContentHomestayPlacesProps> =
       <h1 className="font-semibold text-center text-lg mb-3">{name}</h1>
       <p className="flex m-1 text-base justify-center"><Pin className="mr-2" />{address}</p>
       <p className="flex m-1 text-base justify-center"><Contact className="mr-2" />{contact_person}</p>
-      <div className="flex justify-center text-lg">
+      {/* <div className="flex justify-center text-lg">
         <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
         <a href={addressHref} title="Info" target="_blank" >
           <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500" /></div>
         </a>
+      </div> */}
+      <div className="flex justify-center text-lg">
+        {/* Jika onAddToRoute ada => mode Travel Planning: tampilkan +Add + Info */}
+        {onAddToRoute ? (
+          <>
+            <button
+              type="button"
+              title="Add to Route"
+              onClick={onAddToRoute}
+              className="border-2 border-blue-500 rounded-lg px-3 py-2 m-1 text-blue-500 font-medium"
+            >
+              + Add
+            </button>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        ) : (
+          /* Default: tombol Route + Info */
+          <>
+            <div
+              role="button"
+              title="Route"
+              onClick={routeClickHandler}
+              className="border-2 border-blue-500 rounded-lg p-2 m-1"
+            >
+              <FontAwesomeIcon icon={faRoad} className="text-blue-500" />
+            </div>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        )}
       </div>
     </div>
   )
@@ -427,26 +601,92 @@ export const MapContentWater: React.FC<MapWaterContentProps> = ({ id, name, type
   )
 }
 
-export const MapContentAttraction: React.FC<MapAttractionContentProps> = ({ id, name, lat, lng, type, price, explore, onRouteClick }) => {
+export const MapContentAttraction: React.FC<MapAttractionContentProps> = ({ id, name, lat, lng, type, price, explore, onRouteClick, onAddToRoute }) => {  
+  const addressHref = `/explore/attraction/${id}`
+  const routeClickHandler = () => {
+    onRouteClick(lat, lng)
+  }
+  console.log(name);
+  
+  return (
+    <div className="p-1">
+      <p className="text-lg font-semibold p-1 text-center">{name}</p>
+      <p className="text-sm text-center p-1"><FontAwesomeIcon icon={faSpa} className="mr-1" /> {type}</p>
+      <p className="text-sm text-center p-1"><FontAwesomeIcon icon={faMoneyBill1Wave} className="mr-1" />Rp{price}</p>
+      {/* <div className="flex justify-center text-lg">
+        <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
+          <a href={addressHref} title="Info" target="_blank" >
+            <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500" /></div>
+          </a>
+      </div> */}
+      <div className="flex justify-center text-lg">
+        {/* Jika onAddToRoute ada => mode Travel Planning: tampilkan +Add + Info */}
+        {onAddToRoute ? (
+          <>
+            <button
+              type="button"
+              title="Add to Route"
+              onClick={onAddToRoute}
+              className="border-2 border-blue-500 rounded-lg px-3 py-2 m-1 text-blue-500 font-medium"
+            >
+              + Add
+            </button>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        ) : (
+          /* Default: tombol Route + Info */
+          <>
+            <div
+              role="button"
+              title="Route"
+              onClick={routeClickHandler}
+              className="border-2 border-blue-500 rounded-lg p-2 m-1"
+            >
+              <FontAwesomeIcon icon={faRoad} className="text-blue-500" />
+            </div>
+            <a href={addressHref} title="Info" target="_blank" rel="noreferrer">
+              <div className="border-2 border-blue-500 rounded-lg p-2 m-1">
+                <FontAwesomeIcon icon={faI} className="text-blue-500" />
+              </div>
+            </a>
+          </>
+        )}
+      </div>
+    </div>
+  )
   if (explore == 0) {
-    const addressHref = `/explore/attractions/${id}`
+  }
+}
+
+export const MapContentBrowseAttraction: React.FC<MapAttractionBrowseContentProps> = ({ id, name, lat, lng, type, price, explore, onRouteClick, browse, onBrowseRespond }) => {
+  console.log('ini di MapContentBrowseAttraction');
+  
+  if (explore == 0) {
+    const addressHref = `/explore/attraction/${id}`
     const routeClickHandler = () => {
       onRouteClick(lat, lng)
     }
+    const browseRespondHandler = () => {
+    onBrowseRespond(id, name)
+  }
     return (
       <div className="p-1">
         <p className="text-lg font-semibold p-1 text-center">{name}</p>
         <p className="text-sm text-center p-1"><FontAwesomeIcon icon={faSpa} className="mr-1" /> {type}</p>
         <p className="text-sm text-center p-1"><FontAwesomeIcon icon={faMoneyBill1Wave} className="mr-1" />Rp{price}</p>
-        {/* <div className="text-center mt-2 border-solid border-2 p-2 m-1 border-blue-500 rounded-lg ">
-          <a href={addressHref} title="Info" target="_blank"> <FontAwesomeIcon icon={faMapLocationDot} className="text-blue-500 text-base" /></a>
-        </div> */}
         <div className="flex justify-center text-lg">
-        <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
-        <a href={addressHref} title="Info" target="_blank" >
-          <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500" /></div>
-        </a>
-      </div>
+          <div role="button" title="route" onClick={() => routeClickHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faRoad} className="text-blue-500" /></div>
+          <a href={addressHref} title="Info" target="_blank" >
+            <div role="button" title="info" className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg"><FontAwesomeIcon icon={faI} className="text-blue-500" /></div>
+          </a>
+          {browse && (
+          <div role="button" title="route" onClick={() => browseRespondHandler()} className="border-solid border-2 p-2 m-1 border-blue-500 rounded-lg">Browse Place</div>
+          )}
+        </div>
       </div>
     )
   }

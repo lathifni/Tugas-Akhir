@@ -6,7 +6,7 @@ import { faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import useAxiosAuth from "../../../../../../../libs/useAxiosAuth";
 import { z } from 'zod';
@@ -18,9 +18,14 @@ interface Image {
   file: File;
 }
 
+const nameRegex = /^[\p{L}\p{M}\s'-]+$/u;
+
+// Alamat: huruf, angka, spasi, tanda baca umum
+const addressRegex = /^[\p{L}\p{M}\d\s.,\-\/'()#]+$/u;
+
 const homestay_schema = z.object({
-  homestay_name: z.string().min(1, 'Homestay name cannot be empty'),
-  address: z.string().min(1, 'Address cannot be empty'),
+  homestay_name: z.string().min(1, 'Homestay name cannot be empty').regex(nameRegex, "Only letters, spaces, apostrophes (') and dashes (-) allowed on homestay name"),
+  address: z.string().min(1, 'Address cannot be empty').regex(addressRegex, 'Address contains invalid characters'),
   contact_person: z.string().min(1, 'Contact person cannot be empty'),
   description: z.string().min(1, 'Description cannot be empty'),
   gallery: z.array(z.object({
@@ -54,10 +59,15 @@ export default function AddHomestayAdminPage() {
     setGallery(newGallery);
   }
 
-  const handleCoordinateChange = (latitude: number | null, longitude: number | null) => {
-    setLatitude(latitude)
-    setLongitude(longitude)
-  };
+  const handleCoordinateChange = useCallback((latitude: number | null, longitude: number | null) => {
+    setLatitude(latitude);
+    setLongitude(longitude);
+  }, []); // Dependency array kosong karena setter dari useState sudah stabil
+
+  const handleGeometryChange = useCallback((geometry: any) => {
+    console.log("Geometry:", geometry);
+    setGeometry(geometry);
+  }, []); // Dependency array kosong karena setter dari useState sudah stabil
 
   const handleLatitudeChange = (event: any) => {
     setLatitude(event.target.value);
@@ -72,11 +82,6 @@ export default function AddHomestayAdminPage() {
       console.log('ini button search');
       mapInputRef.current.search(longitude, latitude)
     }
-  }
-
-  const handleGeometryChange = (geometry: any) => {
-    console.log("Geometry:", geometry);
-    setGeometry(geometry)
   }
 
   const handleDeletePolygon = () => {

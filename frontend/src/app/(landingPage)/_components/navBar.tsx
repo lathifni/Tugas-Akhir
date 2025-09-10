@@ -20,7 +20,7 @@ export default function NavBarLandingPage() {
             <a href="#home" className="text-blue-600 ">Home</a>
             <a href="#about" className="text-black hover:text-blue-500 ">About</a>
             <a href="#award" className="text-black hover:text-blue-500 ">Award</a>
-            <a href="/login" className="ml-4 p-1 text-white rounded-sm bg-blue-500 hover:bg-green-400">Login</a>
+            <a href="/login" className="ml-4 px-4 py-2 text-white rounded-lg bg-blue-500 hover:bg-green-400">Login</a>
           </div>
         </div>
       </div>

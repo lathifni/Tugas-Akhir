@@ -48,12 +48,14 @@ export default function MapOrdinaryAttraction({ selectedId, userLocation, setUse
   })
 
   if (type === 'water') {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { data: dataListGeomWater, isLoading: loadingListaGeomHWater } = useQuery({
       queryKey: ['listGeomWater'],
       queryFn: fetchListGeomWater
     })
     dataAttarctionForMap = dataListGeomWater
   } else if (type === 'culture') {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { data: dataListGeomCulture, isLoading: loadingListGeomCulture } = useQuery({
       queryKey: ['listGeomCulture'],
       queryFn: fetchListGeomCulture

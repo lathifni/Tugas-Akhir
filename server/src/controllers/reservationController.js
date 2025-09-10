@@ -33,7 +33,7 @@ const {
 const crypto = require("crypto");
 const { bookingHomestay, bookedHomestay } = require('../services/homestay');
 const { checkCodeReferralAfterDP, makeNewCodeReferralAfterDP } = require('../services/referral');
-const { sendMessage, sendMessageConfirmationDate, sendMessageConfirmationDP, sendMessageConfirmationFP, adminSendMessageReservation, adminSendMessageDepositReservation, adminSendMessageFPReservation, adminSendMessageCancelReservation, customerSendMessageRefundProof, adminSendMessageRefundConfirmation, adminSendMessageCancelRefundReservation } = require('./chatController');
+const { sendMessage, sendMessageConfirmationDate, sendMessageConfirmationDP, sendMessageConfirmationFP, adminSendMessageReservation, adminSendMessageDepositReservation, adminSendMessageFPReservation, adminSendMessageCancelReservation, customerSendMessageRefundProof, adminSendMessageRefundConfirmation, adminSendMessageCancelRefundReservation, customersSendMessageCancelRefundReservation, sendMessageAfterBookingHomestay, adminSendMessageAfterBookingHomestay } = require('./chatController');
 const { allPhoneAdmin } = require('../services/users');
 
 const createReservationController = async (params) => {    
@@ -43,8 +43,8 @@ const createReservationController = async (params) => {
   let idReservation, idDownPayment;
   lastIdNumber++;
   const idNumberString = lastIdNumber.toString().padStart(4, "0");
-  idReservation = `RTeestt${idNumberString}`;
-  idDownPayment = `DPTeestt${idNumberString}`;
+  idReservation = `R${idNumberString}`;
+  idDownPayment = `DP${idNumberString}`;
 
   params.id = idReservation
   params.dp_id = idDownPayment
@@ -62,80 +62,11 @@ const createReservationController = async (params) => {
         await adminSendMessageReservation(params);
       }
     }
+    console.log('createReservationController status 201');
+    
     return { status: 201, idReservation: idReservation }
   } 
   return { status:500 }
-  // idRepayment = `RP${idNumberString}`
-  // return `P${idNumberString}`;
-
-  // const createReservation = await
-
-  // const paramter = {
-  //   transaction_details: {
-  //     order_id: idDownPayment,
-  //     // gross_amount: params.total,
-  //     gross_amount: 800000,
-  //   },
-  //   customer_details: {
-  //     first_name: params.name,
-  //     email: params.email,
-  //   },
-  //   usage_limit: 1,
-  //   expiry: {
-  //     duration: 1,
-  //     unit: "days",
-  //   },
-  //   item_details: [
-  //     {
-  //       id: "P0090",
-  //       name: "Family and Community Gathering",
-  //       price: 1000000,
-  //       quantity: 1,
-  //     },
-  //     {
-  //       name: "down payment",
-  //       price: -200000,
-  //       quantity: 1,
-  //     },
-  //   ],
-  // };
-
-  // const response = await fetch(`${process.env.MIDTRANS_APP_URL}`, {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     Accept: "application/json",
-  //     Authorization: `Basic ${authString}`,
-  //   },
-  //   body: JSON.stringify(paramter),
-  // });
-
-  // if (response.status == 201) {
-  //   const dataResponse = await response.json();
-  //   const token = dataResponse.token;
-  //   const status = 201;
-  //   const data = {
-  //     id: idReservation,
-  //     user_id: params.user_id,
-  //     package_id: params.package_id,
-  //     dp_id: idDownPayment,
-  //     request_date: params.request_date,
-  //     check_in: params.check_in,
-  //     total_people: params.total_people,
-  //     token_midtrans: token,
-  //     note: "ini sebuah note",
-  //     rating: 0,
-  //     status: 1,
-  //     deposit: 160000,
-  //     total_price: 800000,
-  //   };
-  //   await createReservation(data);
-  //   return { token, status };
-  // }
-  // const status = response.status;
-  // const dataResponse = await response.json();
-  // const { error_messages } = dataResponse;
-  // return { error_messages, status };
 };
 
 const confirmationDateController = async(params) => {
@@ -351,6 +282,8 @@ const callbackNotificationController = async (params) => {
           id: order_id,
         };
         const codeReferral = await checkCodeReferralAfterDP({ id: order_id })
+        console.log(codeReferral);
+        
         if (!codeReferral.code_referral || codeReferral.code_referral==null) {
           await makeNewCodeReferralAfterDP({ id: codeReferral.id })
         }
@@ -396,6 +329,13 @@ const bookingHomestayByReservationIdController = async(params) => {
   const { detailReservation, selectedHomestays, totalPriceHomestay } = params 
   const { id, total_price } =  detailReservation
   const check_in = moment(detailReservation.check_in).utc().format('YYYY-MM-DD')
+  const reservation = await getReservationAndUserById(detailReservation)
+  const new_total_price = total_price + totalPriceHomestay
+  const new_deposit = 0.2 * new_total_price
+
+  reservation.deposit = new_deposit
+  reservation.total_price = new_total_price
+  await sendMessageAfterBookingHomestay(reservation, selectedHomestays)
   
   for (let i=1; i<detailReservation.max_day; i++) {
     const date = moment(check_in).utc().add(i, 'days').format('YYYY-MM-DD');
@@ -403,9 +343,17 @@ const bookingHomestayByReservationIdController = async(params) => {
       await bookingHomestay({ homestay, date, id })
     }
   }
-
-  const new_total_price = total_price + totalPriceHomestay
-  const new_deposit = 0.2 * new_total_price
+  const phoneAdminList = await allPhoneAdmin();
+  
+  for (const adminPhone of phoneAdminList) {
+    // Pastikan nomor telepon admin valid
+    if (adminPhone && adminPhone.phone) {
+      // Tambahkan nomor telepon admin pada params
+      reservation.phone = adminPhone.phone;
+      // Kirim pesan ke admin
+      await adminSendMessageAfterBookingHomestay(reservation, selectedHomestays);
+    }
+  }
   return await newTotalByIdReservation({ id, new_deposit })
 }
 
@@ -777,21 +725,25 @@ const calculateCheckOutDate = (checkIn, maxDays) => {
 
 const refundController = async(params) => {
   const account_refund = `${params.bank} (${params.accountNumber}) a/n ${params.owner}`
+  const dataReservation = await getReservationAfterDeposit(params.id);
   const data = {
     account_refund,
     refund_date: moment().format('YYYY-MM-DD HH:mm:ss'),
     id: params.id,
-    refund_amount: params.totalRefund
+    refund_amount: params.totalRefund,
+    fullname: dataReservation.fullname,
   }
   await refund(data)
+  await customersSendMessageCancelRefundReservation(data);
+  
   const phoneAdminList = await allPhoneAdmin(); 
   for (const adminPhone of phoneAdminList) {
     // Pastikan nomor telepon admin valid
     if (adminPhone && adminPhone.phone) {
       // Tambahkan nomor telepon admin pada params
-      params.phone = adminPhone.phone;
+      data.phone = adminPhone.phone;
       // Kirim pesan ke admin
-      await adminSendMessageCancelRefundReservation(params);
+      await adminSendMessageCancelRefundReservation(data);
     }
   }
   return console.log(account_refund);

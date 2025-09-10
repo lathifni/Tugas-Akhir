@@ -56,7 +56,7 @@ const postWorshipController = async (params) => {
     newId = `GP${idGalleryNumberString}`;
     const paramsGallery = {
       id: newId,
-      culinary_place_id: params.id,
+      worship_place_id: params.id,
       url: params.url[i]
     }
     await addWorshipGallery(paramsGallery)

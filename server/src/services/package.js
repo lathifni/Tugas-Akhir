@@ -327,9 +327,7 @@ const exploreOurPackage = async() => {
   );
   return rows
 }
-const exploreBrowsePackage = async(params) => {
-  console.log('ini idnya mah', params.id);
-  
+const exploreBrowsePackage = async(params) => {  
   const [rows] = await promisePool.query(
     `SELECT P.id, P.name, P.cover_url, DP.day, DP.activity, DP.activity_type, DP.object_id, DP.description FROM package P 
     JOIN detail_package DP ON DP.package_id = P.id WHERE P.custom = 0 AND P.id IN ( SELECT DISTINCT package_id FROM detail_package 
@@ -339,11 +337,15 @@ const exploreBrowsePackage = async(params) => {
 }
 
 const exploreMyPackage = async(params) => {
-  console.log(params);
-  
   const [rows] = await promisePool.query(
+  //   `SELECT P.id,P.name,P.cover_url,DP.day,DP.activity,DP.activity_type,DP.object_id FROM package P JOIN detail_package DP ON DP.package_id=P.id 
+  //   JOIN reservation R ON R.package_id=P.id WHERE R.user_id=${params.id} AND P.custom=0 ORDER BY P.id,DP.day,CAST(DP.activity AS UNSIGNED);`
     `SELECT P.id,P.name,P.cover_url,DP.day,DP.activity,DP.activity_type,DP.object_id FROM package P JOIN detail_package DP ON DP.package_id=P.id 
-    JOIN reservation R ON R.package_id=P.id WHERE R.user_id=${params.id} AND P.custom=0 ORDER BY P.id,DP.day,CAST(DP.activity AS UNSIGNED);`
+    JOIN (
+      SELECT DISTINCT package_id
+      FROM reservation
+      WHERE user_id=${params.id}
+    ) R ON R.package_id=P.id WHERE  P.custom=0 ORDER BY P.id,DP.day,CAST(DP.activity AS UNSIGNED);`
   );
   return rows
 }

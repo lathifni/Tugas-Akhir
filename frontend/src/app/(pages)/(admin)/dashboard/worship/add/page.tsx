@@ -10,10 +10,42 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import axios from "axios";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { ToastContainer, Bounce, toast } from "react-toastify";
 import useAxiosAuth from "../../../../../../../libs/useAxiosAuth";
 import { useRouter } from 'next/navigation'
+import { z } from 'zod';
+
+// Nama: huruf Unicode + spasi + apostrof ' + dash -
+const nameRegex = /^[\p{L}\p{M}\s'-]+$/u;
+// Alamat: huruf/angka + tanda baca umum
+const addressRegex = /^[\p{L}\p{M}\d\s.,\-\/'()#]+$/u;
+
+const worshipSchema = z.object({
+  name: z.string()
+    .min(1, 'Name cannot be empty')
+    .max(100, 'Max 100 characters')
+    .regex(nameRegex, "Only letters, spaces, apostrophes (') and dashes (-) allowed"),
+  address: z.string()
+    .min(1, 'Address cannot be empty')
+    .max(200, 'Max 200 characters')
+    .regex(addressRegex, 'Address contains invalid characters'),
+  description: z.string()
+    .min(1, 'Description cannot be empty')
+    .max(1000, 'Max 1000 characters'),
+  status: z.enum(['0','1'], { required_error: 'Status must be chosen' }),
+
+  // angka: capacity minimal 1 (integer), price minimal 0 (boleh gratis)
+  capacity: z.coerce.number()
+    .int('Capacity must be an integer')
+    .min(1, 'Capacity must be at least 1'),
+  price: z.coerce.number()
+    .min(0, 'Price cannot be negative'),
+
+  // media & peta
+  gallery: z.array(z.any()).min(1, 'Gallery cannot be empty'),
+  geometry: z.any().refine(v => v != null, { message: 'Geometry cannot be null' }),
+});
 
 interface Image {
   name: string;
@@ -47,10 +79,15 @@ export default function AddWorshipAdmin() {
     setGallery(newGallery);
   }
 
-  const handleCoordinateChange = (latitude: number | null, longitude: number | null) => {
-    setLatitude(latitude)
-    setLongitude(longitude)
-  };
+  const handleCoordinateChange = useCallback((latitude: number | null, longitude: number | null) => {
+    setLatitude(latitude);
+    setLongitude(longitude);
+  }, []); // Dependency array kosong karena setter dari useState sudah stabil
+
+  const handleGeometryChange = useCallback((geometry: any) => {
+    console.log("Geometry:", geometry);
+    setGeometry(geometry);
+  }, []); // Dependency array kosong karena setter dari useState sudah stabil
 
   const handleLatitudeChange = (event: any) => {
     setLatitude(event.target.value);
@@ -66,10 +103,6 @@ export default function AddWorshipAdmin() {
     }
   }
 
-  const handleGeometryChange = (geometry: any) => {
-    setGeometry(geometry)
-  }
-
   const handleDeletePolygon = () => {
     if (mapInputRef.current) {
       mapInputRef.current.deletePolygon();
@@ -80,14 +113,24 @@ export default function AddWorshipAdmin() {
     e.preventDefault();
 
     let url: any
-    if (formDataInput.address === '') return toast.warn('address cannot be null');
-    if (formDataInput.name == '') return toast.warn('name cannot be null');
-    if (formDataInput.price == '') return toast.warn('price cannot be null');
-    if (formDataInput.capacity == '') return toast.warn('capacity culinary cannot be null')
-    if (formDataInput.description == '') return toast.warn('description culinary cannot be null')
-    if (formDataInput.status == '') return toast.warn('status culinary cannot be null')
-    if (geometry == null) return toast.warn('Geometry on Google Maps cannot be null')
-    if (gallery.length == 0) return toast.warn('Gallery cannot be null')
+    // if (formDataInput.address === '') return toast.warn('address cannot be null');
+    // if (formDataInput.name == '') return toast.warn('name cannot be null');
+    // if (formDataInput.price == '') return toast.warn('price cannot be null');
+    // if (formDataInput.capacity == '') return toast.warn('capacity culinary cannot be null')
+    // if (formDataInput.description == '') return toast.warn('description culinary cannot be null')
+    // if (formDataInput.status == '') return toast.warn('status culinary cannot be null')
+    // if (geometry == null) return toast.warn('Geometry on Google Maps cannot be null')
+    // if (gallery.length == 0) return toast.warn('Gallery cannot be null')
+     const parsed = worshipSchema.safeParse({
+      ...formDataInput,
+      gallery,
+      geometry,
+    });
+
+    if (!parsed.success) {
+      parsed.error.issues.forEach(i => toast.warn(i.message));
+      return;
+    }
 
     const formData = new FormData()
     const category = 'worship'
@@ -145,12 +188,12 @@ export default function AddWorshipAdmin() {
           </div>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900 ">Capacity</label>
-            <input type="number" name='capacity' onChange={handleChange} value={formDataInput.capacity}
+            <input type="number" name='capacity' onChange={handleChange} value={formDataInput.capacity} min={1}
               className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
           </div>
           <div className="px-8">
               <label className="block mt-2 text-sm font-medium text-gray-900 ">Price</label>
-              <input type="number" name='price' onChange={handleChange} value={formDataInput.price}
+              <input type="number" name='price' onChange={handleChange} value={formDataInput.price} min={0}
                 className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
           </div>
           <div className="px-8">
@@ -202,7 +245,7 @@ export default function AddWorshipAdmin() {
           </div>
         </div>
       </div>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3500}
         hideProgressBar={false}
@@ -214,7 +257,7 @@ export default function AddWorshipAdmin() {
         pauseOnHover
         theme="light"
         transition={Bounce}
-      />
+      /> */}
     </>
   )
 }

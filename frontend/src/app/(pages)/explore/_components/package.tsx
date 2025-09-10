@@ -1,9 +1,11 @@
-import { faBed, faCartShopping, faEye, faMosque, faRoad, faUtensils } from "@fortawesome/free-solid-svg-icons";
+import { faCompass, faRoad } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { fetchExploreMyPackage, fetchExploreOurPackage } from "../../api/fetchers/package";
+import { fetchExploreOurPackage } from "../../api/fetchers/package";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
 
 interface PackageSection {
   onSearchAroundClick: () => void;
@@ -14,6 +16,7 @@ interface PackageSection {
 
 export default function Package({ onSearchAroundClick, onShowMapClick, onSelectActivity, onDaySelect  }: PackageSection) {
   const [activeDay, setActiveDay] = useState<{ [key: string]: number | null }>({});
+  const { data: session, status, update } = useSession()
   const [selectedDayActivities, setSelectedDayActivities] = useState<{ [key: string]: any[] }>({});
   const { isError, isSuccess, isLoading, data:dataOurPackage, error } = useQuery({
     queryKey: ['fetchExploreOurPackage'],
@@ -48,21 +51,26 @@ export default function Package({ onSearchAroundClick, onShowMapClick, onSelectA
         <h1 className="text-2xl font-semibold">Our Package</h1>
       </div>
       <div className="bg-blue-500 hover:bg-blue-600 rounded-lg text-white" onClick={onSearchAroundClick} role="button">
-        <button className="m-3">Search Object Around You</button>
+        <button className="m-3">
+          <FontAwesomeIcon className="mr-2" icon={faCompass}/>
+          Search Object Around You
+        </button>
       </div>
       {dataOurPackage?.map((pkg: any) => (
         <div key={pkg.id} className="px-2 text-center w-full rounded-lg hover:bg-slate-200">
           {/* Separator */}
           <hr className="my-4 border-t border-gray-300" /> {/* Adjust border color as needed */}
-          <div key={pkg.id} className="mb-6 w-full flex items-center">
-            <img
-              src={`/photos/package/${pkg.cover_url}`}  
-              alt={pkg.name}
-              className="w-10 h-10 object-cover mr-4" // Set a fixed size for the image and add margin
-            />
-            <h3 className="text-lg font-bold">{pkg.name}</h3>
-          </div>
-          <div className="flex justify-center mb-2">
+          <Link href={`/explore/package/${pkg.id}`}>
+            <div key={pkg.id} className="mb-6 w-full flex items-center">
+              <img
+                src={`/photos/package/${pkg.cover_url}`}  
+                alt={pkg.name}
+                className="w-10 h-10 object-cover mr-4" // Set a fixed size for the image and add margin
+              />
+              <h3 className="text-lg font-bold">{pkg.name}</h3>
+            </div>
+          </Link>
+          <div className="flex flex-wrap justify-center mb-2 gap-1">
             {pkg.days.map((day: any, index: number) => (
               <button
                 key={index}
@@ -72,6 +80,60 @@ export default function Package({ onSearchAroundClick, onShowMapClick, onSelectA
                 Day {day.day}
               </button>
             ))}
+            {/* <Link href={`/explore/package/${pkg.id}/booking`}>
+              <button className="px-4 py-2 mx-1 bg-green-500 text-white rounded-lg">Book Now</button>
+            </Link> */}
+            <Link href={`/explore/package/${pkg.id}/booking`}>
+              <button 
+                className="px-4 py-2 mx-1 bg-green-500 text-white rounded-lg"
+                onClick={(e) => {
+                  // Jika session masih loading, tampilkan toast info
+                  if (status === "loading") {
+                    e.preventDefault();
+                    toast.info("Checking your session...");
+                    return;
+                  }
+                  
+                  // Jika tidak ada session (belum login)
+                  // if (!session) {
+                  //   e.preventDefault();
+                  //   toast.warning("You are not login. Please login first to booking this package", {
+                  //     position: "top-center",
+                  //     autoClose: 5000,
+                  //     hideProgressBar: true,
+                  //     closeOnClick: true,
+                  //     pauseOnHover: true,
+                  //     draggable: true,
+                  //   });
+                  //   return;
+                  // }
+                  if (!session) {
+                    e.preventDefault();
+                    toast.warning(
+                      <div className="text-center">
+                        <div className="font-bold">Login Required</div>
+                        <div>Please login first to book this package</div>
+                        <Link href={'login'}>
+                          <button className="px-4 py-2 mx-1 bg-blue-500 text-white rounded-lg">
+                            Login
+                          </button>
+                        </Link>
+                      </div>, 
+                      {
+                        position: "top-center",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        // closeOnClick: true,
+                      }
+                    );
+                    return;
+                  }
+                  // Jika sudah login, biarkan navigasi berjalan normal
+                }}
+              >
+                Book Now
+              </button>
+            </Link>
           </div>
           {activeDay[pkg.id] !== null && pkg.days[activeDay[pkg.id]!] && pkg.days[activeDay[pkg.id]!].activities && (
             <div className="mt-2">

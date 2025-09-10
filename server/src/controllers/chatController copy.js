@@ -199,17 +199,26 @@ const sendMessage = async (params) => {
   // clients.sendMessage(`${phone}@c.us`, message);
   console.log('ini di client info',clients.info);
   
-  if (clients.info === undefined){
-    console.log('the system is not ready yet');
+  // if (clients.info === undefined){
+  //   console.log('the system is not ready yet');
+  //   }
+  //   else{
+  //     // client.sendMessage(phn, msg);
+  //     clients.sendMessage(`${phone}@c.us`, message);
+  //     // Send message to the provided phone number
+  //     // clients.on('ready', () => {
+  //     //   clients.sendMessage(`${phone}@c.us`, message);
+  //     // })
+  //   }
+  const clientState = await clients.getState();
+    if (clientState !== 'CONNECTED') {
+      console.log(`Client not connected. Current state: ${clientState}`);
+      return;
     }
-    else{
-      // client.sendMessage(phn, msg);
-      clients.sendMessage(`${phone}@c.us`, message);
-      // Send message to the provided phone number
-      // clients.on('ready', () => {
-      //   clients.sendMessage(`${phone}@c.us`, message);
-      // })
-    }
+
+    // ✅ Kirim pesan
+    await clients.sendMessage(`${phone}@c.us`, message);
+    console.log(`Message sent to ${phone}@c.us`);
   } catch (error) {
     console.error('Error sending message:', error);
 
@@ -256,18 +265,26 @@ const sendMessageConfirmationDate = async (params) => {
 
     We look forward to welcoming you on the tour!`;
 
-    console.log('ini di client info',clients.info);
-    if (clients.info === undefined){
-    console.log('the system is not ready yet');
+    // if (clients.info === undefined){
+    // console.log('the system is not ready yet');
+    // }
+    // else{
+    //   // client.sendMessage(phn, msg);
+    //   clients.sendMessage(`${phone}@c.us`, message);
+    //   // Send message to the provided phone number
+    //   clients.on('ready', () => {
+    //     clients.sendMessage(`${phone}@c.us`, message);
+    //   })
+    // }
+    const clientState = await clients.getState();
+    if (clientState !== 'CONNECTED') {
+      console.log(`Client not connected. Current state: ${clientState}`);
+      return;
     }
-    else{
-      // client.sendMessage(phn, msg);
-      clients.sendMessage(`${phone}@c.us`, message);
-      // Send message to the provided phone number
-      clients.on('ready', () => {
-        clients.sendMessage(`${phone}@c.us`, message);
-      })
-    }
+
+    // ✅ Kirim pesan
+    await clients.sendMessage(`${phone}@c.us`, message);
+    console.log(`Message sent to ${phone}@c.us`);
 
   } catch (error) {
     console.error('Error sending message:', error);
@@ -483,15 +500,24 @@ const adminSendMessageReservation = async(params) => {
     For any inquiries, please visit the reservation page: http://localhost:3001/reservation/${id}`;
 
     // Mengecek jika client WhatsApp sudah siap
-    if (clients.info === undefined) {
-      console.log('The system is not ready yet, retrying...');
-      // Bisa tambahkan retry di sini jika perlu menunggu client siap
+    // if (clients.info === undefined) {
+    //   console.log('The system is not ready yet, retrying...');
+    //   // Bisa tambahkan retry di sini jika perlu menunggu client siap
+    //   return;
+    // } else {
+    //   // Kirim pesan ke nomor admin
+    //   clients.sendMessage(`${phone}@c.us`, message);
+    //   console.log(`Message sent to ${phone}@c.us`);
+    // }
+    const clientState = await clients.getState();
+    if (clientState !== 'CONNECTED') {
+      console.log(`Client not connected. Current state: ${clientState}`);
       return;
-    } else {
-      // Kirim pesan ke nomor admin
-      clients.sendMessage(`${phone}@c.us`, message);
-      console.log(`Message sent to ${phone}@c.us`);
     }
+
+    // ✅ Kirim pesan
+    await clients.sendMessage(`${phone}@c.us`, message);
+    console.log(`Message sent to ${phone}@c.us`);
   } catch (error) {
     console.error('Error sending message:', error);
 
@@ -697,18 +723,27 @@ const adminSendMessageCancelRefundReservation = async(params) => {
     //     }
     //   }, 3000); // Delay for 3 seconds
     // });
-    console.log('ini di client info',clients.info);
-    if (clients.info === undefined){
-    console.log('the system is not ready yet');
+    // console.log('ini di client info',clients.info);
+    // if (clients.info === undefined){
+    // console.log('the system is not ready yet');
+    // }
+    // else{
+    //   // client.sendMessage(phn, msg);
+    //   clients.sendMessage(`${phone}@c.us`, message);
+    //   // Send message to the provided phone number
+    //   // clients.on('ready', () => {
+    //   //   clients.sendMessage(`${phone}@c.us`, message);
+    //   // })
+    // }
+    const clientState = await clients.getState();
+    if (clientState !== 'CONNECTED') {
+      console.log(`Client not connected. Current state: ${clientState}`);
+      return;
     }
-    else{
-      // client.sendMessage(phn, msg);
-      clients.sendMessage(`${phone}@c.us`, message);
-      // Send message to the provided phone number
-      // clients.on('ready', () => {
-      //   clients.sendMessage(`${phone}@c.us`, message);
-      // })
-    }
+
+    // ✅ Kirim pesan
+    await clients.sendMessage(`${phone}@c.us`, message);
+    console.log(`Message sent to ${phone}@c.us`);
   } catch (error) {
     console.error('Error:', error);
   }

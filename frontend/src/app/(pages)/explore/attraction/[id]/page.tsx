@@ -16,8 +16,6 @@ export default function AttractionId({ params }: any) {
       queryKey: ['attractionGallery'],
       queryFn: () => fetchGalleriesAttraction(params.id)
     })
-    console.log(data);
-  // console.log(dataGallery);
   return (
     <div className="flex flex-col xl:flex-row m-1 sm:m-2 lg:m-4">
       { (data && dataGallery) ? (
@@ -48,7 +46,6 @@ export default function AttractionId({ params }: any) {
                     </tbody>
                   </table>
                   <h2 className="text-2xl font-semibold">Description</h2>
-                  {/* <p className="text-justify" >{data.description}</p> */}
                   <div
                     className="text-justify space-y-4"
                     dangerouslySetInnerHTML={{ __html: data.description }}

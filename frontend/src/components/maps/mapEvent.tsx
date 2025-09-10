@@ -148,7 +148,9 @@ export default function MapEvent({ selectedEventId, userLocation, setUserLocatio
           }, 1700)
           const container = document.createElement('div');
           const root = createRoot(container);
-          root.render(<MapContentEvent id={id} name={name} type={type} price={price} />)
+          root.render(<MapContentEvent id={id} name={name} type={type} price={price} lat={0} lng={0} onRouteClick={function (latObject: number, lngObject: number): void {
+            throw new Error("Function not implemented.")
+          } } />)
           new google.maps.InfoWindow({
             content: document.body.appendChild(container)
           }).open(map, marker)

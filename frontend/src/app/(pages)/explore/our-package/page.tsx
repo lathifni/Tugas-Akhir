@@ -19,6 +19,8 @@ interface UserLocation {
 }
 
 interface MapType {
+  uniqueAttraction: boolean;
+  attraction: boolean;
   culinaryPlaces: boolean;
   homestay: boolean;
   souvenirPlaces: boolean;
@@ -34,6 +36,7 @@ interface dataListGeom {
   status: number | null;
   lat: number;
   lng: number;
+  price: number;
 }
 interface WeatherData {
   description: string;
@@ -43,7 +46,7 @@ interface WeatherData {
   windSpeed: number;
 }
 
-export default function OurPakcagePage() {
+export default function OurPackagePage() {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [listExploreUlakan, setListExploreUlakan] = useState(true);
   const [dataTypeMap, setDataTypeMap] = useState<dataListGeom[] | null>(null)
@@ -78,6 +81,8 @@ export default function OurPakcagePage() {
   })
 
   const [objectAroundState, setObjectAroundState] = useState<MapType>({
+    uniqueAttraction: false,
+    attraction: false,
     culinaryPlaces: false,
     homestay: false,
     souvenirPlaces: false,
@@ -124,8 +129,6 @@ export default function OurPakcagePage() {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       });
-      console.log(userLocation);
-
     } catch (error) {
       console.error("Error getting location:", error);
     }
@@ -159,7 +162,6 @@ export default function OurPakcagePage() {
   };
 
   const handleSelectActivity = (start:any, end:any) => {
-    // console.log("Selected Route:", start, "to", end);
     setSelectActivities({
       start:start,
       end:end
@@ -171,8 +173,6 @@ export default function OurPakcagePage() {
   const handleDaySelect = (activities:any) => {
     setDaySelectActivities(activities);
     setSelectActivities(null)
-    // console.log("Selected day's activities:", activities);
-    // You can use these activities for Google Maps or other processing
   };
 
   const trafficHandler = () => {
@@ -218,16 +218,6 @@ export default function OurPakcagePage() {
             icon: weatherIcon,
             windSpeed,
           });
-
-          console.log("Weather Data:", {
-            description: weatherDescription,
-            temperature,
-            humidity,
-            icon: weatherIcon,
-            windSpeed,
-          });
-          console.log(mapWeather);
-          
         } catch (error) {
           console.error("Error fetching weather data:", error);
         }

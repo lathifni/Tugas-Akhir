@@ -8,6 +8,9 @@ import { faCaretDown, faCartPlus, faCirclePlay, faPenClip, faRoad, faSquarePlus 
 import MapPackage from "@/components/maps/mapPackage";
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 interface UserLocation {
   lat: number;
@@ -42,6 +45,8 @@ export default function PackageIdPage({ params }: any) {
   const [distances, setDistances] = useState<number[]>([]);
   const [instructions, setInstructions] = useState<string[]>([]);
   const [jenisnya, setJenisnya] = useState('')
+  const { data: session, status, update } = useSession()
+  const router = useRouter(); // Tambahkan ini
 
   const { data: dataListAllServicePackageById, isLoading: loadingListAllServicePackageById } = useQuery({
     queryKey: ['listAllServicePackageById', params.id],
@@ -71,8 +76,7 @@ export default function PackageIdPage({ params }: any) {
     queryKey: ['listAllReviewPackageById', params.id],
     queryFn: () => fetchListAllReviewPackageById(params.id)
   })
-  console.log(dataPackageActivityById);
-  
+  // console.log(dataPackageActivityById);
 
   const rupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -162,6 +166,58 @@ export default function PackageIdPage({ params }: any) {
     setIsDropdownOpen(!isDropdownOpen)
     setJenisnya('journey')
   }
+  const actionButtons = [
+    {
+      href: 'booking',
+      icon: faCartPlus,
+      text: 'Booking',
+    },
+    {
+      href: 'extend',
+      icon: faSquarePlus,
+      text: 'Extend Package',
+    },
+    {
+      href: 'custom',
+      icon: faPenClip,
+      text: 'Customize Package',
+    },
+  ];
+
+  // --- 2. Buat satu fungsi handler untuk semua tombol ---
+  const handleActionClick = (href: string) => {
+    // Jika session masih loading, tampilkan toast info
+    if (status === 'loading') {
+      toast.info('Checking your session...');
+      return; // Hentikan fungsi di sini
+    }
+    
+    // Jika tidak ada session (belum login), tampilkan toast warning
+    if (!session) {
+      toast.warning(
+        <div className="text-center">
+          <div className="font-bold">Login Required</div>
+          <div>Please login first to continue</div>
+          <Link href={'/login'}>
+            <button className="px-4 py-2 mt-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+              Login
+            </button>
+          </Link>
+        </div>,
+        {
+          position: 'top-center',
+          autoClose: 5000,
+          hideProgressBar: false,
+        }
+      );
+      return; // Hentikan fungsi di sini
+    }
+
+    // --- Jika semua validasi lolos, lakukan navigasi ---
+    const fullPath = `/explore/package/${dataPackageActivityById[0]?.package_id}/${href}`;
+    router.push(fullPath);
+  };
+
 
   if (dataListAllServicePackageById && dataPackageById && dataAverageRatingById && dataListAllGalleryPackageById && dataListAllReviewPackageById) {
     const serviceInclude = dataListAllServicePackageById.filter((item: { name: string, status: number; }) => item.status === 1);
@@ -181,25 +237,20 @@ export default function PackageIdPage({ params }: any) {
             )} */}
             <div className="justify-center items-center">
               {dataPackageActivityById && (
-                <Link href={`/explore/package/${dataPackageActivityById[0]?.package_id}/booking`}>
-                  <button className="px-3 py-1 m-2 bg-green-500 rounded-lg text-white hover:bg-green-700">
-                    <FontAwesomeIcon icon={faCartPlus} /> Booking
-                  </button>
-                </Link>
-              )}
-              {dataPackageActivityById && (
-                <Link href={`/explore/package/${dataPackageActivityById[0]?.package_id}/extend`}>
-                  <button className="px-3 py-1 m-2 bg-green-500 rounded-lg text-white hover:bg-green-700">
-                    <FontAwesomeIcon icon={faSquarePlus} /> Extend Package
-                  </button>
-                </Link>
-              )}
-              {dataPackageActivityById && (
-                <Link href={`/explore/package/${dataPackageActivityById[0]?.package_id}/custom`}>
-                  <button  className="px-3 py-1 m-2 bg-green-500 rounded-lg text-white hover:bg-green-700">
-                    <FontAwesomeIcon icon={faPenClip} /> Customize Package
-                  </button>
-                </Link>
+                <>
+                  {actionButtons.map((button) => (
+                    // Hapus komponen <Link> di sini
+                    <button
+                      key={button.href}
+                      className="px-3 py-1 m-2 bg-green-500 rounded-lg text-white hover:bg-green-700"
+                      // Panggil handler dengan href yang sesuai
+                      onClick={() => handleActionClick(button.href)}
+                    >
+                      <FontAwesomeIcon icon={button.icon} className="mr-2" />
+                      {button.text}
+                    </button>
+                  ))}
+                </>
               )}
             </div>
             <div className="justify-center flex">

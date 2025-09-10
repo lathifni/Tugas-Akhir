@@ -1,4 +1,14 @@
-const { estuaryGeomAttractionController, trackingGeomAttractionController, tripGeomAttractionController, makamGeomAttractionController, waterListGeomAttractionController, cultureListGeomAttractionController, listGeomAttractionController, getAttractionByIdController } = require("../controllers/attractionController");
+const { estuaryGeomAttractionController, trackingGeomAttractionController, tripGeomAttractionController, makamGeomAttractionController, waterListGeomAttractionController, cultureListGeomAttractionController, listGeomAttractionController, getAttractionByIdController, listAllAttractionController, listAttractionByRadiusController, listUniqueAttractionByRadiusController } = require("../controllers/attractionController");
+
+const listAllAttractionHandler = async(req, res) => {
+  try {
+    const geom = await listAllAttractionController()
+
+    return res.status(200).send({ status:'success', data:geom })
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 const listGeomAttractionHandler = async(req, res) => {
   try {
@@ -72,7 +82,7 @@ const cultureListGeomAttractionHandler = async(req, res) => {
 
 const getAttractionByIdHandler = async(req, res) => {
   try {
-    const data = await getAttractionByIdController(req.params)
+    const data = await getAttractionByIdController(req.params)    
     data.icon = 'attraction.png'
 
     return res.status(200).send({ status:'success', data:data })
@@ -81,5 +91,26 @@ const getAttractionByIdHandler = async(req, res) => {
   }
 }
 
-module.exports = { listGeomAttractionHandler, estuaryGeomAttractionHandler, trackingGeomAttractionHandler, tripGeomAttractionHandler, makamGeomAttractionHandler,
-waterListGeomAttractionHandler, cultureListGeomAttractionHandler, getAttractionByIdHandler, }
+const listAttractionyByRadiusHandler = async(req, res) => {
+  try {    
+    const list = await listAttractionByRadiusController(req.query)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const listUniqueAttractionyByRadiusHandler = async(req, res) => {
+  try {    
+    const list = await listUniqueAttractionByRadiusController(req.query)
+
+    return res.status(200).send({ status:'success', data:list })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { listAllAttractionHandler, listGeomAttractionHandler, estuaryGeomAttractionHandler, trackingGeomAttractionHandler, tripGeomAttractionHandler, makamGeomAttractionHandler,
+waterListGeomAttractionHandler, cultureListGeomAttractionHandler, getAttractionByIdHandler, listAttractionyByRadiusHandler,
+listUniqueAttractionyByRadiusHandler, }

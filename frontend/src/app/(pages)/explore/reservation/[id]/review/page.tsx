@@ -136,13 +136,13 @@ export default function ReviewReservationId({ params }: any) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="font-semibold whitespace-no-wrap">Review </td>
+                  <td className="font-semibold whitespace-no-wrap">Review</td>
                   <td> {/* Tambahkan <td> untuk menampung textarea */}
                     <textarea
                       placeholder="Leave a comment or review"
-                      value={dataReservationById.reservation.review}
-                      readOnly
+                      value={review}
                       rows={6}
+                      onChange={(e) => setReview(e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded-md"
                     />
                   </td>

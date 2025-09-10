@@ -1,5 +1,8 @@
-const { estuaryGeomAttraction, trackingGeomAttraction, tripGeomAttraction, makamGeomAttraction, waterListGeomAttraction, cultureListGeomAttraction, listGeomAttractions, getAttractionById } = require("../services/attraction")
+const { estuaryGeomAttraction, trackingGeomAttraction, tripGeomAttraction, makamGeomAttraction, waterListGeomAttraction, cultureListGeomAttraction, listGeomAttractions, getAttractionById, listAllAttractions, listAttractionByRadius, listUniqueAttractionByRadius } = require("../services/attraction")
 
+const listAllAttractionController = async() => {
+  return await listAllAttractions()
+}
 
 const listGeomAttractionController = async() => {
   return await listGeomAttractions()
@@ -32,5 +35,13 @@ const getAttractionByIdController = async(params) => {
   return await getAttractionById(params)
 }
 
-module.exports = { listGeomAttractionController, estuaryGeomAttractionController, trackingGeomAttractionController, tripGeomAttractionController, makamGeomAttractionController, waterListGeomAttractionController,
-cultureListGeomAttractionController, getAttractionByIdController, }
+const listAttractionByRadiusController = async(payload) => {
+  return await listAttractionByRadius(payload)
+}
+
+const listUniqueAttractionByRadiusController = async(payload) => {
+  return await listUniqueAttractionByRadius(payload)
+}
+
+module.exports = { listAllAttractionController, listGeomAttractionController, estuaryGeomAttractionController, trackingGeomAttractionController, tripGeomAttractionController, makamGeomAttractionController, waterListGeomAttractionController,
+cultureListGeomAttractionController, getAttractionByIdController, listAttractionByRadiusController, listUniqueAttractionByRadiusController }

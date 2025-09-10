@@ -62,7 +62,7 @@ export default function TableReservationExplore({ columns, data, onDelete, }: Pr
                     <FontAwesomeIcon icon={faInfoCircle} style={{ fontSize: '1.3em' }} />
                   </button>
                 </Link>
-                <Link href={`/dashboard/reservation/${row.original.id}/comment`}>
+                <Link href={`/dashboard/reservation/${row.original.id}/review`}>
                   <button className='mx-2 border-2 border-green-500 p-2 rounded-lg text-green-500 hover:text-white hover:bg-green-500 '>
                     <FontAwesomeIcon icon={faComment} style={{ fontSize: '1.3em' }} />
                   </button>

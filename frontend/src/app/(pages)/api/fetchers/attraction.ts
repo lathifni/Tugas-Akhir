@@ -36,3 +36,8 @@ export const fetchAttractionById = async(params: any) => {
   const res = await useAxiosAuth.get(`/attraction/${params}`)
   return res.data.data
 }
+
+export const fetchAllAttraction = async() => {
+  const res = await useAxiosAuth.get('/attraction')
+  return res.data.data
+}

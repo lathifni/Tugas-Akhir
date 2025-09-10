@@ -11,6 +11,8 @@ interface Props {
 }
 
 export default function InfoUserDialog({ isOpen, setIsOpen, dataUser, }: Props) {
+  console.log(dataUser);
+  
   return (
     <Dialog open={isOpen} maxWidth="lg" sx={{ "& .MuiDialog-paper": { width: "35%", maxWidth: "none" } }}>
       <h3 className="text-center ">Detail Profile User</h3>
@@ -39,6 +41,13 @@ export default function InfoUserDialog({ isOpen, setIsOpen, dataUser, }: Props) 
         </div>
         <div className="mb-4">
           <strong>Code Referral :</strong> <p>{dataUser?.code_referral ?? 'N/A'}</p>
+        </div>
+        <div className="mb-4">
+          <strong>Percentage Referral :</strong> 
+          <p>{dataUser?.percentage_referral != null 
+            ? `${dataUser.percentage_referral}%` 
+            : 'N/A'}
+          </p>
         </div>
         <div className="mb-4">
           <strong>Account Referral :</strong> <p>{dataUser?.account_referral ?? 'N/A'}</p>

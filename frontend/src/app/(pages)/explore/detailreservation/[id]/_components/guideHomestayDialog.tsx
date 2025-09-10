@@ -15,10 +15,10 @@ export default function GuideHomestayDialog({ isOpen, setIsOpen }: Props) {
         <div className="w-full">
           <h2 className="text-xl text-center font-bold">Homestay Reservation</h2>
           <ul className="list-disc pl-4 font-medium">
-            <li>Homestays can be selected according to the user's wishes</li>
+            <li>Homestays can be selected according to the users wishes</li>
             <li>Detailed information on the homestay unit is on the homestay page</li>
             <li>The number of homestay reservation days depends on the number of activity days in the tour package</li>
-            <li>If the homestay unit ordered has been booked, a notification 'homestay unit has been booked' will appear when added</li>
+            <li>If the homestay unit ordered has been booked, a notification homestay unit has been booked will appear when added</li>
             <li>If tourists only want to book a homestay, customize the package by selecting package activities only for the homestay you are visiting</li>
           </ul>
         </div>

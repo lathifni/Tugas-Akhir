@@ -5,17 +5,36 @@ import FileInput from "@/components/fileInput";
 import MapInput from "@/components/maps/mapInput";
 import { faSearch, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import 'react-toastify/dist/ReactToastify.css';
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { ToastContainer, Bounce, toast } from "react-toastify";
 import useAxiosAuth from "../../../../../../../libs/useAxiosAuth";
 import { useRouter } from 'next/navigation'
+import { z } from 'zod';
+
+const nameRegex = /^[\p{L}\p{M}\s'-]+$/u;
+
+const facilityNameSchema = z.object({
+  name: z.string()
+    .min(1, 'Facility name cannot be empty')
+    .max(100, 'Max 100 characters')
+    .regex(nameRegex, "Only letters, spaces, apostrophes (') and dashes (-) allowed"),
+  type: z.string().min(1, 'Facility type cannot be empty'),
+  price: z.string().min(1, 'Price cannot be empty'),
+  category: z.enum(['0', '1'], { 
+    required_error: 'Category cannot be empty',
+    invalid_type_error: 'Category must be chosen'
+  }),
+});
+const galleryGeometrySchema = z.object({
+  gallery: z.array(z.any()).min(1, 'Gallery cannot be empty'),
+  geometry: z.any().refine(v => v != null, { message: 'Geometry cannot be null' }),
+});
 
 interface Image {
   name: string;
@@ -29,7 +48,6 @@ export default function AddFacilityAdmin() {
   const mapInputRef = useRef<any>(null);
   const [geometry, setGeometry] = useState<any | null>(null)
   const [gallery, setGallery] = useState<Image[]>([]);
-  // const [linkGallery, setLinkGallery] = useState
   const router = useRouter();
   const [formDataInput, setFormDataInput] = useState({
     name: "",
@@ -42,19 +60,44 @@ export default function AddFacilityAdmin() {
     queryFn: fetchAllTypeFacility
   })
 
-  const handleChange = (e: any) => {
+  const handleChangeLama = (e: any) => {
     const { name, value } = e.target;
-    setFormDataInput({ ...formDataInput, [name]: value });
+        setFormDataInput({ ...formDataInput, [name]: value });
+      };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    let v = value;
+
+    if (name === 'name') {
+      v = value
+        .replace(/[’`´]/g, "'")
+        .normalize('NFC')
+        // buang karakter selain yang diizinkan
+        .replace(/[^\p{L}\p{M}\s'-]/gu, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
+        .slice(0, 100);
+    }
+
+    setFormDataInput(prev => ({ ...prev, [name]: v }));
   };
 
   const handleGalleryChange = (newGallery: any) => {
     setGallery(newGallery);
   }
 
-  const handleCoordinateChange = (latitude: number | null, longitude: number | null) => {
-    setLatitude(latitude)
-    setLongitude(longitude)
-  };
+  const handleCoordinateChange = useCallback((latitude: number | null, longitude: number | null) => {
+    setLatitude(latitude);
+    setLongitude(longitude);
+  }, []); // Dependency array kosong karena setter dari useState sudah stabil
+
+  const handleGeometryChange = useCallback((geometry: any) => {
+    console.log("Geometry:", geometry);
+    setGeometry(geometry);
+  }, []); // Dependency array kosong karena setter dari useState sudah stabil
 
   const handleLatitudeChange = (event: any) => {
     setLatitude(event.target.value);
@@ -71,11 +114,6 @@ export default function AddFacilityAdmin() {
     }
   }
 
-  const handleGeometryChange = (geometry: any) => {
-    console.log("Geometry:", geometry);
-    setGeometry(geometry)
-  }
-
   const handleDeletePolygon = () => {
     if (mapInputRef.current) {
       mapInputRef.current.deletePolygon();
@@ -83,28 +121,28 @@ export default function AddFacilityAdmin() {
   };
 
   const submitHandler = async (e: any) => {
-    if (formDataInput.category == '') {
-      toast.warn('category cannot be null')
+   const parsed = facilityNameSchema.safeParse({
+      name: formDataInput.name,
+      type: formDataInput.type,
+      price: formDataInput.price,
+      category: formDataInput.category,
+    });
+
+    if (!parsed.success) {
+      parsed.error.errors.forEach(err => toast.warn(err.message));
       return;
     }
-    if (formDataInput.name == '') {
-      toast.warn('name cannot be null')
-      return;
-    }
-    if (formDataInput.price == '') {
-      toast.warn('price cannot be null')
-      return;
-    }
-    if (formDataInput.type == '') {
-      toast.warn('type facility cannot be null')
-      return;
-    }
-    if (geometry == null) {
-      toast.warn('Geometry on Google Maps cannot be null')
-      return;
-    }
-    if (gallery.length == 0) {
-      toast.warn('Gallery cannot be null')
+    // if (geometry == null) {
+    //   toast.warn('Geometry on Google Maps cannot be null')
+    //   return;
+    // }
+    // if (gallery.length == 0) {
+    //   toast.warn('Gallery cannot be null')
+    //   return;
+    // }
+    const ok = galleryGeometrySchema.safeParse({ gallery, geometry });
+    if (!ok.success) {
+      ok.error.errors.forEach(err => toast.warn(err.message));
       return;
     }
 
@@ -145,7 +183,7 @@ export default function AddFacilityAdmin() {
           <h1 className="text-3xl text-center font-bold">Add Facility</h1>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900 ">Facility Name</label>
-            <input type="text" name='name' onChange={handleChange}
+            <input type="text" name='name' autoCapitalize="words" onChange={handleChange}
               className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
           </div>
           <div className="px-8">
@@ -170,12 +208,22 @@ export default function AddFacilityAdmin() {
           </div>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900 ">Price</label>
-            <input type="text" name='price' onChange={handleChange}
+            <input type="number" name='price' onChange={handleChange} min={0}
               className="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
           </div>
           <div className="px-8">
             <label className="block mt-2 text-sm font-medium text-gray-900">Category</label>
-            <RadioGroup row name="category" onChange={handleChange}>
+            {/* <RadioGroup row name="category" onChange={handleChange}>
+              <FormControlLabel value="0" control={<Radio />} label="Group" />
+              <FormControlLabel value="1" control={<Radio />} label="Individu" />
+            </RadioGroup> */}
+            <RadioGroup
+              row
+              value={formDataInput.category}
+              onChange={(_, value) =>
+                setFormDataInput(prev => ({ ...prev, category: value }))
+              }
+            >
               <FormControlLabel value="0" control={<Radio />} label="Group" />
               <FormControlLabel value="1" control={<Radio />} label="Individu" />
             </RadioGroup>
@@ -222,7 +270,7 @@ export default function AddFacilityAdmin() {
           </div>
         </div>
       </div>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-center"
         autoClose={3500}
         hideProgressBar={false}
@@ -234,7 +282,7 @@ export default function AddFacilityAdmin() {
         pauseOnHover
         theme="light"
         transition={Bounce}
-      />
+      /> */}
     </>
   )
 }

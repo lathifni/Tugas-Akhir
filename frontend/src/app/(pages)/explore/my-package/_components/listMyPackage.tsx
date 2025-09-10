@@ -9,6 +9,8 @@ import { useSession } from "next-auth/react";
 interface ExploreUlakanTableSectionProps {
   onSearchAroundClick: () => void;
   onShowMapClick: (type: string) => void;
+  onSelectActivity: (start: string, end: string) => void;
+  onDaySelect: (activities: any[]) => void;
 }
 
 export default function ListMyPackageSection({ onSearchAroundClick, onShowMapClick, onSelectActivity, onDaySelect }: ExploreUlakanTableSectionProps) {
