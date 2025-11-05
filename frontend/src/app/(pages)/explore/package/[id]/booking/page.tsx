@@ -73,6 +73,7 @@ export default function BookingIdPage({ params }: any) {
   }
 
   const saveReservationButtonHandler = async () => {
+    if (!validateBeforeSubmit()) return;
     if (!readCheck) return toast.warn("Please read the guide and fill the checkbox");
     try {
       const currentDate = new Date(); // Mendapatkan tanggal saat ini
@@ -182,6 +183,68 @@ export default function BookingIdPage({ params }: any) {
       toast.error('An unexpected error occurred');
     }
   };  
+  // 1) helper: cek kosong/invalid
+const isEmpty = (v?: string | number | null) =>
+  v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
+
+  const validateBeforeSubmit = () => {
+    const missing: string[] = [];
+
+    if (isEmpty(dateCheckIn)) missing.push('Check-In');
+    if (isEmpty(dateCheckOut)) missing.push('Check-Out');
+    if (!totalPeople || totalPeople <= 0) missing.push('Total People');
+    if (!totalOrderPackage || totalOrderPackage <= 0) missing.push('Total Order Package');
+    if (!totalPricePackage || totalPricePackage <= 0) missing.push('Total Price Package');
+    if (!totalDeposit || totalDeposit <= 0) missing.push('Deposit');
+    // NOTE opsional -> kalau mau wajib, uncomment ini:
+    // if (isEmpty(note)) missing.push('Note');
+
+    if (missing.length) {
+      toast.error(`Please fill required field(s): ${missing.join(', ')}`);
+      return false;
+    }
+
+    // validasi tanggal masuk akal
+    const ci = new Date(dateCheckIn);
+    const co = new Date(dateCheckOut);
+    if (isNaN(ci.getTime()) || isNaN(co.getTime())) {
+      toast.error('Invalid date/time format.');
+      return false;
+    }
+    // if (co <= ci) {
+    //   toast.error('Check-Out must be after Check-In.');
+    //   return false;
+    // }
+
+    // range min/max (3 hari–14 hari dari sekarang) — optional tapi bagus
+    const startMin = new Date(formattedDate + 'T00:00:00');      // 3 hari lagi
+    const endMax   = new Date(formattedMaxDate + 'T23:59:59');   // 14 hari lagi
+    if (ci < startMin || ci > endMax) {
+      toast.warn('Check-In must be within the allowed window.');
+      return false;
+    }
+
+    // referral: sudah kamu cek di bawah, tapi kita percepat biar jelas
+    if (codeReferral && !idUserReferral) {
+      toast.warning('Code referral has not been verified yet. Please verify it or clear the field.');
+      return false;
+    }
+
+    // login check
+    if (!session?.user) {
+      toast.error('You must be logged in to make a reservation.');
+      return false;
+    }
+
+    // checkbox guide
+    if (!readCheck) {
+      toast.warn('Please read the guide and tick the checkbox.');
+      return false;
+    }
+
+    return true;
+  };
+
 
   if (dataPackageById) {
     return (

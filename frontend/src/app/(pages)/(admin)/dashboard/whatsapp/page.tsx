@@ -137,8 +137,8 @@ export default function WhatsAppPage() {
         {statusWA === 'connected' && (
           <div className="text-green-700">
             <p>Status: <span className="font-bold">Connected</span></p>
-            <p>Number: {data.data.number}</p>
-            <p>Name: {data.data.name}</p>
+            <p>Number: {data?.data?.number || 'N/A'}</p> 
+            <p>Name: {data?.data?.name || 'N/A'}</p>
           </div>
         )}
         {statusWA === 'waiting_for_qr' && (

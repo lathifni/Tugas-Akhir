@@ -156,13 +156,13 @@ const getFacilty = async() => {
 
 const totalAdmin = async() => {
   const [rows] = await promisePool.query(
-    `SELECT COUNT(U.id) total_admin FROM users U JOIN ROLE R ON R.id=U.role_id WHERE U.role_id=1;`)
+    `SELECT COUNT(U.id) total_admin FROM users U JOIN role R ON R.id=U.role_id WHERE U.role_id=1;`)
   return rows[0]
 }
 
 const totalCustomer = async() => {
   const [rows] = await promisePool.query(
-    `SELECT COUNT(U.id) total_customer FROM users U JOIN ROLE R ON R.id=U.role_id WHERE U.role_id=2;`)
+    `SELECT COUNT(U.id) total_customer FROM users U JOIN role R ON R.id=U.role_id WHERE U.role_id=2;`)
   return rows[0]
 }
 
@@ -268,7 +268,7 @@ const peopleAnalysis = async() => {
 const referralAnalysis = async() => {
   const [rows] = await promisePool.query(
     `SELECT DATE_FORMAT(check_in, '%b %Y') AS month_year, COUNT(R.id) AS total_reservations, 
-    FORMAT(SUM(r.total_price * u.percentage_referral / 100), 2) AS total_referral_value FROM reservation R 
+    FORMAT(SUM(R.total_price * u.percentage_referral / 100), 2) AS total_referral_value FROM reservation R 
     JOIN users u ON R.owner_referral_id = u.id WHERE check_in >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) GROUP BY month_year 
     ORDER BY MIN(check_in);`)
   return rows

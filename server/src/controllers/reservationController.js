@@ -34,7 +34,7 @@ const crypto = require("crypto");
 const { bookingHomestay, bookedHomestay } = require('../services/homestay');
 const { checkCodeReferralAfterDP, makeNewCodeReferralAfterDP } = require('../services/referral');
 const { sendMessage, sendMessageConfirmationDate, sendMessageConfirmationDP, sendMessageConfirmationFP, adminSendMessageReservation, adminSendMessageDepositReservation, adminSendMessageFPReservation, adminSendMessageCancelReservation, customerSendMessageRefundProof, adminSendMessageRefundConfirmation, adminSendMessageCancelRefundReservation, customersSendMessageCancelRefundReservation, sendMessageAfterBookingHomestay, adminSendMessageAfterBookingHomestay } = require('./chatController');
-const { allPhoneAdmin } = require('../services/users');
+const { allPhoneAdmin, customerPhoneByReservation } = require('../services/users');
 
 const createReservationController = async (params) => {    
   const latestIdReservation = await getLatestIdReservation();
@@ -43,8 +43,8 @@ const createReservationController = async (params) => {
   let idReservation, idDownPayment;
   lastIdNumber++;
   const idNumberString = lastIdNumber.toString().padStart(4, "0");
-  idReservation = `R${idNumberString}`;
-  idDownPayment = `DP${idNumberString}`;
+  idReservation = `Rooo${idNumberString}`;
+  idDownPayment = `DPooo${idNumberString}`;
 
   params.id = idReservation
   params.dp_id = idDownPayment
@@ -724,6 +724,7 @@ const calculateCheckOutDate = (checkIn, maxDays) => {
 
 
 const refundController = async(params) => {
+
   const account_refund = `${params.bank} (${params.accountNumber}) a/n ${params.owner}`
   const dataReservation = await getReservationAfterDeposit(params.id);
   const data = {
@@ -732,6 +733,7 @@ const refundController = async(params) => {
     id: params.id,
     refund_amount: params.totalRefund,
     fullname: dataReservation.fullname,
+    phone: params.phone
   }
   await refund(data)
   await customersSendMessageCancelRefundReservation(data);
@@ -775,6 +777,11 @@ const refundAdminProofController = async(params) => {
     refund_date: moment().format('YYYY-MM-DD HH:mm:ss'),
     id:params.id
   }
+  const customerPhone = await customerPhoneByReservation(params.id)
+  if (!customerPhone) {
+    throw new Error(`Customer phone not found for reservation ID: ${params.id}`);
+  }
+  data.phone = customerPhone.phone
   await refundAdminProof(data)
   await customerSendMessageRefundProof(data)
   return console.log(params.url[0]);

@@ -20,6 +20,7 @@ import RefundConfirmationDialog from "./_components/refundConfirmationDialog";
 import RefundDepositDialog from "./_components/refundDepositDialog";
 import CancelDialog from "./_components/cancelDialog";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 interface Activity {
   day: string;
@@ -42,6 +43,7 @@ export default function ReservationIdPage({ params }: any) {
   const [refundProofIsOpen, setRefundProofIsOpen] = useState(false)
   const [editReviewIsOpen, setEditReviewIsOpen] = useState(false)
   const steps = ['Waiting Confirmation Date', 'Deposit', 'Full Payment', 'Enjoy Trip'];
+  const { data: session } = useSession() // Hapus status, update jika tidak dipakai
   const getStatusStep = () => {
     switch (dataReservationById.reservation.status_id) {
       case 1:
@@ -179,7 +181,11 @@ export default function ReservationIdPage({ params }: any) {
 
   const refundOnSave = async(data:any) => {
     console.log(data);
-    
+    if (!session?.user?.user_id) {
+      toast.error('User session not found. Please log in again.');
+      return;
+    }
+    data.phone = session.user.phone
     data.id = params.id
     const response = await useAxiosAuth.post('reservation/refund', data)
       if (response.data.status == 'success') {

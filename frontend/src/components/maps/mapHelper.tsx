@@ -156,7 +156,6 @@ export const MapContentGeneral: React.FC<MapContentGeneralProps> = ({id,name,ico
    const routeClickHandler = () => {
     onRouteClick(lat, lng)
   }
-  console.log(name, 'ini di MapContentGeneral');
   
   return (
     <div className="p-2">
@@ -606,7 +605,6 @@ export const MapContentAttraction: React.FC<MapAttractionContentProps> = ({ id, 
   const routeClickHandler = () => {
     onRouteClick(lat, lng)
   }
-  console.log(name);
   
   return (
     <div className="p-1">

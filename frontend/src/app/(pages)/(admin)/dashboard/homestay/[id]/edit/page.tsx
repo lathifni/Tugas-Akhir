@@ -300,7 +300,7 @@
               <div className="bg-white rounded-lg mt-4">
                 <h1 className="py-4 text-3xl text-center font-bold">Homestay Unit</h1>
                 <div className="flex justify-end">
-                  <Link href={`/dashboard/homestay/${params.id}/unit`}>
+                  <Link href={`/dashboard/homestay/${params.id}/edit/unit`}>
                     <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 mr-8">
                       <FontAwesomeIcon icon={faPencil} /> Edit Unit
                     </button>

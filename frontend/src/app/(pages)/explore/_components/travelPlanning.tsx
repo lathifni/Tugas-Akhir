@@ -43,7 +43,7 @@ export default function TravelPlanning({
     unique: false,
   });
   const [radius, setRadius] = useState(0);
-  console.log(waypoints);
+  // console.log(waypoints);
   
   // tombol Search aktif hanya jika ada kategori dicentang dan radius > 0
   const canSearch = useMemo(

@@ -11,7 +11,7 @@ export default function LandingPageLayout({
     <main className="h-full pt-16">
       <NavBarLandingPage/>
       {children}
-      <FooterLandingPage/>
+      {/* <FooterLandingPage/> */}
     </main>
   )
 }

@@ -229,7 +229,7 @@ export default function LandingPage() {
                 </div>
             </div>
            
-            <div className="w-full py-5 lg:mx-10 xl:mx-52 mt-5" id="about">
+            {/* <div className="w-full py-5 lg:mx-10 xl:mx-52 mt-5" id="about">
                 <div className="mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                         <div className="mx-4 col-span-1 lg:col-span-1">
@@ -244,16 +244,6 @@ export default function LandingPage() {
                                More than just a recreational spot, Green Talao Park offers a rich variety of events and tour packages. Visitors can immerse themselves in experiences centered on local wisdom, participate in conservation efforts, admire the natural landscape, go on island tours, or indulge in a culinary journey.
                                Furthermore, the park is seamlessly integrated with West Sumatras main religious tourism hub, connected to the revered tomb of Sheikh Burhanuddin—a great cleric instrumental in spreading Islam in the Minangkabau realm—and the stunning Pieh Island Marine Tourism Park (TWP).
                             </p>
-                            {/* <p className="mb-4 text-xs sm:text-base text-slate-700">
-                                Nagari ulakan, secara geografis memiliki potensi alam pesisir pantai dengan estuarianya atau dalam bahasa lokal dinamai talao,
-                                berhasil menyulap lahan tidur seluas 15 hektar menjadi sebuah destinasi desa wisata dengan konsep community based ecotourism.
-                                Kawasan ini diberi nama Green Talao Park dengan mengusung tema ekowisata dan edukasi dengan keunikan daya tarik, berupa
-                                tracking talao/mangrove sepanjang 1,8 km yang merupakan treking terpanjang di Sumatera Barat.
-                                Tak hanya sebagai tempat rekreasi, Green Talao Park juga menyajikan berbagai event dan paket wisata,
-                                mulai dari paket kearifan lokal, konservasi, landscape alam, wisata pulau serta wisata kuliner.
-                                Selain itu, kawasan ini juga terintegrasi langsung dengan pusat pariwisata religi di sumatera barat melalui situs budaya non benda yang diberikan oleh pemerintah,
-                                yaitu makam Syekh Burhanudin, seorang ulama besar penyiar agama islam di ranah minang dan kawasan Taman Wisata Pulau (TWP) Pieh.
-                            </p> */}
                             <ul className="list-none mb-3 text-xs sm:text-lg">
                                 <li className="mb-1 flex items-center cursor-pointer hover:text-blue-500" onClick={() => handleCategoryClick('Natural Tourism')}>
                                     <SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Natural Tourism
@@ -267,12 +257,6 @@ export default function LandingPage() {
                                 <li className="mb-1 flex items-center cursor-pointer hover:text-blue-500" onClick={() => handleCategoryClick('Religion')}>
                                     <SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Religious Tourism
                                 </li>
-                                {/* <li className="mb-1 flex items-center cursor-pointer hover:text-blue-500" onClick={() => handleCategoryClick('Water')}>
-                                    <SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Water Tourism
-                                </li>
-                                <li className="mb-1 flex items-center cursor-pointer hover:text-blue-500" onClick={() => handleCategoryClick('Adventure')}>
-                                    <SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Adventure Tourism
-                                </li> */}
                                 <li className="mb-1 flex items-center cursor-pointer hover:text-blue-500" onClick={() => handleCategoryClick('Culinary')}>
                                     <SearchCheck className="mr-4" style={{ color: 'blue', fontSize: '1.5em' }} />Culinary Tourism
                                 </li>
@@ -292,7 +276,7 @@ export default function LandingPage() {
                         </div>
                     )}
                 </div>
-            </div>
+            </div> */}
             <div className=" w-full relative rounded-xl bg-gradient-to-tr from-black to-gray-600 md:h-80 xl:mx-52 mt-5" id="award">
                 <img src="/landingPage/bg-about.jpg" className="absolute mix-blend-overlay rounded-xl object-cover h-full w-full" />
                 <div className="w-full py-5 h-full flex items-center justify-center">

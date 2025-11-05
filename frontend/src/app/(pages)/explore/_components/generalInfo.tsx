@@ -126,7 +126,7 @@ export default function GeneralInfo({ onSearchAroundClick, onCreatePlanClick }:G
       <div className="bg-green-500 hover:bg-green-600 rounded-lg text-white mt-2" onClick={onCreatePlanClick} role="button">
         <button className="m-3">
           <FontAwesomeIcon className="mr-2" icon={faRoute}/>
-          Create a Travel Plan
+          Create a Travel Route
         </button>
       </div>
     </div>

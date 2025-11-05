@@ -1,4 +1,4 @@
-const { registerUserController, allAdminController, allCostumerController, updateUserInformationController, newAdminController } = require('../controllers/usersController')
+const { registerUserController, allAdminController, allCostumerController, updateUserInformationController, newAdminController, updatePasswordController } = require('../controllers/usersController')
 const { detailById, deleteAdmin } = require('../services/users')
 const { registerUserSchema } = require('../validations/userValidator')
 
@@ -76,6 +76,42 @@ const newAdminHandler = async(req, res) => {
     }
 }
 
+const updatePasswordHandler = async(req, res) => {
+    try {
+        console.log(req.body);
+        
+    // 1. Ambil User ID dari sesi/token (SANGAT PENTING!)
+    //    Ganti 'req.user.id' sesuai cara kamu menyimpan ID user yang terautentikasi
+    const userId = req.body?.id;
+    if (!userId) {
+      return res.status(401).send({ status: 'failed', message: 'Unauthorized' });
+    }
+
+    // 2. Ambil password dari body request
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).send({ status: 'failed', message: 'Current and new passwords are required' });
+    }
+    if (newPassword.length < 8) {
+       return res.status(400).send({ status: 'failed', message: 'New password must be at least 8 characters long' });
+    }
+
+
+    // 3. Panggil controller dengan data yang diperlukan
+    await updatePasswordController({ userId, currentPassword, newPassword });
+
+    // 4. Kirim respons sukses (204 No Content biasanya tidak punya body)
+    //    Gunakan 200 OK jika ingin mengirim status sukses di body
+    return res.status(200).send({ status: 'success', message: 'Password updated successfully' });
+
+  } catch (error) {
+    console.error('Error in updatePasswordHandler:', error);
+    // Kirim pesan error yang spesifik jika ada
+    const statusCode = error.statusCode || 400; // Default ke 400 Bad Request
+    return res.status(statusCode).send({ status: 'failed', message: error.message || 'Failed to update password' });
+  }
+}
+
 const deleteAdminHandler = async(req, res) => {
     try {        
         await deleteAdmin(req.params)
@@ -88,5 +124,5 @@ const deleteAdminHandler = async(req, res) => {
 
 module.exports = { 
     registerHandler, allAdminHandler, allCostumerHandler, detailByIdHandler
-    , updateUserInformationHandler, newAdminHandler, deleteAdminHandler
+    , updateUserInformationHandler, newAdminHandler, deleteAdminHandler, updatePasswordHandler,
 }

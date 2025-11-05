@@ -54,8 +54,9 @@ const checkAvailableEmailAndGoogle = async (params) => {
 }
 
 const getUserByUsernameOrEmail = async (params) => {
-  const sql = `SELECT U.id,fullname,email,password_hash,google,user_image,AG.role FROM users AS U JOIN auth_groups_users AS AGU ON AGU.user_id=U.id 
-  JOIN auth_groups AS AG ON AG.id=AGU.group_id WHERE (email='${params.emailOrUsername}' OR username='${params.emailOrUsername}') AND google=0`
+  console.log(params);
+  
+  const sql = `SELECT U.id,fullname,email,password_hash,google,user_image,R.name AS role FROM users AS U JOIN role AS R ON R.id=U.role_id WHERE (email='${params.emailOrUsername}' OR username='${params.emailOrUsername}') AND google=0`
   const [rows] = await promisePool.query(sql)
   if (rows[0] == undefined) return false
   return rows[0]
@@ -142,6 +143,22 @@ const addAdmin = async(params) => {
   return rows.affectedRows;
 }
 
+const updatePassword = async(params) => {
+  const { userId, newHash } = params;
+
+  console.log(`Updating password for user ID: ${userId}`); // Log sebelum query
+
+  const [result] = await promisePool.query(
+    `UPDATE users SET password_hash = ? WHERE id = ?`,
+    [newHash, userId]
+  );
+
+  console.log('Update result:', result); // Log hasil query
+
+  // Kembalikan jumlah baris yang terpengaruh
+  return result.affectedRows;
+}
+
 const deleteAdmin =  async(params) => {
   const [rows] = await promisePool.query(
     `DELETE FROM users WHERE id=?`,
@@ -165,10 +182,27 @@ const allPhoneAdmin = async() => {
   return rows;
 }
 
+const customerPhoneByReservation = async(params) => {
+  const [rows] = await promisePool.query(
+    `SELECT U.phone FROM reservation R JOIN users U ON U.id=R.user_id WHERE R.id=?;`,
+    [params]
+  );  
+  return rows[0];
+}
+
+const customerRefPhoneByReservation = async(params) => {
+  const [rows] = await promisePool.query(
+    `SELECT U.phone FROM reservation R JOIN users U ON U.id=R.owner_referral_id  WHERE R.id=?;`,
+    [params]
+  );  
+  return rows[0];
+}
+
 module.exports = { 
   getAllCostumer, createDataUser, checkAvailablelUsername, checkAvailableEmail, getUserByUsernameOrEmail
   , storeRefreshToken, checkUsesrByRefreshToken, deleteRefreshToken, checkAvailableRefreshToken
   , getUserByEmailAndGoogle, checkAvailableEmailAndGoogle, createDataUserByGoogleOAuth, getAllAdminUser
   , detailById, updateUserInformation, addAdmin, checkAvailableUsernameEmail, deleteAdmin
-  , searchUser, updateUserDetail, allPhoneAdmin, 
+  , searchUser, updateUserDetail, allPhoneAdmin, updatePassword, customerPhoneByReservation
+  , customerRefPhoneByReservation, 
 }

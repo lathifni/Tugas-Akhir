@@ -1,15 +1,32 @@
-const { Client, LocalAuth } = require("whatsapp-web.js");
+let _baileysMod;
+async function getBaileys() {
+  if (!_baileysMod) _baileysMod = await import('@whiskeysockets/baileys');
+  return _baileysMod;
+}
+const path = require('path');
+const fs = require('fs-extra'); // Ganti ini
+const pino = require('pino');
 
 const { userChats, findChat, createChat, getLatestIdChatRoom, createNewChatRoom, createNewMemberChatRoom, checkMemberRoomChatAvailable } = require("../services/chat");
 
-let client = null;
+const AUTH_FOLDER =
+  process.env.WA_AUTH_DIR
+  // 2) Default: sejajar dgn `src` (2x naik dari controllers -> src -> server)
+  || path.resolve(__dirname, '..', '..', 'auth-ta-bot');
+fs.mkdirSync(AUTH_FOLDER, { recursive: true });
+let sock = null;
 let isInitializing = false;
-let qrCode = null;
+let qrCode = null;  
 let isWhatsAppReady = false; // Buat status global
 // Configuration
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_DELAY_MS = 5000;
 let retryCount = 0;
+let selfName = null;
+let hasAutoPingSent = false;
+
+const toJid = (phone) =>
+  /@s\.whatsapp\.net$/.test(phone) ? phone : `${phone}@s.whatsapp.net`
 
 async function initWhatsAppClient() {
   if (isInitializing) return;
@@ -17,72 +34,137 @@ async function initWhatsAppClient() {
   retryCount++;
 
   try {
-    // Hancurkan client lama jika ada
-    if (client) {
-      console.log('Destroying previous client instance');
-      await client.destroy().catch(err => console.error('Error destroying client:', err))
-      client = null;
+    // === dynamic import bailey's (ESM) ===
+    const {
+      default: makeWASocket,
+      DisconnectReason,
+      useMultiFileAuthState,
+      fetchLatestBaileysVersion
+    } = await getBaileys();
+
+    // (opsional) kalau mau pakai Boom, load di sini juga:
+    // const { Boom } = await getBoom();
+
+    // --- lanjut kode kamu seperti sebelumnya ---
+    const { state, saveCreds } = await useMultiFileAuthState(AUTH_FOLDER);
+    const { version } = await fetchLatestBaileysVersion();
+
+    const logger = pino({
+       level: 'silent', // <-- Ganti level di sini ('warn', 'error', 'silent')
+       // Opsional: pino-pretty untuk format yang lebih bagus
+       // transport: {
+       //   target: 'pino-pretty',
+       //   options: { colorize: true }
+       // }
+     });
+
+    sock = makeWASocket({
+      version,
+      auth: state,
+      printQRInTerminal: true,
+      logger: logger // <-- Masukkan logger yang sudah dibuat
+    });
+
+    sock.ev.on('creds.update', saveCreds);
+    sock.ev.on('creds.update', (u) => {
+      if (u?.me?.name) selfName = u.me.name;
+      saveCreds(); // Pastikan saveCreds dipanggil di sini juga
+    });
+    
+    if (!selfName && state?.creds?.me?.name) {
+      selfName = state.creds.me.name;
     }
 
-    // Buat client baru
-    client = new Client({
-      authStrategy: new LocalAuth(),
-      puppeteer: {
-        headless: true  ,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',       // Mengurangi penggunaan shared memory
-          '--disable-accelerated-2d-canvas', // Non-aktifkan hardware acceleration
-          '--no-first-run',                // Lewati first-run Chrome
-          '--no-zygote',                   // Matikan zygote process
-          '--single-process'               // Mode single process
-        ]
+    sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
+      if (qr) {
+        qrCode = qr;
+        isWhatsAppReady = false;
+      }
+
+      if (connection === 'open') {
+        console.log('Baileys: connection open');
+        isWhatsAppReady = true;
+        qrCode = null;
+        retryCount = 0;
+        
+        const me = sock.authState.creds.me;
+        if (me?.name) {
+          selfName = me.name;
+          console.log(`Nama berhasil didapat saat koneksi terbuka: ${selfName}`);
+        }
+        if (!hasAutoPingSent) {
+          try {
+            const targetJid = toJid('6283152073998');
+            await sock.sendMessage(targetJid, {
+              text: `Halo! (auto-login ping) ${new Date().toLocaleString('id-ID')}`
+            });
+            hasAutoPingSent = true;
+          } catch (e) {
+            console.error('Auto-ping failed:', e);
+          }
+        }
+      }
+
+      if (connection === 'close') {
+        console.log('Baileys: connection closed');
+        isWhatsAppReady = false;
+
+        // Aman tanpa Boom: cek properti isBoom
+        const ldErr = lastDisconnect?.error;
+        const status = ldErr?.isBoom ? ldErr.output?.statusCode : undefined;
+
+        if (status !== DisconnectReason.loggedOut) {
+          scheduleRetry();
+        } else {
+          console.error('Baileys: Sesi tidak valid (Logged out). Membersihkan folder auth secara otomatis...');
+          try {
+            // Hapus folder auth secara sinkron
+            fs.removeSync(AUTH_FOLDER);
+            console.log('Folder auth berhasil dibersihkan. Coba sambungkan ulang...');
+            retryCount = 0;
+            hasAutoPingSent = false;
+            
+            initWhatsAppClient();
+          } catch (err) {
+            console.error('Gagal membersihkan folder auth:', err);
+          }
+        }
+      }
+    });
+    sock.ev.on('messages.upsert', ({ messages, type }) => {
+        if (type !== 'notify') return; 
+        for (const m of messages) {
+          // LOGGING DETAIL DI SINI
+          if (m.key?.fromMe) {
+            if (m.pushName) {
+              selfName = m.pushName;
+            }
+          }
+        }
+    });
+
+    // 2) sinkron nama dari event kontak (kalau WA kirim kontak diri kita)
+    sock.ev.on('contacts.upsert', (arr) => {
+      const me = sock.user?.id;
+      for (const c of arr) {
+        if (me && c.id === me) {
+          selfName = c.name || c.notify || c.verifiedName || selfName;
+        }
+      }
+    });
+    sock.ev.on('contacts.update', (arr) => {
+      const me = sock.user?.id;
+      for (const c of arr) {
+        if (me && c.id === me) {
+          selfName = c.name || c.notify || c.verifiedName || selfName;
+        }
       }
     });
 
-    // Setup event handlers
-    client.on('qr', (qr) => {
-      qrCode = qr;
-      // qrcode.generate(qr);
-    });
-
-    client.on('ready', () => {
-      console.log('Client is ready!');
-      isWhatsAppReady = true; // Set status jadi ready
-      qrCode = null; // Reset QR setelah ready
-    });
-
-    client.on('authenticated', () => {
-      console.log('Authenticated!');
-    });
-
-    client.on('disconnected', async (reason) => {
-      console.log('Client disconnected:', reason);
-      isWhatsAppReady = false;
-      await initWhatsAppClient(); // Auto-reconnect
-    });
-
-    client.on('auth_failure', (msg) => {
-      console.error('Auth failure:', msg);
-      isWhatsAppReady = false;
-      setTimeout(initWhatsAppClient, 5000); // Retry setelah 5 detik
-    });
-
-    client.on('error', (err) => {
-      isWhatsAppReady = false;
-      console.error('Client error:', err);
-      if (err.message.includes('WidFactory') || 
-          err.message.includes('onQRChangedEvent')) {
-        scheduleRetry();
-      }
-      scheduleRetry();
-    });
-
-    await client.initialize();
+    console.log('Baileys: initializing...');
   } catch (error) {
     console.error('Initialization error:', error);
-    setTimeout(initWhatsAppClient, 5000); // Retry setelah 5 detik
+    scheduleRetry();
   } finally {
     isInitializing = false;
   }
@@ -102,45 +184,50 @@ function scheduleRetry() {
   }, delay);
 }
 
-const whatsAppClientControllerTestBaru = async () => {
+const whatsAppClientController = async () => {
   try {
-    if (!client) {
-      await initWhatsAppClient(); // Inisialisasi jika belum
+    if (!sock) {
+      await initWhatsAppClient()
     }
 
-    if (qrCode) {
+    if (qrCode) {      
       return {
-        status: "waiting_for_qr",
+        status: 'waiting_for_qr',
         qr: qrCode,
-        message: "Silakan scan QR code untuk login",
-      };
+        message: 'Silakan scan QR code untuk login',
+      }
     }
 
-    if (client && client.info && client.info.wid) {
+    if (isWhatsAppReady && sock?.user?.id) {
+      const jid = sock.user.id
+      const number = jid.replace(/:.*@.*/, '').replace(/@.*/, '') // buang suffix
+      const finalName = 
+          sock.user?.verifiedName ||  // 1. Paling akurat, biasanya nama profil resmi/bisnis
+          sock.user?.name ||          // 2. Nama yang ditampilkan di WhatsApp
+          sock.authState?.creds?.me?.name || // 3. Nama dari file sesi/kredensial
+          selfName ||                 // 4. Fallback ke variabel global dari event
+          null;                       // 5. Jika semua gagal, hasilnya null
+
       const userInfo = {
-        number: client.info.wid.user,
-        name: client.info.pushname || null,
+          number,
+          name: finalName,
       };
-
       return {
-        status: "connected",
+        status: 'connected',
         data: userInfo,
-        message: "WhatsApp client aktif",
-      };
+        message: 'WhatsApp client aktif (Baileys)',
+      }
     }
 
     return {
-      status: "initializing",
-      message: "Sedang memulai WhatsApp client...",
-    };
+      status: 'initializing',
+      message: 'Sedang memulai WhatsApp (Baileys)...',
+    }
   } catch (error) {
-    console.error("Handler error:", error);
-    return {
-      status: "error",
-      message: error.message,
-    };
+    console.error('Handler error:', error)
+    return { status: 'error', message: error.message }
   }
-};
+}
 
 const createChatController = async (params) => {
   return await createChat(params);
@@ -156,12 +243,14 @@ const findChatController = async (params) => {
 
 const sendMessage = async (params) => {
   // params.phone = '6285274953262'
-  params.phone = '6283152073998';
-  
-  try {
-    const { phone, package_id, request_date, check_in, total_people, total_price, deposit, note, id, package_name, user_name } = params;
+  params.phone = '6283152073998'
 
-  // Format pesan secara dinamis menggunakan data dari params
+  try {
+    const {
+      phone, package_id, request_date, check_in, total_people,
+      total_price, deposit, note, id, package_name, user_name
+    } = params
+
     const message = `Hello ${user_name}, your booking for the ${package_name} Package (Package ID: ${package_id}) has been successfully placed. Here are the details:
 
     - Booking Reference: ${id}
@@ -172,38 +261,29 @@ const sendMessage = async (params) => {
     - Deposit Paid: ${deposit.toLocaleString()} IDR
     - Notes: ${note || 'No additional notes'}
 
-    Please waiting until admin confirmation your reservation We look forward to having you on the tour!`;
-  
-  if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
+    Please waiting until admin confirmation your reservation We look forward to having you on the tour!`
+
+    if (!isWhatsAppReady || !sock) {
+      console.log('the system is not ready yet')
+      return
     }
-    else{
-      await client.sendMessage(`${phone}@c.us`, message);
-      console.log(`Message sent to ${phone}@c.us di sendMessage`);
-    }
+
+    const jid = toJid(phone) // ==> 628xx@s.whatsapp.net
+    await sock.sendMessage(jid, { text: message })
+    console.log(`Message sent to ${jid} di sendMessage`)
   } catch (error) {
-    console.error('Error sending message:', error);
-
-    // Periksa apakah error berasal dari Puppeteer dengan WidFactory
-    if (error.message && error.message.includes('WidFactory')) {
-      console.error("Error due to Puppeteer WidFactory issue. Restarting client.");
-      // await whatsAppClientController(); // Restart WA client
-    } else {
-      console.error("Other error encountered:", error);
-    }
+    console.error('Error sending message:', error)
   }
-};
+}
 
-const sendMessageAfterBookingHomestay = async(params, selectedHomestays) => {  
+const sendMessageAfterBookingHomestay = async (params, selectedHomestays) => {
   try {
-    const homestayDetails = selectedHomestays.map(homestay => {
-        // Format string untuk setiap unit homestay
-        return `    - ${homestay.name}${homestay.nama_unit}-${homestay.unit_number} (Capacity: ${homestay.capacity} people, Price: ${homestay.price.toLocaleString('id-ID')} IDR)`;
-    }).join('\n');
-    
-    const { phone, package_id, request_date, check_in, total_people, total_price, deposit, note, id, name, user_name } = params;
+    const homestayDetails = selectedHomestays.map(h => 
+      `    - ${h.name}${h.nama_unit}-${h.unit_number} (Capacity: ${h.capacity} people, Price: ${h.price.toLocaleString('id-ID')} IDR)`
+    ).join('\n')
 
-  // Format pesan secara dinamis menggunakan data dari params
+    const { phone, package_id, request_date, check_in, total_people, total_price, deposit, note, id, name, user_name } = params
+
     const message = `Hello ${user_name}, your booking for the ${name} Package (Package ID: ${package_id}) has been successfully updated. Here are the details:
 
     - Booking Reference: ${id}
@@ -211,29 +291,22 @@ const sendMessageAfterBookingHomestay = async(params, selectedHomestays) => {
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     Booked Homestays:
-      ${homestayDetails}
+${homestayDetails}
     - Total Price: ${total_price.toLocaleString()} IDR
     - Deposit Paid: ${deposit.toLocaleString()} IDR
     - Notes: ${note || 'No additional notes'}
 
-    Please waiting until admin confirmation your reservation We look forward to having you on the tour!`;
-  
-  if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
-    }
-    else{
-      await client.sendMessage(`${phone}@c.us`, message);
-    }
-  } catch (error) {
-    console.error('Error sending message:', error);
+    Please waiting until admin confirmation your reservation We look forward to having you on the tour!`
 
-    // Periksa apakah error berasal dari Puppeteer dengan WidFactory
-    if (error.message && error.message.includes('WidFactory')) {
-      console.error("Error due to Puppeteer WidFactory issue. Restarting client.");
-      // await whatsAppClientController(); // Restart WA client
-    } else {
-      console.error("Other error encountered:", error);
+    if (!isWhatsAppReady || !sock) {
+      console.log('the system is not ready yet')
+      return
     }
+
+    const jid = toJid(phone)
+    await sock.sendMessage(jid, { text: message })
+  } catch (error) {
+    console.error('Error sending message:', error)
   }
 }
 
@@ -242,9 +315,8 @@ const sendMessageConfirmationDate = async (params) => {
   params.phone = '6283152073998';
 
   try {
-    const { phone, request_date, check_in, total_people, total_price, deposit, note, id, user_name, name } = params;
+    const { phone, request_date, check_in, total_people, total_price, deposit, note, id, user_name, name } = params
 
-    // Dynamically format the message using data from params
     const message = `Hello, your booking for the ${name} Package has been confirmed by Admin! Here are the details:
 
     - Booking Reference: ${id}
@@ -257,40 +329,28 @@ const sendMessageConfirmationDate = async (params) => {
 
     Please proceed with the down payment (DP) to continue your reservation.
 
-    We look forward to welcoming you on the tour!`;
+    We look forward to welcoming you on the tour!`
 
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
-    }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-      console.log('di sendMessageConfirmationDate');
+    if (!isWhatsAppReady || !sock) {
+      console.log('the system is not ready yet')
+      return
     }
 
+    const jid = toJid(phone)
+    await sock.sendMessage(jid, { text: message })
+    console.log('di sendMessageConfirmationDate')
   } catch (error) {
-    console.error('Error sending message:', error);
-
-    // Check if error is from Puppeteer with WidFactory
-    if (error.message && error.message.includes('WidFactory')) {
-      console.error("Error due to Puppeteer WidFactory issue. Restarting client.");
-      // await whatsAppClientController(); // Restart WA client
-    } else {
-      console.error("Other error encountered:", error);
-    }
+    console.error('Error sending message:', error)
   }
-};
+}
 
 const sendMessageConfirmationDP = async (params) => {
-  // params.phone = '6285274953262';
-  params.phone = '6283152073998';
-  console.log(params);
+  // params.phone = '6283152073998'; // Tetap biarkan untuk testing jika perlu
 
   try {
-    const { phone, id, total_price, deposit, fullname, email, package_id, name, request_date, check_in, transaction_time } = params;
+    const { phone, id, total_price, deposit, fullname, package_id, name, request_date, check_in, transaction_time } = params;
 
-    // Dynamically format the message using data from params
-    const message = `Hello ${fullname}, we have successfully received your down payment (IDR ${deposit.toLocaleString()}) on ${transaction_time} for the ${name} Package! Here are your booking details:
+    const message = `Hello ${fullname}, we have successfully received your down payment (IDR ${deposit.toLocaleString()}) on ${new Date(transaction_time).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })} for the ${name} Package! Here are your booking details:
 
     - Booking Reference: ${id}
     - Package ID: ${package_id}
@@ -298,116 +358,105 @@ const sendMessageConfirmationDP = async (params) => {
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total Package Price: ${total_price.toLocaleString()} IDR
 
-    Please complete the remaining payment within the next 24 hours to secure your reservation.
+    Please complete the remaining payment to secure your reservation.
 
     Thank you, and we look forward to your visit!`;
-    console.log('ini di client info',client.info);
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
-    }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-      console.log('di ');
-      
-    }
-  } catch (error) {
-    console.error('Error sending message:', error);
 
-    // Check if error is from Puppeteer with WidFactory
-    if (error.message && error.message.includes('WidFactory')) {
-      console.error("Error due to Puppeteer WidFactory issue. Restarting client.");
-      // await whatsAppClientController(); // Restart WA client
-    } else {
-      console.error("Other error encountered:", error);
+    // 1. Ganti pengecekan kesiapan dengan yang konsisten
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return; // Hentikan fungsi jika belum siap
     }
+
+    // 2. Gunakan helper `toJid` untuk format nomor
+    const jid = toJid(phone);
+
+    // 3. Kirim pesan menggunakan format Baileys (`sock`)
+    await sock.sendMessage(jid, { text: message });
+    console.log('Pesan konfirmasi DP berhasil dikirim ke', jid);
+
+  } catch (error) {
+    // 4. Sederhanakan penanganan error
+    console.error('Error sending DP confirmation message:', error);
   }
 };
 
 const sendMessageConfirmationFP = async (params) => {
-  // params.phone = '6285274953262';
-  params.phone = '6283152073998';
-  console.log(params);
+  // params.phone = '6283152073998'; // Tetap biarkan untuk testing jika perlu
 
   try {
     const { phone, request_date, check_in, total_people, total_price, deposit, note, id, user_name, name } = params;
 
-    // Dynamically format the message using data from params
-    const message = `Hello ${user_name}, the reservation process is done, here the details:
+    const message = `Hello ${user_name}, your reservation is fully paid and confirmed! Here are the final details:
 
     - Booking Reference: ${id}
     - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     - Total Price: ${total_price.toLocaleString()} IDR
-    - Deposit Paid: ${deposit.toLocaleString()} IDR
+    - Total Paid: ${total_price.toLocaleString()} IDR
     - Notes: ${note || 'No additional notes'}
 
     We look forward to welcoming you on the tour. Thank you!`;
-    console.log('ini di client info',client.info);
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
-    }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-    }
-  } catch (error) {
-    console.error('Error sending message:', error);
 
-    // Check if error is from Puppeteer with WidFactory
-    if (error.message && error.message.includes('WidFactory')) {
-      console.error("Error due to Puppeteer WidFactory issue. Restarting client.");
-      // await whatsAppClientController(); // Restart WA client
-    } else {
-      console.error("Other error encountered:", error);
+    // 1. Ganti pengecekan kesiapan dengan yang konsisten
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return; // Hentikan fungsi jika belum siap
     }
+
+    // 2. Gunakan helper `toJid` untuk format nomor
+    const jid = toJid(phone);
+
+    // 3. Kirim pesan menggunakan format Baileys (`sock`)
+    await sock.sendMessage(jid, { text: message });
+    console.log('Pesan konfirmasi lunas (FP) berhasil dikirim ke', jid);
+
+  } catch (error) {
+    // 4. Sederhanakan penanganan error
+    console.error('Error sending FP confirmation message:', error);
   }
 };
 
 const sendMessagePaymentReferral = async (params) => {
-  // phone = '6285274953262';
-  params.phone = '6283152073998';
+  // params.phone = '6283152073998'; // Tetap biarkan untuk testing jika perlu
 
   try {
-    // const { phone, request_date, check_in, total_people, total_price, deposit, note, id, user_name, name } = params;
+    const { phone } = params;
 
-    // Dynamically format the message using data from params
-    const message = `Hello, Admin have been put the proof of referral please check you referral account
-    for confirmation`;
-    if (client.info == undefined || client.info == null){
-      console.log('the system is not ready yet');
-      }
-      else{
-        // client.sendMessage(phn, msg);
-        await client.sendMessage(`${phone}@c.us`, message);
-        // Send message to the provided phone number
-      }
-  } catch (error) {
-    console.error('Error sending message:', error);
+    const message = `Hello, Admin has uploaded proof of referral payment. Please check your referral account for confirmation.`;
 
-    // Check if error is from Puppeteer with WidFactory
-    if (error.message && error.message.includes('WidFactory')) {
-      console.error("Error due to Puppeteer WidFactory issue. Restarting client.");
-      // await whatsAppClientController(); // Restart WA client
-    } else {
-      console.error("Other error encountered:", error);
+    // 1. Ganti pengecekan kesiapan dengan yang konsisten
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return; // Hentikan fungsi jika belum siap
     }
+
+    // 2. Gunakan helper `toJid` untuk format nomor
+    const jid = toJid(phone);
+
+    // 3. Kirim pesan menggunakan format Baileys (`sock`)
+    await sock.sendMessage(jid, { text: message });
+    console.log('Pesan notifikasi pembayaran referral berhasil dikirim ke', jid);
+
+  } catch (error) {
+    // 4. Sederhanakan penanganan error
+    console.error('Error sending referral payment message:', error);
   }
 };
 
-const adminSendMessageReservation = async(params) => {
+const adminSendMessageReservation = async (params) => {
   // Pastikan params sudah ada data nomor teleponnya
   if (!params.phone) {
-    console.error('Phone number is missing');
+    console.error('Phone number is missing in params for admin notification');
     return;
   }
 
   try {
-    const { phone, package_id, request_date, check_in, total_people, total_price, deposit, note, id } = params;
+    const { phone, package_id, request_date, check_in, total_people, total_price, deposit, note, id, name } = params;
 
     // Format pesan secara dinamis menggunakan data dari params
-    const message = `Hello Admin, a new booking has been placed for the Jelajah Talao Tour Package (Package ID: ${package_id}). Please review the details below and confirm the reservation:
+    const message = `Hello Admin, a new booking has been placed for the ${name} Package (Package ID: ${package_id}). Please review the details below and confirm the reservation:
 
     - Booking Reference: ${id}
     - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
@@ -419,69 +468,64 @@ const adminSendMessageReservation = async(params) => {
 
     Please confirm the reservation and proceed with the necessary actions.`;
 
-    // Mengecek jika client WhatsApp sudah siap    
-    if (client.info == undefined || client.info == null) {
-      console.log('The system is not ready yet, retrying...');
-      // Bisa tambahkan retry di sini jika perlu menunggu client siap
-      return;
-    } else {
-      // Kirim pesan ke nomor admin
-      await client.sendMessage(`${phone}@c.us`, message);
-      console.log(`Message sent to ${phone}@c.us di adminSendMessageReservation`);
+    // 1. Ganti pengecekan kesiapan dengan yang konsisten
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return; // Hentikan fungsi jika belum siap
     }
-  } catch (error) {
-    console.error('Error sending message:', error);
 
-    // Periksa apakah error berasal dari Puppeteer dengan WidFactory
-    if (error.message && error.message.includes('WidFactory')) {
-      console.error("Error due to Puppeteer WidFactory issue. Restarting client.");
-      // Implementasi untuk restart client WhatsApp jika diperlukan
-    } else {
-      console.error("Other error encountered:", error);
-    }
+    // 2. Gunakan helper `toJid` untuk format nomor
+    const jid = toJid(phone);
+
+    // 3. Kirim pesan menggunakan format Baileys (`sock`)
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Admin notification sent to ${jid}`);
+
+  } catch (error) {
+    // 4. Sederhanakan penanganan error
+    console.error('Error sending admin notification message:', error);
   }
 };
 
-const adminSendMessageDepositReservation = async(params) => {
+const adminSendMessageDepositReservation = async (params) => {
   try {
-    console.log('di adminSendMessageDepositReservation', params);
-    
     const { phone, transaction_time, order_id, gross_amount } = params;
 
-    // Format pesan secara dinamis menggunakan data dari params
     const message = `Hello Admin, a new deposit has been successfully paid for a reservation. Here are the details:
 
     - Booking Reference: ${order_id}
-    - Payment Date: ${transaction_time}
-    - Paid: ${gross_amount} IDR
+    - Payment Date: ${new Date(transaction_time).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Paid: ${gross_amount.toLocaleString('id-ID')} IDR
 
-    The customer has made the deposit payment. Please review and proceed with the next steps.
+    The customer has made the deposit payment. Please review and proceed with the next steps.`;
 
-    Thank you for your attention!`;
-    console.log('ini di client info',client.info);
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
+    // 1. Ganti pengecekan kesiapan dengan yang konsisten
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return;
     }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-    }
+
+    // 2. Gunakan helper `toJid` untuk format nomor
+    const jid = toJid(phone);
+
+    // 3. Kirim pesan menggunakan format Baileys (`sock`)
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Admin notification for deposit sent to ${jid}`);
 
   } catch (error) {
-    console.error('Error:', error);
+    // 4. Sederhanakan penanganan error
+    console.error('Error sending admin deposit notification:', error);
   }
 };
 
-const adminSendMessageAfterBookingHomestay = async(params, selectedHomestays) => {
+const adminSendMessageAfterBookingHomestay = async (params, selectedHomestays) => {
   try {
-    const homestayDetails = selectedHomestays.map(homestay => {
-      // Format string untuk setiap unit homestay
-      return `    - ${homestay.name}${homestay.nama_unit}-${homestay.unit_number} (Capacity: ${homestay.capacity} people, Price: ${homestay.price.toLocaleString('id-ID')} IDR)`;
-    }).join('\n');
+    const homestayDetails = selectedHomestays.map(homestay => 
+      `    - ${homestay.name}${homestay.nama_unit}-${homestay.unit_number} (Capacity: ${homestay.capacity}, Price: ${homestay.price.toLocaleString('id-ID')} IDR)`
+    ).join('\n');
     
-    const { phone,id, name, package_id, request_date, check_in, total_people, total_price, deposit, note } = params;
+    const { phone, id, name, package_id, request_date, check_in, total_people, total_price, deposit, note } = params;
 
-    // Format pesan secara dinamis menggunakan data dari params
     const message = `Hello Admin, booking for the ${name} Package (Package ID: ${package_id}) has been successfully updated. Here are the details:
 
     - Booking Reference: ${id}
@@ -489,237 +533,239 @@ const adminSendMessageAfterBookingHomestay = async(params, selectedHomestays) =>
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     Booked Homestays:
-      ${homestayDetails}
-    - Total Price: ${total_price.toLocaleString()} IDR
-    - Deposit Paid: ${deposit.toLocaleString()} IDR
+${homestayDetails}
+    - Total Price: ${total_price.toLocaleString('id-ID')} IDR
+    - Deposit Paid: ${deposit.toLocaleString('id-ID')} IDR
     - Notes: ${note || 'No additional notes'}
 
     Thank you for your attention!`;
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
-    }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
+
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return;
     }
 
+    const jid = toJid(phone);
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Admin notification for homestay booking sent to ${jid}`);
+
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error sending admin homestay notification:', error);
   }
 };
 
-const adminSendMessageFPReservation = async(params) => {
+const adminSendMessageFPReservation = async (params) => {
   try {
-    console.log('di adminSendMessageFPReservation', params);    
-    
-    // const { phone, request_date, check_in, total_people, total_price, deposit, note, order_id, user_name, name } = params;
     const { phone, transaction_time, order_id, gross_amount } = params;
 
-    // Format pesan secara dinamis menggunakan data dari params
     const message = `Hello Admin, a new full payment has been successfully paid for a reservation. Here are the details:
 
     - Booking Reference: ${order_id}
-    - Payment Date: ${transaction_time}
-    - Paid: ${gross_amount} IDR
+    - Payment Date: ${new Date(transaction_time).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Paid: ${gross_amount.toLocaleString('id-ID')} IDR
 
-    Thank you for your attention!`;
+    The reservation is now fully paid. Thank you for your attention!`;
     
-    console.log('ini di client info',client.info);
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return;
     }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-    }
+
+    const jid = toJid(phone);
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Admin notification for full payment sent to ${jid}`);
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error sending admin full payment notification:', error);
   }
 };
 
-const adminSendMessageCancelReservation = async(params) => {
+const adminSendMessageCancelReservation = async (params) => {
   try {
-    console.log('di adminSendMessageCancelReservation');
-    
-    const { id, phone, date } = params
+    const { id, phone, date } = params;
 
-    const message = `Hello Admin, a new cancel reservation here are the details:
+    const message = `Hello Admin, a reservation has been canceled. Here are the details:
 
     - Booking Reference: ${id}
-    - Booking Date: ${date}
+    - Cancellation Date: ${new Date(date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
 
-    Thank you for your attention!`;
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
-    }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-    }
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
-const adminSendMessageCancelRefundReservation = async(params) => {
-  try {
-    console.log('di adminSendMessageCancelRefundReservation', params);
+    Please take note of this cancellation.`;
     
-    const { id, refund_date, phone, account_refund, refund_amount } = params
-
-    const message = `Hello Admin, customer have been cancel the reservation here are the details for refund:
-
-    - Booking Reference: ${id}
-    - Booking Date: ${refund_date}
-    - Account Refund: ${account_refund}
-    - Total Refund: Rp${refund_amount}
-
-    Thank you for your attention!`;
-    const clientState = await client.getState();
-
-    if (clientState !== 'CONNECTED') {
-      console.log(`Client not connected. Current state: ${clientState}`);
+    // 1. Gunakan pengecekan kesiapan Baileys
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
       return;
     }
 
-    // ✅ Kirim pesan
-    await client.sendMessage(`${phone}@c.us`, message);
+    // 2. Format JID dan kirim pesan
+    const jid = toJid(phone);
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Admin notification for cancellation sent to ${jid}`);
+
   } catch (error) {
-    console.error('Error:', error);
-    if (error.message && error.message.includes('WidFactory')) {
-      console.error("Error due to Puppeteer WidFactory issue. Restarting client.");
-      // Implementasi untuk restart client WhatsApp jika diperlukan
-    } else {
-      console.error("Other error encountered:", error);
-    }
+    // 3. Sederhanakan error handling
+    console.error('Error sending admin cancellation notification:', error);
   }
-}
+};
 
-const customersSendMessageCancelRefundReservation = async(params) => {
+const adminSendMessageCancelRefundReservation = async (params) => {
   try {
-    console.log('di customersSendMessageCancelRefundReservation', params);
-    
-    params.phone = '6283152073998';
-    const { id, refund_date, phone, account_refund, refund_amount, fullname } = params
+    const { id, refund_date, phone, account_refund, refund_amount } = params;
 
-    const message = `Hello ${fullname}, you have been cancel the reservation here are the details for refund:
+    const message = `Hello Admin, a customer has canceled their reservation and requires a refund. Here are the details:
 
     - Booking Reference: ${id}
-    - Booking Date: ${refund_date}
-    - Account Refund: ${account_refund}
-    - Total Refund: Rp${refund_amount}
+    - Refund Request Date: ${new Date(refund_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Account for Refund: ${account_refund}
+    - Total Refund Amount: ${refund_amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
 
-    Thank you for your attention!`;
-    const clientState = await client.getState();
+    Please process the refund accordingly.`;
 
-    if (clientState !== 'CONNECTED') {
-      console.log(`Client not connected. Current state: ${clientState}`);
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
       return;
     }
 
-    // ✅ Kirim pesan
-    await client.sendMessage(`${phone}@c.us`, message);
+    const jid = toJid(phone);
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Admin notification for refund sent to ${jid}`);
+
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error sending admin refund notification:', error);
   }
-}
+};
 
-const customerSendMessageRefundProof = async(params) => {
+const customersSendMessageCancelRefundReservation = async (params) => {
   try {
-    // params.phone = '6285274953262';
-    params.phone = '6283152073998';
-    const { id, refund_date, phone } = params
+    // params.phone = '6283152073998'; // Tetap biarkan untuk testing jika perlu
+    console.log(params);
+    
+    const { id, refund_date, phone, account_refund, refund_amount, fullname } = params;
 
-    const message = `Hello, Admin have been upload refund proof for your reservation. Please
-    check to your refund account here are the details:
+    const message = `Hello ${fullname}, your reservation has been successfully canceled. Here are the details for your refund:
 
     - Booking Reference: ${id}
-    - Refund Date: ${refund_date}
+    - Cancellation Date: ${new Date(refund_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Refund to Account: ${account_refund}
+    - Total Refund: ${refund_amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
 
-    Thank you for your attention!`;
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
+    Please wait while our team processes your refund. Thank you!`;
+
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return;
     }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-    }
+
+    const jid = toJid(phone);
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Customer notification for refund sent to ${jid}`);
+
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error sending customer refund notification:', error);
   }
-}
+};
 
-const adminSendMessageRefundConfirmation = async(params) => {
+const customerSendMessageRefundProof = async (params) => {
   try {
-    const { phone, id, status } = params
+    console.log(params);
+    
+    // params.phone = '6283152073998'; // Tetap biarkan untuk testing jika perlu
+    const { id, refund_date, phone } = params;
+
+    const message = `Hello, the admin has uploaded proof of your refund. Please check your account. Here are the details:
+
+    - Booking Reference: ${id}
+    - Refund Process Date: ${new Date(refund_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+
+    Thank you for your patience!`;
+
+    // 1. Gunakan pengecekan kesiapan Baileys
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return;
+    }
+
+    // 2. Format JID dan kirim pesan
+    const jid = toJid(phone);
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Customer notification for refund proof sent to ${jid}`);
+
+  } catch (error) {
+    // 3. Sederhanakan error handling
+    console.error('Error sending customer refund proof notification:', error);
+  }
+};
+
+const adminSendMessageRefundConfirmation = async (params) => {
+  try {
+    const { phone, id, status } = params;
+    let message = ''; // Gunakan let karena nilainya akan diubah
 
     if (status == 1) {
-      // Jika refund sukses
-      message = `Hello Admin, the customer has successfully confirmed the refund. Here are the details:
+      // Jika refund sukses dikonfirmasi customer
+      message = `Hello Admin, the customer has successfully confirmed the refund.
 
       - Booking Reference: ${id}
 
-      The refund process has been successfully completed.
-
-      Thank you for your attention!`;
+      The refund process is now complete.`;
     } else {
-      // Jika refund tidak berhasil (misalnya bukti refund salah)
-      message = `Hello Admin, the customer attempted to confirm a refund, but the proof of refund is incorrect. Please check the details again. Here are the details:
+      // Jika refund ditolak customer
+      message = `Hello Admin, the customer has rejected the refund proof for the following booking:
 
       - Booking Reference: ${id}
 
-      Please review the refund proof and take the necessary actions.
+      Please review the refund proof and take the necessary actions.`;
+    }
 
-      Thank you for your attention!`;
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return;
     }
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
-    }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-    }
+
+    const jid = toJid(phone);
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Admin notification for refund confirmation sent to ${jid}`);
+
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error sending admin refund confirmation:', error);
   }
-}
+};
 
-const adminSendMessageReferralConfirmation = async(params) => {
+const adminSendMessageReferralConfirmation = async (params) => {
   try {
-    const { phone, id, status, datetime } = params
+    const { phone, id, status, datetime } = params;
+    let message = ''; // Gunakan let karena nilainya akan diubah
 
     if (status == 1) {
-      // Jika refund sukses
-      message = `Hello Admin, the customer has successfully confirmed the referral payment. Here are the details:
+      // Jika pembayaran referral sukses dikonfirmasi
+      message = `Hello Admin, the user has successfully confirmed the referral payment.
 
       - Booking Reference: ${id}
-      - Date Confirmation: ${datetime}
+      - Confirmation Date: ${new Date(datetime).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
 
-      The referral payment process has been successfully completed.
-
-      Thank you for your attention!`;
+      The referral payment process is complete.`;
     } else {
-      // Jika refund tidak berhasil (misalnya bukti refund salah)
-      message = `Hello Admin, the customer attempted to confirm a refund, but the proof of referral is incorrect. Please check the details again. Here are the details:
+      // Jika pembayaran referral ditolak
+      message = `Hello Admin, the user has rejected the referral payment proof for the following booking:
 
       - Booking Reference: ${id}
 
-      Please review the referral proof and take the necessary actions.
+      Please review the proof and take necessary actions.`;
+    }
+    
+    if (!isWhatsAppReady || !sock) {
+      console.log('WhatsApp client (Baileys) is not ready yet');
+      return;
+    }
 
-      Thank you for your attention!`;
-    }
-    if (client.info == undefined || client.info == null){
-    console.log('the system is not ready yet');
-    }
-    else{
-      // client.sendMessage(phn, msg);
-      await client.sendMessage(`${phone}@c.us`, message);
-    }
+    const jid = toJid(phone);
+    await sock.sendMessage(jid, { text: message });
+    console.log(`Admin notification for referral confirmation sent to ${jid}`);
+
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error sending admin referral confirmation:', error);
   }
-}
+};
 
 const createRoomChatController = async(params) => {
   const check = await checkMemberRoomChatAvailable(params)
@@ -761,7 +807,7 @@ module.exports = {
   customerSendMessageRefundProof,
   adminSendMessageRefundConfirmation,
   adminSendMessageReferralConfirmation,
-  whatsAppClientControllerTestBaru,
+  whatsAppClientController,
   customersSendMessageCancelRefundReservation,
   sendMessageAfterBookingHomestay,
   adminSendMessageAfterBookingHomestay

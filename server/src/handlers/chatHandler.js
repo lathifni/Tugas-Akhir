@@ -1,4 +1,4 @@
-const { userChatsController, createChatController, findChatController, sendMessage, createRoomChatController, whatsAppClientControllerTestBaru } = require("../controllers/chatController");
+const { userChatsController, createChatController, findChatController, sendMessage, createRoomChatController, whatsAppClientController } = require("../controllers/chatController");
 const { addNewChatWithAdmin } = require("../services/chat");
 
 const createChatHandler = async(req, res) => {
@@ -35,7 +35,7 @@ const whatsAppClientHandler = async(req, res) => {
     // const qrCode = await whatsAppClientControllerLamaaa()
     // const qrCode = await whatsAppClientController()
     // const qrCode = await whatsAppClientControllerTestBaru()
-    const result = await whatsAppClientControllerTestBaru()
+    const result = await whatsAppClientController()
 
     console.log(result);
     

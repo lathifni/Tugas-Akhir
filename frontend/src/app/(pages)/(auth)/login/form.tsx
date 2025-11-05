@@ -139,7 +139,7 @@ export default function Form() {
    return (
    <div className="bg-white px-8 py-4 rounded-lg shadow-md w-full max-w-md">
       <h2 className="text-3xl font-bold mb-6 text-center">Login</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
          <div className="mb-4">
             <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"

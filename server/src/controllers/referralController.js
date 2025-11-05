@@ -1,5 +1,5 @@
 const { listAllReferral, referralById, addReferralProof, verifyCodeReferral, createCodeReferral, listAllReferralByUserId, myReferralById, confirmationReferralProof } = require("../services/referral");
-const { getUserByUsernameOrEmail, searchUser, allPhoneAdmin } = require("../services/users");
+const { getUserByUsernameOrEmail, searchUser, allPhoneAdmin, customerRefPhoneByReservation } = require("../services/users");
 const { sendMessagePaymentReferral, adminSendMessageReferralConfirmation } = require("./chatController");
 
 const listAllReferralController = async() => {
@@ -19,6 +19,8 @@ const myReferralByIdController = async(params) => {
 }
 
 const addReferralProofController = async(params) => {
+  console.log(params);
+  
   const now = new Date();
   const currentDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1)
     .padStart(2, '0')}-${String(now.getDate())
@@ -26,7 +28,12 @@ const addReferralProofController = async(params) => {
         .padStart(2, '0')}:${String(now.getMinutes())
           .padStart(2, '0')}:${String(now.getSeconds())
             .padStart(2, '0')}`;
-  params.datetime = currentDatetime,
+  params.datetime = currentDatetime
+  const customerPhone = await customerRefPhoneByReservation(params.id_reservation)
+  if (!customerPhone) {
+    throw new Error(`Customer phone not found for reservation ID: ${params.id}`);
+  }
+  params.phone = customerPhone.phone
   await sendMessagePaymentReferral(params)
   return addReferralProof(params)
 }

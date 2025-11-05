@@ -91,7 +91,6 @@ interface MapExploreUlakanProps {
     isTravelPlanning: boolean; // <<< NEW
     onWaypointAdded?: (w: { id:string; name:string; lat:number; lng:number }) => void;
     planningWaypoints?: { id:string; name:string; lat:number; lng:number }[]; // << NEW
-    planningStart: UserLocation | null; // <-- TERIMA PROP BARU
 }
 
 interface Coordinates {
@@ -1247,37 +1246,36 @@ export default function MapHomeUpdateNewVer({
     objectAround, distances, setDistances, instructions, setInstructions, showLegend,
     dayActivities, selectActivities, traffic, visibility, reachToObject, object,
     goToObject, setGoToObject, showLabels, setShowLabels, showTerrain, setShowTerrain,
-    browsePlace, setBrowseId, setBrowseName, activeMapMode, isTravelPlanning, onWaypointAdded, 
-    planningWaypoints, planningStart
+    browsePlace, setBrowseId, setBrowseName, activeMapMode, isTravelPlanning, onWaypointAdded, planningWaypoints
 }: MapExploreUlakanProps) {    
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const legendRef = useRef<HTMLDivElement>(null);
     const travelPlanStartRef = useRef<UserLocation | null>(null);                // start rute (beku di A)
     const tpWaypointsRef = useRef<Array<{id:string; name:string; lat:number; lng:number}>>([]); // B, C, ...
     const tpRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);  // renderer rute TP
-    // const planningStartRef = useRef<UserLocation | null>(null);
+    const planningStartRef = useRef<UserLocation | null>(null);
 
-    // useEffect(() => {
-    //     if (isTravelPlanning) {
-    //     if (!planningStartRef.current && userLocation) {            
-    //         planningStartRef.current = userLocation; // A = lokasi saat mulai planning
-    //     }
-    //     } else {
-    //     planningStartRef.current = null;
-    //     }
-    // }, [userLocation]);
+    useEffect(() => {
+        if (isTravelPlanning) {
+        if (!planningStartRef.current && userLocation) {            
+            planningStartRef.current = userLocation; // A = lokasi saat mulai planning
+        }
+        } else {
+        planningStartRef.current = null;
+        }
+    }, [userLocation]);
     
-    // useEffect(() => {
-    //     if (isTravelPlanning && userLocation && !travelPlanStartRef.current) {
-    //         travelPlanStartRef.current = { ...userLocation }; // A dibekukan sekali
-    //     }
-    //     if (!isTravelPlanning) {
-    //         travelPlanStartRef.current = null;
-    //         tpWaypointsRef.current = [];
-    //         tpRendererRef.current?.setMap(null);
-    //         tpRendererRef.current = null;
-    //     }
-    // }, [userLocation]);
+    useEffect(() => {
+        if (isTravelPlanning && userLocation && !travelPlanStartRef.current) {
+            travelPlanStartRef.current = { ...userLocation }; // A dibekukan sekali
+        }
+        if (!isTravelPlanning) {
+            travelPlanStartRef.current = null;
+            tpWaypointsRef.current = [];
+            tpRendererRef.current?.setMap(null);
+            tpRendererRef.current = null;
+        }
+    }, [userLocation]);
 
     // Inisialisasi Peta dan InfoWindow Global (useEffect #1)
     const { map, infoWindowRef } = useGoogleMap(mapContainerRef);
@@ -1358,7 +1356,7 @@ export default function MapHomeUpdateNewVer({
     // RENDER RUTE GABUNGAN (A -> ... -> last)
     const combinedRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
     useEffect(() => {
-        if (!map) return;        
+        if (!map) return;
 
         // bersihkan renderer sebelumnya
         if (combinedRendererRef.current) {
@@ -1366,24 +1364,12 @@ export default function MapHomeUpdateNewVer({
             combinedRendererRef.current = null;
         }
 
-        // if (!isTravelPlanning || !planningWaypoints || planningWaypoints.length === 0 || !planningStartRef.current) {
-        // return;
-        // }
-        console.log('isTravelPlanning', isTravelPlanning);
-        console.log('planningWaypoints', planningWaypoints);
-        console.log('planningStart', planningStart);
-        
-        
-        
-        if (!isTravelPlanning || !planningWaypoints || planningWaypoints.length === 0 || !planningStart) {
-            return;
+        if (!isTravelPlanning || !planningWaypoints || planningWaypoints.length === 0 || !planningStartRef.current) {
+        return;
         }
-        console.log('ini planningWaypoints', planningWaypoints);
-        
 
         const ds = new google.maps.DirectionsService();
-        // const origin = new google.maps.LatLng(planningStartRef.current.lat!, planningStartRef.current.lng!);
-        const origin = new google.maps.LatLng(planningStart.lat, planningStart.lng);
+        const origin = new google.maps.LatLng(planningStartRef.current.lat!, planningStartRef.current.lng!);
         const destination = new google.maps.LatLng(
             planningWaypoints[planningWaypoints.length - 1].lat,
             planningWaypoints[planningWaypoints.length - 1].lng
@@ -1435,7 +1421,7 @@ export default function MapHomeUpdateNewVer({
                 }
             }
         );
-    }, [map, isTravelPlanning, planningWaypoints, planningStart]);
+    }, [map, isTravelPlanning, planningWaypoints]);
 
     // Gunakan custom hook untuk objek marker (attraction, culinary, dll.) (useEffect #3)
     useObjectMarkers(

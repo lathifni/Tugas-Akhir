@@ -126,7 +126,16 @@ export default function ExplorePage() {
   const [objectAroundState, setObjectAroundState] = useState<MapType>(EMPTY_FILTERS);
   const [activeMapMode, setActiveMapMode] = useState<'none' | 'browse' | 'radius' | 'route'>('none');
   const [travelPlanning, setTravelPlanning] = useState(false);
-  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
+  const [planningStart, setPlanningStart] = useState<UserLocation | null>(null); // <-- TAMBAHKAN STATE INI
+  // const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>(() => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+    const savedWaypoints = localStorage.getItem('travelWaypoints');
+    // Jika ada, pakai data lama. Jika tidak, array kosong.
+    return savedWaypoints ? JSON.parse(savedWaypoints) : [];
+  });
   // const handleWaypointAdded = (w: Waypoint) => {
   //   setWaypoints(prev => [...prev, w]);
   // };
@@ -188,9 +197,7 @@ export default function ExplorePage() {
 
   const getCurrentPosition = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        console.log('gabisa nih');
-        
+      if (!navigator.geolocation) {        
         reject(new Error("Geolocation is not supported by this browser."));
       }
 
@@ -244,15 +251,50 @@ export default function ExplorePage() {
   };
 
   const planningStartRef = useRef<UserLocation | null>(null);
+    useEffect(() => {
+    if (!travelPlanning || !detourType) return;
+
+    if (detourType === 'pre') {
+      // pakai GTP Gate sebagai start → userLocation dipaksa ke GTP Gate
+      setUserLocation({ lat: GTP_GATE.lat, lng: GTP_GATE.lng });
+
+      // optional: seed waypoint pertama kalau kosong
+      // if (waypoints.length === 0) {
+      //   setWaypoints([{ id: GTP_GATE.id, name: GTP_GATE.name, lat: GTP_GATE.lat, lng: GTP_GATE.lng }]);
+      // }
+    } else if (userLocation) {
+      setUserLocation({ lat: userLocation!.lat, lng:userLocation!.lng})
+      // on-journey → start = My Location (biarkan userLocation apa adanya)
+      if (userLocation && waypoints.length === 0) {
+        // setWaypoints([{ id: 'MY_LOC', name: 'My Location', lat: userLocation.lat, lng: userLocation.lng }]);
+      }
+    }
+
+    // mode bantu radius biar fokus ke pusat start
+    // setActiveMapMode('radius');
+  }, [travelPlanning, detourType]); // (cukup detourType & travelPlanning)
+
+  // useEffect(() => {
+  //   if (travelPlanning && !planningStartRef.current && userLocation) {
+  //     planningStartRef.current = userLocation;
+  //   }
+  //   if (!travelPlanning) {
+  //     planningStartRef.current = null;
+  //     setWaypoints([]); // opsional: reset daftar saat keluar planning
+  //   }
+  // }, [userLocation]);
   useEffect(() => {
-    if (travelPlanning && !planningStartRef.current && userLocation) {
-      planningStartRef.current = userLocation;
-    }
-    if (!travelPlanning) {
+    if (travelPlanning) {
+      // Logika ini berjalan saat masuk mode planning
+      if (!planningStartRef.current && userLocation) {
+        planningStartRef.current = userLocation;
+      }
+    } else {
+      // Logika ini hanya berjalan saat travelPlanning menjadi false
       planningStartRef.current = null;
-      setWaypoints([]); // opsional: reset daftar saat keluar planning
+      // setWaypoints([]); 
     }
-  }, [travelPlanning, userLocation]);
+  }, [travelPlanning, userLocation]); // <-- UBAH DEPENDENCY-NYA
 
   const handleWaypointAdded = (w: Waypoint) => {
     setWaypoints(prev => [...prev, w]);
@@ -372,6 +414,7 @@ export default function ExplorePage() {
       setListExploreUlakan(false);
       setPackageSection(false);
       setDataTypeMap(null);
+      setPlanningStart(userLocation); // <-- LANGSUNG SET TITIK AWAL DI SINI
       setRadius(0);
 
       // === ADD: buka dialog detour langsung
@@ -386,8 +429,7 @@ export default function ExplorePage() {
 
 
   const handleObjectAroundStateChange = (newState: any) => {
-    console.log(newState);
-    
+    // console.log(newState);
     setObjectAroundState(newState);
   }
 
@@ -510,6 +552,7 @@ export default function ExplorePage() {
       setTravelPlanning(true);
       setActiveMapMode('route');
       setListExploreUlakan(false);
+      setPlanningStart(userLocation);
       setPackageSection(false);
       setDataTypeMap(null);
       setRadius(0);
@@ -519,26 +562,9 @@ export default function ExplorePage() {
   }, [userLocation]);
 
   useEffect(() => {
-    if (!travelPlanning || !detourType) return;
+    localStorage.setItem('travelWaypoints', JSON.stringify(waypoints));
+  }, [waypoints]);
 
-    if (detourType === 'pre') {
-      // pakai GTP Gate sebagai start → userLocation dipaksa ke GTP Gate
-      setUserLocation({ lat: GTP_GATE.lat, lng: GTP_GATE.lng });
-
-      // optional: seed waypoint pertama kalau kosong
-      // if (waypoints.length === 0) {
-      //   setWaypoints([{ id: GTP_GATE.id, name: GTP_GATE.name, lat: GTP_GATE.lat, lng: GTP_GATE.lng }]);
-      // }
-    } else {
-      // on-journey → start = My Location (biarkan userLocation apa adanya)
-      if (userLocation && waypoints.length === 0) {
-        // setWaypoints([{ id: 'MY_LOC', name: 'My Location', lat: userLocation.lat, lng: userLocation.lng }]);
-      }
-    }
-
-    // mode bantu radius biar fokus ke pusat start
-    // setActiveMapMode('radius');
-  }, [travelPlanning, detourType]); // (cukup detourType & travelPlanning)
 
   return (
     <>
@@ -566,7 +592,7 @@ export default function ExplorePage() {
             <div className="flex items-center justify-center">
               <h1 className="text-2xl font-semibold md:ml-3">Google Maps with Location</h1>
             </div>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center">
               <div className="p-2 bg-blue-500 rounded-lg hover:bg-blue-600" title="Current Location" role="button" onClick={fetchUserLocation}>
                 <Goal className="text-slate-200" />
               </div>
@@ -647,7 +673,7 @@ export default function ExplorePage() {
                   onMouseLeave={() => setDropdownObjectVisible(false)}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-center justify-between px-2 pb-2 border-b">
+                  {/* <div className="flex items-center justify-between px-2 pb-2 border-b">
                     <span className="text-sm font-medium">Visibility</span>
                     <span className="text-xs text-gray-500">
                       {selectedObj === totalObj
@@ -656,7 +682,7 @@ export default function ExplorePage() {
                         ? 'All off'
                         : `${selectedObj} selected`}
                     </span>
-                  </div>
+                  </div> */}
 
                   <ul className="max-h-64 overflow-auto py-2">
                     {objectKeys.map((key) => (
@@ -675,7 +701,7 @@ export default function ExplorePage() {
                     ))}
                   </ul>
 
-                  <div className="flex items-center justify-end gap-2 px-2 pt-2 border-t">
+                  {/* <div className="flex items-center justify-end gap-2 px-2 pt-2 border-t">
                     <button
                       className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
                       onClick={() => setAllObjectVisibility(false)}
@@ -688,7 +714,7 @@ export default function ExplorePage() {
                     >
                       Enable all
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               )}
               </div>
@@ -779,6 +805,7 @@ export default function ExplorePage() {
             isTravelPlanning={travelPlanning}
             onWaypointAdded={handleWaypointAdded}
             planningWaypoints={waypoints}
+            planningStart={planningStart} // <-- KIRIM STATE BARU SEBAGAI PROP
             // isManualLocation={isManualLocationClicked} setIsManualLocation={setIsManualLocationClicked}
             // setUserLocation={setUserLocation}
             />
@@ -908,8 +935,8 @@ export default function ExplorePage() {
       </dialog>
       {/* === ADD: Dialog pilih detour type */}
       <dialog id="detourTypeDialog" className="bg-white p-12 mt-72 rounded-lg shadow-lg">
-        <h2 className="text-xl mb-4 text-center font-bold">Detour Destination</h2>
-        <p className="mb-4 text-center">Choose your detour type for this travel plan:</p>
+        <h2 className="text-xl mb-4 text-center font-bold">Journey Phase</h2>
+        <p className="mb-4 text-center">Choose your journey phase type for this travel route</p>
         <div className="mt-2 flex justify-center gap-3">
           <button
             onClick={() => handleChooseDetour('pre')}
@@ -931,7 +958,7 @@ export default function ExplorePage() {
           </button>
         </div>
       </dialog>
-      <ToastContainer />
+     
     </>
   )
 }
