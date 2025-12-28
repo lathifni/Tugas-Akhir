@@ -427,7 +427,6 @@ export default function ExplorePage() {
     }
   };
 
-
   const handleObjectAroundStateChange = (newState: any) => {
     // console.log(newState);
     setObjectAroundState(newState);
@@ -439,11 +438,12 @@ export default function ExplorePage() {
   }
 
   const handleManualLocationUpdate = () => {
+    setGoToObject(true)
     const dialogElement = document.getElementById('manualLocationDialog') as HTMLDialogElement;
     if (dialogElement) dialogElement.showModal();
   };
 
-  const handleBrowsePlace = () => {
+  const  handleBrowsePlace = () => {
     const dialogElement = document.getElementById('browsePlace') as HTMLDialogElement;
     if (dialogElement) dialogElement.showModal();
   };
@@ -500,6 +500,25 @@ export default function ExplorePage() {
   // === ADD: handler pilihan detour
   const handleChooseDetour = (type: 'pre' | 'on') => {
     setDetourType(type);
+    if (type === 'pre') {
+      // Definisi Lokasi GTP Gate
+      const gtpGateLocation = { lat: -0.709045, lng: 100.198671 }; // Sesuaikan koordinat GTP Gate kamu
+      
+      // 1. Pindahkan Lokasi User (untuk radius search)
+      setUserLocation(gtpGateLocation);
+      
+      // 2. PENTING: Update juga Planning Start (titik awal rute)
+      setPlanningStart(gtpGateLocation); 
+      
+      // Opsional: Jika kamu ingin menghapus waypoint lama saat ganti mode
+      // setWaypoints([]); 
+
+    } else {
+      // Jika 'on-journey', pastikan start-nya lokasi user sekarang
+      if (userLocation) {
+          setPlanningStart(userLocation);
+      }
+    }
     closeDetourDialog();
     // (opsional) lakukan sesuatu berdasar type, mis. aktifkan mode tertentu
     // setActiveMapMode(type === 'pre' ? 'browse' : 'route');

@@ -268,7 +268,7 @@ export default function CostumbookingIdPage({ params }: any) {
             <p className="ml-5">Price : {rupiah(dataPackageById[0].price)}</p>
           </div>
           <div>
-            <h2 className="font-medium text-lg">Booking</h2>
+            <h2 className="font-medium text-lg">Reserve</h2>
             {snapShow && (
               <div id="snap-container"></div>
             )}

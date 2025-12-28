@@ -60,7 +60,7 @@
 
 //ni codingan lama
 import path from "path";
-import fs from "fs/promises";
+import fs from "fs";
 import { NextResponse } from "next/server";
 
 // export const config = {
@@ -90,11 +90,11 @@ export const POST = async (request: any) => {
     const fileName = `${new Date().getTime()}_${file.name}`;
 
     try {
-      await fs.readdir(
+      await fs.promises.readdir(
         path.join(process.cwd() + "/public", `/photos/${category}`)
       );
     } catch (error) {
-      await fs.mkdir(
+      await fs.promises.mkdir(
         path.join(process.cwd() + "/public", `/photos/${category}`)
       );
     }
@@ -107,9 +107,43 @@ export const POST = async (request: any) => {
     );
 
     // fs.writeFile(filePath, Buffer.from(buffer));
-    await fs.writeFile(filePath, data);
+    await fs.promises.writeFile(filePath, data);
 
     fileNames.push(fileName);
   }
   return NextResponse.json({ msg: "image upload successfully", data: fileNames  }, { status: 201 });
 };
+
+// export async function GET(req: Request, { params }: { params: { path: string[] } }) {
+//   // 1. Ambil path dari URL (misal: ['refund', 'bukti1.jpg'])
+//   const pathArray = params.path; 
+  
+//   // 2. Gabungin jadi path file asli di harddisk
+//   // Lokasi: ProjectRoot/public/photos/refund/bukti1.jpg
+//   const filePath = path.join(process.cwd(), 'public', 'photos', ...pathArray);
+
+//   // 3. Cek apakah file ada?
+//   if (!fs.existsSync(filePath)) {
+//     return new NextResponse('File not found', { status: 404 });
+//   }
+
+//   // 4. Baca file dari harddisk
+//   const fileBuffer = fs.readFileSync(filePath);
+
+//   // 5. Tentukan tipe file (biar browser tau ini gambar)
+//   // Kalau mau simpel manual: cek ekstensi file, atau pakai library 'mime'
+//   const ext = path.extname(filePath).toLowerCase();
+//   let contentType = 'application/octet-stream';
+//   if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+//   else if (ext === '.png') contentType = 'image/png';
+//   else if (ext === '.pdf') contentType = 'application/pdf';
+
+//   // 6. Return gambarnya
+//   return new NextResponse(fileBuffer as unknown as BodyInit, {
+//     headers: {
+//       'Content-Type': contentType,
+//       // Cache control opsional: biar browser gak simpen cache kelamaan kalau file sering ganti
+//       'Cache-Control': 'public, max-age=0, must-revalidate' 
+//     }
+//   });
+// }

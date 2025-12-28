@@ -41,6 +41,14 @@ const slides = [
         charm of natural tourism, but also supports the sustainability of the coastal water environment.`
     },
     {
+        url: '/landingPage/carousel-7.jpg',
+        alt: 'Tracking Mangrove ',
+        caption: `When visiting Ulakan GTP, visitors will be able to enjoy the natural beauty of the coast. The tour provides a 1.8-kilometer track that allows tourists to explore the beach and mangrove forest rich with flora and fauna typical of Ulakan. Please note that currently, the mangrove tracking track only covers a distance of about 700 meters as it is currently under construction.
+        Mangroves, a type of plant that grows in tidal areas, provide a unique touch to the coastline. With their prominent breathing roots, known as pneumatophores, mangroves demonstrate their ability to adapt to soils that have low oxygen availability. Beach forest, tidal forest, brackish forest, or mangrove forest are terms that reflect the diversity of vegetation that mangroves possess.
+        The role of mangroves is very important in maintaining the ecological balance of the environment around coastal waters. As natural biofilters, binding agents, and pollution traps, mangroves create an ideal environment for various types of organisms such as gastropods, detritus-eating crabs, and plankton-eating bivalves. The presence of mangroves in Ulakan GTP not only adds to the
+        charm of natural tourism, but also supports the sustainability of the coastal water environment.`
+    },
+    {
         url: '/landingPage/5.jpg',
         // url: '/landingPage/carousel-6.jpg',
         alt: 'Biodiversity',

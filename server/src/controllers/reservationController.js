@@ -43,8 +43,8 @@ const createReservationController = async (params) => {
   let idReservation, idDownPayment;
   lastIdNumber++;
   const idNumberString = lastIdNumber.toString().padStart(4, "0");
-  idReservation = `Rooo${idNumberString}`;
-  idDownPayment = `DPooo${idNumberString}`;
+  idReservation = `R${idNumberString}`;
+  idDownPayment = `DP${idNumberString}`;
 
   params.id = idReservation
   params.dp_id = idDownPayment
@@ -284,7 +284,7 @@ const callbackNotificationController = async (params) => {
         const codeReferral = await checkCodeReferralAfterDP({ id: order_id })
         console.log(codeReferral);
         
-        if (!codeReferral.code_referral || codeReferral.code_referral==null) {
+        if (!codeReferral || codeReferral==null) {
           await makeNewCodeReferralAfterDP({ id: codeReferral.id })
         }
         dataReservation.paymentDate = params.transaction_time
@@ -700,7 +700,7 @@ const createInvoiceController = async (params) => {
       .text(` ${moment(reservation.deposit_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}`, { align: 'left' });
     doc.font('Helvetica')
       .text(`Full Payment         :`, leftMargin, doc.y, { align: 'left', continued: true })
-      .text(` ${moment(reservation.payment_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm')}`, { align: 'left' });
+      .text(` ${reservation.payment_date ? moment(reservation.payment_date).utc(true).format('dddd, Do MMMM YYYY, hh:mm') : 'N/A (Waiting full payment)'}`, { align: 'left' });
     const statusText = reservation.status_id === 4 ? 'Acceptance' : reservation.status;
     doc.font('Helvetica')
       .text(`Status                   :`, leftMargin, doc.y, { align: 'left', continued: true })

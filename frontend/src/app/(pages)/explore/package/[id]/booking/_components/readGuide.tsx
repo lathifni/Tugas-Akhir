@@ -34,7 +34,7 @@ export default function ReadGuide({ readGuideOpen, setReadGuideOpen }: ReadGuide
               <p>Tourists make a reservation by filling in the tour package reservation form</p>
             </li>
             <li>
-              <p>If tourists want to book a homestay, they can fill in the homestay reservation form</p>
+              <p>If tourists want to reservation a homestay, they can fill in the homestay reservation form</p>
             </li>
           </ul>
           <h1 className="font-semibold">3. Homestay Reservation</h1>

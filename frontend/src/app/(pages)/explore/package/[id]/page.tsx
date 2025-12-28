@@ -170,7 +170,7 @@ export default function PackageIdPage({ params }: any) {
     {
       href: 'booking',
       icon: faCartPlus,
-      text: 'Booking',
+      text: 'Reserve',
     },
     {
       href: 'extend',
@@ -228,14 +228,7 @@ export default function PackageIdPage({ params }: any) {
         <div className="w-full h-full px-1 xl:p-0 xl:mb-0 xl:mr-3 xl:w-7/12 ">
           <div className="relative py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
             <h1 className="text-center text-2xl font-semibold">Package Information</h1>
-            {/* {dataPackageActivityById && (
-              <Link href={`/explore/package/${dataPackageActivityById[0]?.package_id}/booking`}>
-                <div className="absolute right-1 sm:right-5 px-3 py-1 bg-green-500 rounded-lg text-white hover:bg-green-700" role="button">
-                  <FontAwesomeIcon icon={faCartPlus} /> Booking
-                </div>
-              </Link>
-            )} */}
-            <div className="justify-center items-center">
+            <div className="flex flex-wrap justify-center items-center">
               {dataPackageActivityById && (
                 <>
                   {actionButtons.map((button) => (

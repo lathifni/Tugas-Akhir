@@ -112,7 +112,7 @@ export default function Package({ onSearchAroundClick, onShowMapClick, onSelectA
                     toast.warning(
                       <div className="text-center">
                         <div className="font-bold">Login Required</div>
-                        <div>Please login first to book this package</div>
+                        <div>Please login first to reserve this package</div>
                         <Link href={'login'}>
                           <button className="px-4 py-2 mx-1 bg-blue-500 text-white rounded-lg">
                             Login
@@ -131,7 +131,7 @@ export default function Package({ onSearchAroundClick, onShowMapClick, onSelectA
                   // Jika sudah login, biarkan navigasi berjalan normal
                 }}
               >
-                Book Now
+                Reserve
               </button>
             </Link>
           </div>

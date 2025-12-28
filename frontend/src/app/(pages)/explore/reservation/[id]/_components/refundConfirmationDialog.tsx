@@ -61,7 +61,8 @@ export default function RefundConfirmationDialog({ isOpen, setIsOpen, onSave, ga
        <div className="mb-4">
           <label>Refund Proof</label>
           <div className="bg-gray-100 border-2 border-blue-500 border-dashed rounded-lg">
-            <img className="p-8" src={`/photos/refund/${gallery}`} alt={gallery} />
+            {/* <img className="p-8" src={`/photos/refund/${gallery}`} alt={gallery} /> */}
+            <img src={`/api/refund/${gallery}`} />
           </div>
         </div>
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}

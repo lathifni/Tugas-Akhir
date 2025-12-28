@@ -100,7 +100,7 @@ export default function BookingIdPage({ params }: any) {
         if (res.status == 201) {
           if (dataPackageById[0].max_day > 1) {
             toast.success("Successful!");
-            toast.info("Redirecting You to Booking Homestay");
+            toast.info("Redirecting You to Reserve Homestay");
             setTimeout(() => {
               router.push(`/explore/detailreservation/${res.data.idReservation}`);
             }, 1300);
@@ -270,7 +270,7 @@ const isEmpty = (v?: string | number | null) =>
             <p className="ml-5">Price : {rupiah(dataPackageById[0].price)}</p>
           </div>
           <div>
-            <h2 className="font-medium text-lg">Booking</h2>
+            <h2 className="font-medium text-lg">Reserve</h2>
             {weatherWarnings.length > 0 && (
               <div className="">
                 <h2 className="font-medium text-lg">Weather Forecasting</h2>

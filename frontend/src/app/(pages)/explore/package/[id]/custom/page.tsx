@@ -12,6 +12,7 @@ import { fetchListAllObject } from "@/app/(pages)/api/fetchers/gtp"
 import Link from "next/link"
 import useAxiosAuth from "../../../../../../../libs/useAxiosAuth"
 import { useRouter } from 'next/navigation';
+import moment from "moment"
 
 interface PackageActivity {
   package_id: string;
@@ -107,7 +108,8 @@ export default function CustomIdPage({ params }: any) {
   };
   
   const currentTime = new Date();
-  const formattedDate = currentTime.toISOString().slice(0, 19).replace('T', ' ');
+  // const formattedDate = currentTime.toISOString().slice(0, 19).replace('T', ' ');
+  const formattedDate = moment().utcOffset('+0700').format('YYYY-MM-DD HH:mm:ss');
 
   const handleAddDay = () => {
     const newDay = parseInt(maxDay.toString()) + 1
@@ -353,7 +355,7 @@ export default function CustomIdPage({ params }: any) {
               <br />
               <div className="absolute mr-5 right-1 top-14">
                 <button className="text-white bg-green-500 px-3 py-1 rounded-lg hover:bg-green-600 mr-3" onClick={() => setBookingPackage(!bookingPackage)}>
-                  <FontAwesomeIcon icon={faCartPlus} /> Booking this Package
+                  <FontAwesomeIcon icon={faCartPlus} /> Reserve this Package
                 </button>
                 <Dialog 
                   open={bookingPackage} 
@@ -364,13 +366,13 @@ export default function CustomIdPage({ params }: any) {
                   {/* 1. Judul yang jelas dengan ikon yang menarik */}
                   <DialogTitle className="font-bold text-xl flex items-center justify-center">
                     <FontAwesomeIcon icon={faCircleCheck} className="text-green-500 mr-2" />
-                    Confirm Your Booking
+                    Confirm Your Reserve
                   </DialogTitle>
 
                   {/* 2. Tambahkan teks konten untuk memberi konteks pada pengguna */}
                   <DialogContent>
                     <DialogContentText>
-                      You are about to finalize this package booking. Do you wish to proceed?
+                      You are about to finalize this package reservation. Do you wish to proceed?
                     </DialogContentText>
                   </DialogContent>
 
@@ -391,7 +393,7 @@ export default function CustomIdPage({ params }: any) {
                       onClick={() => saveBooking()}
                     >
                       <FontAwesomeIcon icon={faCartPlus} className="mr-2" />
-                      Yes, Book Now
+                      Yes, Reserve
                     </button>
                   </DialogActions>
                 </Dialog>

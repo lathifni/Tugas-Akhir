@@ -8,7 +8,7 @@ import { createRoot } from 'react-dom/client';
 import { fetchGeomGtp, fetchListAllObject } from "@/app/(pages)/api/fetchers/gtp";
 import { fetchEstuaryGeom, fetchListVillage, fetchUlakanVillage } from "@/app/(pages)/api/fetchers/vilage";
 import { fetchListGeomKec, fetchListGeomKotaKab } from "@/app/(pages)/api/fetchers/kotaKabKec";
-import {
+import CustomScale, {
     MapContentCulinaryPlaces, MapContentWorshipPlaces, MapContentSouvenirPlaces,
     MapContentHomestayPlaces, Legend, MapContentGeneral, MapContentAttraction,
     GtpInfoWindow, MapContentBrowseCulinaryPlaces, MapContentBrowseWorshipPlaces,
@@ -261,6 +261,10 @@ const useGoogleMap = (mapRef: React.RefObject<HTMLDivElement>) => {
                     zoom: 6,
                     mapTypeId: 'satellite', // Default: satellite
                     // disableDefaultUI: true,
+                    // scaleControl: true,
+                    // scaleControlOptions: {
+                    //     position: google.maps.ControlPosition.BOTTOM_LEFT // Skala muncul di kiri bawah
+                    // },
                     styles: [{ featureType: "all", elementType: "labels", stylers: [{ "visibility": "off" }] }] // Default: labels off
                 });
                 infoWindowRef.current = new google.maps.InfoWindow(); // Inisialisasi InfoWindow global
@@ -272,7 +276,11 @@ const useGoogleMap = (mapRef: React.RefObject<HTMLDivElement>) => {
     return { map: googleMap.current, infoWindowRef };
 };
 
-const useGeoJsonLayers = (map: google.maps.Map | null, visibility: MapExploreUlakanProps['visibility'], infoWindowRef: React.MutableRefObject<google.maps.InfoWindow | null>) => {
+const useGeoJsonLayers = (
+    map: google.maps.Map | null, visibility: MapExploreUlakanProps['visibility'], 
+    infoWindowRef: React.MutableRefObject<google.maps.InfoWindow | null>,
+    setCursorCoord: (coord: { lat: number; lng: number } | null) => void
+) => {
     const dataLayersRef = useRef<Record<string, google.maps.Data>>({});
     const gtpMarkerRef = useRef<google.maps.Marker | null>(null);
     const kotaKabData = useQuery({ queryKey: ['kotaKab'], queryFn: fetchListGeomKotaKab, refetchOnWindowFocus: false });
@@ -282,64 +290,107 @@ const useGeoJsonLayers = (map: google.maps.Map | null, visibility: MapExploreUla
     const ulakanVillageData = useQuery({ queryKey: ['ulakanVillage'], queryFn: fetchUlakanVillage, refetchOnWindowFocus: false });
     const geomEstuary = useQuery({ queryKey: ['geomEstuary'], queryFn: fetchEstuaryGeom, refetchOnWindowFocus: false });
 
-  const loadAndRenderGeoJson = useCallback(async (
-      layerKey: string,
-      dataInput: string[] | any[] | undefined, // Ubah nama parameter & tambahkan 'undefined'
-      styleOptions: google.maps.Data.StyleOptions,
-      featureProps?: (item: any) => { id?: string; name?: string; geometry: any },
-      onClick?: (event: google.maps.Data.MouseEvent) => void
-  ) => {
-      if (!map || !infoWindowRef.current || dataInput === undefined) return; // Tambah cek undefined
+    const loadAndRenderGeoJson = useCallback(async (
+        layerKey: string,
+        dataInput: string[] | any[] | undefined, // Ubah nama parameter & tambahkan 'undefined'
+        styleOptions: google.maps.Data.StyleOptions,
+        featureProps?: (item: any) => { id?: string; name?: string; geometry: any },
+        onClick?: (event: google.maps.Data.MouseEvent) => void
+    ) => {
+        if (!map || !infoWindowRef.current || dataInput === undefined) return; // Tambah cek undefined
 
-      let dataLayer = dataLayersRef.current[layerKey];
-      if (!dataLayer) {
-          dataLayer = new google.maps.Data();
-          dataLayer.setStyle(styleOptions);
-          if (onClick) {
-              dataLayer.addListener('click', onClick);
-          }
-          dataLayersRef.current[layerKey] = dataLayer;
-      }
+        let dataLayer = dataLayersRef.current[layerKey];
+        if (!dataLayer) {
+            dataLayer = new google.maps.Data();
+            dataLayer.setStyle(styleOptions);
+            if (onClick) {
+                dataLayer.addListener('click', onClick);
+            }
+            dataLayersRef.current[layerKey] = dataLayer;
+        }
 
-      dataLayer.forEach(feature => dataLayer.remove(feature));
+        dataLayer.forEach(feature => dataLayer.remove(feature));
+        dataLayer.addListener('mousemove', (e: google.maps.Data.MouseEvent) => {
+            if (e.latLng) {
+                // Update state koordinat dari layer daratan
+                setCursorCoord({
+                    lat: e.latLng.lat(),
+                    lng: e.latLng.lng(),
+                });
+            }
+        });
 
-      // Perbaiki penanganan tipe di sini
-      if (typeof dataInput[0] === 'string') { // Jika elemen pertama adalah string, asumsikan itu array URL
-          const urls = dataInput as string[]; // Cast ke string[]
-          for (const url of urls) {
-              try {
-                  const response = await fetch(url);
-                  const data = await response.json();
-                  dataLayer.addGeoJson(data);
-              } catch (error) {
-                  console.error(`Error loading ${url}:`, error);
-              }
-          }
-      } else if (Array.isArray(dataInput)) { // Jika ini array objek (dari useQuery)
-          const dataArray = dataInput as any[]; // Cast ke any[] atau tipe yang lebih spesifik
-          dataArray.forEach(item => {
-              const feature = featureProps ? { type: 'Feature', properties: featureProps(item), geometry: item.geom } : { type: 'Feature', geometry: item.geom };
-              dataLayer.addGeoJson(feature);
-          });
-      }
-      
-      dataLayer.setMap(map);
-  }, [map, infoWindowRef]); // Dependensi untuk useCallback
+        // Perbaiki penanganan tipe di sini
+        if (typeof dataInput[0] === 'string') { // Jika elemen pertama adalah string, asumsikan itu array URL
+            const urls = dataInput as string[]; // Cast ke string[]
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    dataLayer.addGeoJson(data);
+                } catch (error) {
+                    console.error(`Error loading ${url}:`, error);
+                }
+            }
+        } else if (Array.isArray(dataInput)) { // Jika ini array objek (dari useQuery)
+            const dataArray = dataInput as any[]; // Cast ke any[] atau tipe yang lebih spesifik
+            dataArray.forEach(item => {
+                const feature = featureProps ? { type: 'Feature', properties: featureProps(item), geometry: item.geom } : { type: 'Feature', geometry: item.geom };
+                dataLayer.addGeoJson(feature);
+            });
+        }
+        
+        dataLayer.setMap(map);
+    }, [map, infoWindowRef]); // Dependensi untuk useCallback
 
     // Efek utama untuk mengelola visibilitas dan data setiap layer GeoJSON
     useEffect(() => {
+        const countrySources = [
+            { url: 'maps/N01.geojson', color: '#FF65A3' }, // Merah Bata
+            { url: 'maps/N02.geojson', color: '#7E3AF2' }, // Hijau Neon
+            { url: 'maps/N03.geojson', color: '#ffffff' }, // Biru
+            { url: 'maps/N06.geojson', color: '#FFC107' }, // Kuning
+            ];
+        const countryConfigs = countrySources.map((source, index) => {
+            // Cek apakah ini Indonesia (N03)?
+            const isIndonesia = source.url === 'maps/N03.geojson';
+
+            return {
+                key: `country_${index}`,
+                visible: visibility.country,
+                urls: [source.url],
+                style: { 
+                    fillColor: source.color, 
+                    strokeWeight: 0.6, 
+                    strokeColor: '#ffffff', // Warna garis pinggir tetap putih
+                    
+                    // --- BAGIAN PENTING DI SINI ---
+                    // Kalau Indonesia, opacity 0 (tembus pandang). Kalau bukan, 0.6.
+                    fillOpacity: isIndonesia ? 0.0 : 0.6, 
+                    
+                    clickable: true, 
+                    zIndex: 1 
+                },
+                onClick: (event: google.maps.Data.MouseEvent) => {
+                    infoWindowRef.current?.setContent(`Country ${event.feature.getProperty('name')}`);
+                    infoWindowRef.current?.setPosition(event.latLng);
+                    infoWindowRef.current?.open(map);
+                }
+            };
+        });
         const geoJsonConfig: GeoJsonConfigItem[] = [
-          {
-            key: 'country',
-            visible: visibility.country,
-            urls: ['maps/N01.geojson', 'maps/N02.geojson', 'maps/N03.geojson', 'maps/N06.geojson'],
-            style: { fillColor: '#ffffff', strokeWeight: 0.6, strokeColor: '#ffffff', fillOpacity: 0.05, clickable: true, zIndex: 1 },
-            onClick: (event: google.maps.Data.MouseEvent) => {
-                infoWindowRef.current?.setContent(`Country ${event.feature.getProperty('name')}`);
-                infoWindowRef.current?.setPosition(event.latLng);
-                infoWindowRef.current?.open(map);
-            }
-        },
+        //   {
+        //     key: 'country',
+        //     visible: visibility.country,
+        //     urls: ['maps/N01.geojson', 'maps/N02.geojson', 'maps/N03.geojson', 'maps/N06.geojson'],
+        //     style: { fillColor: '#ffffff', strokeWeight: 0.6, strokeColor: '#ffffff', fillOpacity: 0.05, clickable: true, zIndex: 1 },
+        //     onClick: (event: google.maps.Data.MouseEvent) => {
+        //         infoWindowRef.current?.setContent(`Country ${event.feature.getProperty('name')}`);
+        //         infoWindowRef.current?.setPosition(event.latLng);
+        //         infoWindowRef.current?.open(map);
+        //     }
+        // },
+        ...countryConfigs,
         {
             key: 'province',
             visible: visibility.province,
@@ -698,6 +749,16 @@ const useUserLocationAndRadiusYangLama = (
             infoWindowRef.current.close();
         }
 
+        const myLocationContent = `
+            <div style="padding:4px; color:black; text-align:center;">
+                <p style="font-weight:bold; margin-bottom:4px;">You Are Here</p>
+                <p style="font-size:12px; margin:0;">
+                Lat: ${userLocation.lat.toFixed(6)} <br/>
+                Lng: ${userLocation.lng.toFixed(6)}
+                </p>
+            </div>
+            `;
+
         // Buat marker lokasi pengguna yang baru
         const newMarkerLocation = new google.maps.Marker({
             position: userLocation,
@@ -706,17 +767,17 @@ const useUserLocationAndRadiusYangLama = (
         });
 
         if (infoWindowRef.current) {
-            infoWindowRef.current.setContent(`<p>You Are Here</p>`);
+            infoWindowRef.current.setContent(myLocationContent);
             infoWindowRef.current.open(map, newMarkerLocation);
         } else {
-            const tempInfoWindow = new google.maps.InfoWindow({ content: `<p>You Are Here</p>` });
+            const tempInfoWindow = new google.maps.InfoWindow({ content: myLocationContent });
             tempInfoWindow.open(map, newMarkerLocation);
             infoWindowRef.current = tempInfoWindow;
         }
 
         newMarkerLocation.addListener('click', () => {
             if (infoWindowRef.current) {
-                infoWindowRef.current.setContent(`<p>You Are Here</p>`);
+                infoWindowRef.current.setContent(myLocationContent);
                 infoWindowRef.current.open(map, newMarkerLocation);
             }
         });
@@ -837,6 +898,16 @@ const useUserLocationAndRadius = (
     circleRef.current?.setMap(null);
     infoWindowRef.current?.close();
 
+    const myLocationContent = `
+            <div style="padding:4px; color:black; text-align:center;">
+                <p style="font-weight:bold; margin-bottom:4px;">You Are Here</p>
+                <p style="font-size:12px; margin:0;">
+                Lat: ${userLocation.lat.toFixed(6)} <br/>
+                Lng: ${userLocation.lng.toFixed(6)}
+                </p>
+            </div>
+            `;
+
     // Marker "You are here"
     const youHere = new google.maps.Marker({
       position: userLocation,
@@ -844,14 +915,14 @@ const useUserLocationAndRadius = (
       animation: google.maps.Animation.DROP,
     });
     if (infoWindowRef.current) {
-        infoWindowRef.current.setContent(`<p>You Are Here</p>`);
+        infoWindowRef.current.setContent(myLocationContent);
         infoWindowRef.current.open(map, youHere);
     } else {
-        infoWindowRef.current = new google.maps.InfoWindow({ content: `<p>You Are Here</p>` });
+        infoWindowRef.current = new google.maps.InfoWindow({ content: myLocationContent });
         infoWindowRef.current.open(map, youHere);
     }
     youHere.addListener('click', () => {
-        infoWindowRef.current?.setContent(`<p>You Are Here</p>`);
+        infoWindowRef.current?.setContent(myLocationContent);
         infoWindowRef.current?.open(map, youHere);
     });
     locationMarkerRef.current = youHere;
@@ -1205,6 +1276,71 @@ const useRouteAndAnimations = (
 
         const cleanups: (() => void)[] = []; // Array untuk menyimpan fungsi cleanup
 
+        const roadsLayer = new google.maps.Data();
+    
+        // Load data jalan yang sudah kita download
+        roadsLayer.loadGeoJson('/maps/roads.geojson'); 
+
+        // Pasang Style Keren yang tadi kita bahas
+        roadsLayer.setStyle((feature) => {
+            const type = feature.getProperty('highway');
+            const name = feature.getProperty('name') as string;
+            let color = '#ffffff'; 
+            let weight = 0.5;
+            let zIndex = 1;
+
+            if (type === 'trunk' || type === 'primary') {
+                color = '#F59E0B'; // Oranye (Jalan Besar)
+                weight = 12;
+                zIndex = 10;
+            } else if (type === 'secondary' || type === 'tertiary') {
+                color = '#FCD34D'; // Kuning
+                weight = 8;
+                zIndex = 5;
+            }
+
+            return {
+                strokeColor: color,
+                strokeWeight: weight,
+                strokeOpacity: 0.8,
+                clickable: true, // Biar gak ganggu klik user
+                zIndex: zIndex,
+                title: name,
+            };
+        });
+
+        roadsLayer.addListener('click', (event: google.maps.Data.MouseEvent) => {
+            const osmID = event.feature.getProperty('@id');
+            const name = event.feature.getProperty('name') as string;
+            const tipe = event.feature.getProperty('highway') as string;
+            console.log("OSM ID (Copy ini):", osmID); // <--- INI KUNCINYA
+
+            // Cek dulu, kalau namanya kosong, ganti jadi strip
+            const displayName = name ? name : "Unknown Road";
+
+            // Set isi InfoWindow
+            // Kita bisa masukin HTML biar rapi
+            infoWindowRef.current?.setContent(`
+                <div style="padding:4px; color:black;">
+                    <strong>${displayName}</strong><br>
+                    <strong>${osmID}</strong><br>
+                    <span style="color:gray; font-size:11px;">Tipy: ${tipe}</span>
+                </div>
+            `);
+
+            // Munculin InfoWindow tepat di titik yang diklik
+            infoWindowRef.current?.setPosition(event.latLng);
+            infoWindowRef.current?.open(map);
+        });
+
+        // Tempel layer ke Map
+        roadsLayer.setMap(map);
+
+        // Daftarkan ke cleanup biar HILANG pas reachToObject false
+        cleanups.push(() => {
+            roadsLayer.setMap(null);
+        });
+
         // Marker Padang (jika unik untuk animasi ini)
         const markerPadang = new google.maps.Marker({
             position: padang,
@@ -1255,6 +1391,7 @@ export default function MapHomeUpdateNewVer({
     const travelPlanStartRef = useRef<UserLocation | null>(null);                // start rute (beku di A)
     const tpWaypointsRef = useRef<Array<{id:string; name:string; lat:number; lng:number}>>([]); // B, C, ...
     const tpRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);  // renderer rute TP
+    const [cursorCoord, setCursorCoord] = useState<{ lat: number; lng: number } | null>(null);
     // const planningStartRef = useRef<UserLocation | null>(null);
 
     // useEffect(() => {
@@ -1290,7 +1427,7 @@ export default function MapHomeUpdateNewVer({
     });
 
     // Gunakan custom hook untuk layers GeoJSON (useEffect #2)
-    useGeoJsonLayers(map, visibility, infoWindowRef);
+    useGeoJsonLayers(map, visibility, infoWindowRef, setCursorCoord);
 
     // Dapatkan handlerRouteButtonClick dari useRouteAndAnimations (sebelum useObjectMarkers)
     const { handleRouteButtonClick } = useRouteAndAnimations(
@@ -1373,14 +1510,11 @@ export default function MapHomeUpdateNewVer({
         console.log('planningWaypoints', planningWaypoints);
         console.log('planningStart', planningStart);
         
-        
-        
         if (!isTravelPlanning || !planningWaypoints || planningWaypoints.length === 0 || !planningStart) {
             return;
         }
         console.log('ini planningWaypoints', planningWaypoints);
         
-
         const ds = new google.maps.DirectionsService();
         // const origin = new google.maps.LatLng(planningStartRef.current.lat!, planningStartRef.current.lng!);
         const origin = new google.maps.LatLng(planningStart.lat, planningStart.lng);
@@ -1398,6 +1532,9 @@ export default function MapHomeUpdateNewVer({
             (result, status) => {
                 if (status === google.maps.DirectionsStatus.OK && result) {
                 const dr = new google.maps.DirectionsRenderer({ map, suppressMarkers: false });
+                console.log('ROUTE ORIGIN', planningStart);
+console.log('UI CENTER', userLocation);
+
                 dr.setDirections(result);
                 const legs = result.routes[0].legs;
 
@@ -1442,6 +1579,23 @@ export default function MapHomeUpdateNewVer({
         map, object, dataListAllObject, browsePlace, setBrowseId, setBrowseName,
         handleRouteButtonClick, infoWindowRef, activeMapMode, isTravelPlanning, onAddToRoute
     );
+    useEffect(() => {
+        if (!map) return;
+
+        const mouseMoveListener = map.addListener('mousemove', (e: google.maps.MapMouseEvent) => {
+            if (e.latLng) {
+            setCursorCoord({
+                lat: e.latLng.lat(),
+                lng: e.latLng.lng(),
+            });
+            }
+        });
+
+        // Bersih-bersih event biar gak memory leak
+        return () => {
+            google.maps.event.removeListener(mouseMoveListener);
+        };
+    }, [map]);
 
     // Gunakan custom hook untuk lokasi pengguna dan radius (useEffect #4)
     useUserLocationAndRadius(
@@ -1504,16 +1658,61 @@ export default function MapHomeUpdateNewVer({
         }
     }, [showLegend]);
 
-  return (
-    <div className="relative">
-      <div ref={legendRef} className={`absolute bottom-6 left-2 `} style={{ zIndex: 100 }}>
-        {showLegend && (
-          <div className="legend-content" style={{ border: '1px solid #ccc', padding: '10px', background: '#fff' }}>
-            <Legend />
-          </div>
-        )}
-      </div>
-      <div ref={mapContainerRef} className="text-slate-700 h-[500px] md:h-[550px] rounded-lg"></div>
-    </div>
-  );
+//   return (
+//     <div className="relative">
+//       <div ref={legendRef} className={`absolute bottom-6 left-2 `} style={{ zIndex: 100 }}>
+//         {showLegend && (
+//           <div className="legend-content" style={{ border: '1px solid #ccc', padding: '10px', background: '#fff' }}>
+//             <Legend />
+//           </div>
+//         )}
+        
+//       </div>
+//       <div ref={mapContainerRef} className="text-slate-700 h-[500px] md:h-[550px] rounded-lg"></div>
+//     </div>
+//   );
+    return (
+        <div className="relative"> {/* <- Ini Container Utama (Parent) */}
+        
+        {/* 1. LEGEND (Kode Lama) */}
+        <div ref={legendRef} className={`absolute bottom-6 left-2 `} style={{ zIndex: 100 }}>
+            {showLegend && (
+            <div className="legend-content" style={{ border: '1px solid #ccc', padding: '10px', background: '#fff' }}>
+                <Legend />
+            </div>
+            )}
+        </div>
+
+        {/* 2. MATA ANGIN (Baru Diselipin Disini) */}
+        <div 
+            className="absolute top-16 right-2 z-10 p-1 bg-white/80 rounded-full shadow-md"
+            // Penjelasan:
+            // top-20 : Biar gak ketabrak tombol "Map/Satellite" bawaan Google di pojok kanan atas
+            // right-4: Nempel kanan
+            // z-10   : Wajib di atas map
+        >
+            <img 
+                src="/icon/north-arrow.png" // Pastikan filenya ada di public/icon/
+                alt="North Arrow" 
+                className="w-10 h-10"       // Sesuaikan ukuran (misal 40px)
+                style={{ display: 'block' }}
+            />
+        </div>
+
+        {cursorCoord && (
+            <div className="absolute bottom-7 left-2 z-10 bg-white/90 px-2 py-1 rounded shadow text-xs font-mono text-slate-700 pointer-events-none">
+                {/* pointer-events-none: Biar kalau kursor lewat di atas angka ini, map di belakangnya gak ke-block */}
+                <div>Lat: {cursorCoord.lat.toFixed(5)}</div>
+                <div>Lng: {cursorCoord.lng.toFixed(5)}</div>
+            </div>
+            )}
+        <div className="absolute bottom-6 right-14 z-10">
+            <CustomScale map={map} />
+        </div>
+
+        {/* 3. MAP CONTAINER (Kode Lama) */}
+        <div ref={mapContainerRef} className="text-slate-700 h-[500px] md:h-[550px] rounded-lg"></div>
+        
+        </div>
+    );
 }

@@ -50,7 +50,7 @@ async function initWhatsAppClient() {
     const { version } = await fetchLatestBaileysVersion();
 
     const logger = pino({
-       level: 'silent', // <-- Ganti level di sini ('warn', 'error', 'silent')
+       level: 'info', // <-- Ganti level di sini ('warn', 'error', 'silent')
        // Opsional: pino-pretty untuk format yang lebih bagus
        // transport: {
        //   target: 'pino-pretty',
@@ -62,13 +62,26 @@ async function initWhatsAppClient() {
       version,
       auth: state,
       printQRInTerminal: true,
+      browser: ['Ubuntu', 'Chrome', '20.0.04'],
+      keepAliveIntervalMs: 10000,
       logger: logger // <-- Masukkan logger yang sudah dibuat
     });
 
-    sock.ev.on('creds.update', saveCreds);
-    sock.ev.on('creds.update', (u) => {
-      if (u?.me?.name) selfName = u.me.name;
-      saveCreds(); // Pastikan saveCreds dipanggil di sini juga
+    // sock.ev.on('creds.update', saveCreds);
+    sock.ev.on('creds.update', async (u) => {
+          try {
+        // update selfName kalau tersedia di update credential
+        if (u?.me?.name) selfName = u.me.name;
+
+        // simpan kredensial (useMultiFileAuthState memberikan saveCreds)
+        await saveCreds();
+      } catch (err) {
+        console.error('Failed to save creds:', err);
+        // optional: coba tulis ulang setelah delay kecil untuk recover
+        setTimeout(() => {
+          try { saveCreds(); } catch (e) { console.error('Retry saveCreds failed', e); }
+        }, 500);
+      }
     });
     
     if (!selfName && state?.creds?.me?.name) {
@@ -76,6 +89,13 @@ async function initWhatsAppClient() {
     }
 
     sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
+      if (lastDisconnect?.error) {
+        const err = lastDisconnect.error;
+        console.error('Last disconnect error:', err?.message || err);
+        if (err?.isBoom) {
+          console.error('Boom output:', err.output);
+        }
+      }
       if (qr) {
         qrCode = qr;
         isWhatsAppReady = false;
@@ -247,21 +267,21 @@ const sendMessage = async (params) => {
 
   try {
     const {
-      phone, package_id, request_date, check_in, total_people,
+      phone, request_date, check_in, total_people,
       total_price, deposit, note, id, package_name, user_name
     } = params
 
-    const message = `Hello ${user_name}, your booking for the ${package_name} Package (Package ID: ${package_id}) has been successfully placed. Here are the details:
+    const message = `Hello ${user_name}, your reservation for the ${package_name} Package has been successfully placed. Here are the details:
 
-    - Booking Reference: ${id}
-    - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Reservation Reference: ${id}
+    - Reservation Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     - Total Price: ${total_price.toLocaleString()} IDR
     - Deposit Paid: ${deposit.toLocaleString()} IDR
     - Notes: ${note || 'No additional notes'}
 
-    Please waiting until admin confirmation your reservation We look forward to having you on the tour!`
+    Please waiting until admin confirmation your reservation We look forward to having you on the tour! Thank you for your attention.`
 
     if (!isWhatsAppReady || !sock) {
       console.log('the system is not ready yet')
@@ -286,8 +306,8 @@ const sendMessageAfterBookingHomestay = async (params, selectedHomestays) => {
 
     const message = `Hello ${user_name}, your booking for the ${name} Package (Package ID: ${package_id}) has been successfully updated. Here are the details:
 
-    - Booking Reference: ${id}
-    - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Reservation Reference: ${id}
+    - Reservation Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     Booked Homestays:
@@ -317,10 +337,10 @@ const sendMessageConfirmationDate = async (params) => {
   try {
     const { phone, request_date, check_in, total_people, total_price, deposit, note, id, user_name, name } = params
 
-    const message = `Hello, your booking for the ${name} Package has been confirmed by Admin! Here are the details:
+    const message = `Hello ${user_name}, your reservation for the ${name} Package has been confirmed by Admin! Here are the details:
 
-    - Booking Reference: ${id}
-    - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Reservation Reference: ${id}
+    - Reservation Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     - Total Price: ${total_price.toLocaleString()} IDR
@@ -329,7 +349,7 @@ const sendMessageConfirmationDate = async (params) => {
 
     Please proceed with the down payment (DP) to continue your reservation.
 
-    We look forward to welcoming you on the tour!`
+    We look forward to welcoming you on the tour! Thank you for your attention.`
 
     if (!isWhatsAppReady || !sock) {
       console.log('the system is not ready yet')
@@ -348,19 +368,22 @@ const sendMessageConfirmationDP = async (params) => {
   // params.phone = '6283152073998'; // Tetap biarkan untuk testing jika perlu
 
   try {
-    const { phone, id, total_price, deposit, fullname, package_id, name, request_date, check_in, transaction_time } = params;
+    const { phone, id, total_price, deposit, fullname, package_id, name, request_date, check_in, paymentDate } = params;
+    console.log('ini di sendMessageConfirmationDP', params);
+    
 
-    const message = `Hello ${fullname}, we have successfully received your down payment (IDR ${deposit.toLocaleString()}) on ${new Date(transaction_time).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })} for the ${name} Package! Here are your booking details:
+    // const message = `Hello ${fullname}, we have successfully received your down payment (IDR ${deposit.toLocaleString()}) on ${new Date(transaction_time).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })} for the ${name} Package! Here are your booking details:
+    const message = `Hello ${fullname}, we have successfully received your down payment (IDR${deposit.toLocaleString()}) on ${paymentDate} for the ${name} Package! Here are your booking details:
 
-    - Booking Reference: ${id}
+    - Reservation Reference: ${id}
     - Package ID: ${package_id}
-    - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Reservation Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total Package Price: ${total_price.toLocaleString()} IDR
 
-    Please complete the remaining payment to secure your reservation.
+    Please complete the remaining full payment to secure your reservation.
 
-    Thank you, and we look forward to your visit!`;
+    Thank you for your attention, and we look forward to your visit!`;
 
     // 1. Ganti pengecekan kesiapan dengan yang konsisten
     if (!isWhatsAppReady || !sock) {
@@ -385,19 +408,21 @@ const sendMessageConfirmationFP = async (params) => {
   // params.phone = '6283152073998'; // Tetap biarkan untuk testing jika perlu
 
   try {
-    const { phone, request_date, check_in, total_people, total_price, deposit, note, id, user_name, name } = params;
+    const { phone, request_date, check_in, total_people, total_price, deposit, note, id, fullname, name } = params;
+    console.log('sendMessageConfirmationFP', params);
+    
 
-    const message = `Hello ${user_name}, your reservation is fully paid and confirmed! Here are the final details:
+    const message = `Hello ${fullname}, your reservation is fully paid and confirmed! Here are the final details:
 
-    - Booking Reference: ${id}
-    - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - reservation Reference: ${id}
+    - reservation Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     - Total Price: ${total_price.toLocaleString()} IDR
     - Total Paid: ${total_price.toLocaleString()} IDR
     - Notes: ${note || 'No additional notes'}
 
-    We look forward to welcoming you on the tour. Thank you!`;
+    We look forward to welcoming you on the tour. Thank you for your attention!`;
 
     // 1. Ganti pengecekan kesiapan dengan yang konsisten
     if (!isWhatsAppReady || !sock) {
@@ -453,20 +478,23 @@ const adminSendMessageReservation = async (params) => {
   }
 
   try {
-    const { phone, package_id, request_date, check_in, total_people, total_price, deposit, note, id, name } = params;
+    const { phone, package_id, request_date, check_in, total_people, total_price, deposit, note, id, package_name, user_name } = params;
+    console.log(params);
+    
 
     // Format pesan secara dinamis menggunakan data dari params
-    const message = `Hello Admin, a new booking has been placed for the ${name} Package (Package ID: ${package_id}). Please review the details below and confirm the reservation:
+    const message = `Hello Admin, a new reservation has been made for the ${package_name} Package (Package ID: ${package_id}). Please review the details below and confirm the reservation:
 
-    - Booking Reference: ${id}
-    - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Reservation Reference: ${id}
+    - Username: ${user_name}
+    - Reservation Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     - Total Price: ${total_price.toLocaleString()} IDR
     - Deposit Paid: ${deposit.toLocaleString()} IDR
     - Notes: ${note || 'No additional notes'}
 
-    Please confirm the reservation and proceed with the necessary actions.`;
+    Please confirm the reservation and proceed with the necessary actions. Thank you for your attention. `;
 
     // 1. Ganti pengecekan kesiapan dengan yang konsisten
     if (!isWhatsAppReady || !sock) {
@@ -493,7 +521,7 @@ const adminSendMessageDepositReservation = async (params) => {
 
     const message = `Hello Admin, a new deposit has been successfully paid for a reservation. Here are the details:
 
-    - Booking Reference: ${order_id}
+    - Reservation Reference: ${order_id}
     - Payment Date: ${new Date(transaction_time).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Paid: ${gross_amount.toLocaleString('id-ID')} IDR
 
@@ -526,10 +554,10 @@ const adminSendMessageAfterBookingHomestay = async (params, selectedHomestays) =
     
     const { phone, id, name, package_id, request_date, check_in, total_people, total_price, deposit, note } = params;
 
-    const message = `Hello Admin, booking for the ${name} Package (Package ID: ${package_id}) has been successfully updated. Here are the details:
+    const message = `Hello Admin, reservation for the ${name} Package (Package ID: ${package_id}) has been successfully updated. Here are the details:
 
-    - Booking Reference: ${id}
-    - Booking Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+    - Reservation Reference: ${id}
+    - Reservation Date: ${new Date(request_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Check-in Date: ${new Date(check_in).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Total People: ${total_people}
     Booked Homestays:
@@ -560,7 +588,7 @@ const adminSendMessageFPReservation = async (params) => {
 
     const message = `Hello Admin, a new full payment has been successfully paid for a reservation. Here are the details:
 
-    - Booking Reference: ${order_id}
+    - Reservation Reference: ${order_id}
     - Payment Date: ${new Date(transaction_time).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Paid: ${gross_amount.toLocaleString('id-ID')} IDR
 
@@ -586,7 +614,7 @@ const adminSendMessageCancelReservation = async (params) => {
 
     const message = `Hello Admin, a reservation has been canceled. Here are the details:
 
-    - Booking Reference: ${id}
+    - Reservation Reference: ${id}
     - Cancellation Date: ${new Date(date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
 
     Please take note of this cancellation.`;
@@ -614,7 +642,7 @@ const adminSendMessageCancelRefundReservation = async (params) => {
 
     const message = `Hello Admin, a customer has canceled their reservation and requires a refund. Here are the details:
 
-    - Booking Reference: ${id}
+    - Reservation Reference: ${id}
     - Refund Request Date: ${new Date(refund_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Account for Refund: ${account_refund}
     - Total Refund Amount: ${refund_amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
@@ -644,7 +672,7 @@ const customersSendMessageCancelRefundReservation = async (params) => {
 
     const message = `Hello ${fullname}, your reservation has been successfully canceled. Here are the details for your refund:
 
-    - Booking Reference: ${id}
+    - Reservation Reference: ${id}
     - Cancellation Date: ${new Date(refund_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
     - Refund to Account: ${account_refund}
     - Total Refund: ${refund_amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
@@ -674,7 +702,7 @@ const customerSendMessageRefundProof = async (params) => {
 
     const message = `Hello, the admin has uploaded proof of your refund. Please check your account. Here are the details:
 
-    - Booking Reference: ${id}
+    - Reservation Reference: ${id}
     - Refund Process Date: ${new Date(refund_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
 
     Thank you for your patience!`;
@@ -705,14 +733,14 @@ const adminSendMessageRefundConfirmation = async (params) => {
       // Jika refund sukses dikonfirmasi customer
       message = `Hello Admin, the customer has successfully confirmed the refund.
 
-      - Booking Reference: ${id}
+      - Reservation Reference: ${id}
 
       The refund process is now complete.`;
     } else {
       // Jika refund ditolak customer
       message = `Hello Admin, the customer has rejected the refund proof for the following booking:
 
-      - Booking Reference: ${id}
+      - Reservation Reference: ${id}
 
       Please review the refund proof and take the necessary actions.`;
     }
@@ -740,7 +768,7 @@ const adminSendMessageReferralConfirmation = async (params) => {
       // Jika pembayaran referral sukses dikonfirmasi
       message = `Hello Admin, the user has successfully confirmed the referral payment.
 
-      - Booking Reference: ${id}
+      - Reservation Reference: ${id}
       - Confirmation Date: ${new Date(datetime).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
 
       The referral payment process is complete.`;
@@ -748,7 +776,7 @@ const adminSendMessageReferralConfirmation = async (params) => {
       // Jika pembayaran referral ditolak
       message = `Hello Admin, the user has rejected the referral payment proof for the following booking:
 
-      - Booking Reference: ${id}
+      - Reservation Reference: ${id}
 
       Please review the proof and take necessary actions.`;
     }

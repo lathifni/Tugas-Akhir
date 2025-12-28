@@ -40,6 +40,8 @@ export default function GeneralInfo({ onSearchAroundClick, onCreatePlanClick }:G
 
   useEffect(() => {
     if (dataGalleries) {
+      console.log(dataGalleries);
+      
       const interval = setInterval(() => {
         setCurrentIndex(prevIndex => (prevIndex + 1) % dataGalleries.length);
       }, 3000);

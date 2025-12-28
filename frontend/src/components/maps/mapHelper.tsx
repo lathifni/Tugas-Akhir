@@ -529,44 +529,165 @@ export const Legend = () => {
   return (
     <div className="text-xs flex flex-col">
       <div className="flex items-center">
-        <img src="/icon/bathroom.png" alt="" className="w-4 h-5 mr-2" /><p>Public Bathroom</p>
+        <img src="/icon/culinary.png" alt="" className="w-4 h-5 mr-2" /><p>Culinary Place</p>
       </div>
       <div className="flex items-center mt-2">
-        <img src="/icon/selfie.png" alt="" className="w-4 h-5 mr-2" /><p>Selfie Area</p>
+        <img src="/icon/homestay.png" alt="" className="w-4 h-5 mr-2" /><p>Homestay</p>
       </div>
       <div className="flex items-center mt-2">
         <img src="/icon/souvenir.png" alt="" className="w-4 h-5 mr-2" /><p>Souvenir Place</p>
       </div>
       <div className="flex items-center mt-2">
-        <img src="/icon/treehouse.png" alt="" className="w-4 h-5 mr-2" /><p>Tree House</p>
-      </div>
-      <div className="flex items-center mt-2">
-        <img src="/icon/tower.png" alt="" className="w-4 h-5 mr-2" /><p>Viewing Tower</p>
+        <img src="/icon/attraction.png" alt="" className="w-4 h-5 mr-2" /><p>Attraction</p>
       </div>
       <div className="flex items-center mt-2">
         <img src="/icon/worship.png" alt="" className="w-4 h-5 mr-2" /><p>Worship Place</p>
       </div>
       <div className="flex items-center mt-2">
-        <img src="/icon/negara.png" alt="" className="w-4 h-4 mr-2" /><p>Negara</p>
+        <img src="/icon/negara.png" alt="" className="w-4 h-4 mr-2" /><p>Malaysia</p>
       </div>
-      <div className="flex items-center mt-2">
+      {/* <div className="flex items-center mt-2">
         <img src="/icon/provinsi.png" alt="" className="w-4 h-4 mr-2" /><p>Provinsi</p>
-      </div>
+        </div> */}
       <div className="flex items-center mt-2">
-        <img src="/icon/kabkota.png" alt="" className="w-4 h-4 mr-2" /><p>Kota/Kabupaten</p>
+        <img src="/icon/kabkota.png" alt="" className="w-4 h-4 mr-2" /><p>Singapore</p>
       </div>
-      <div className="flex items-center mt-2">
+      {/* <div className="flex items-center mt-2">
         <img src="/icon/kecamatan.png" alt="" className="w-4 h-4 mr-2" /><p>Kecamatan</p>
+        </div> */}
+      <div className="flex items-center mt-2">
+        <img src="/icon/nagari.png" alt="" className="w-4 h-4 mr-2" /><p>Brunei Darussalam</p>
       </div>
       <div className="flex items-center mt-2">
-        <img src="/icon/nagari.png" alt="" className="w-4 h-4 mr-2" /><p>Nagari</p>
+        <img src="/icon/desawisata.png" alt="" className="w-4 h-4 mr-2" /><p>GTP Ulakan</p>
       </div>
-      <div className="flex items-center mt-2">
-        <img src="/icon/desawisata.png" alt="" className="w-4 h-4 mr-2" /><p>Desa Wista</p>
+      <div className="flex items-center mt-2 ml-0.5">
+        <CheckeredLegendIcon color="#A0522D" borderColor="#8B4513" /><p>Estuary</p>
       </div>
     </div>
   )
 }
+
+import { useEffect, useState } from 'react';
+
+interface Props {
+  map: google.maps.Map | null;
+}
+
+export default function CustomScale({ map }: Props) {
+  const [scaleText, setScaleText] = useState('100 m');
+  const [barWidth, setBarWidth] = useState(0);
+
+  useEffect(() => {
+    if (!map) return;
+
+    const calculateScale = () => {
+      const zoom = map.getZoom() || 0;
+      const lat = map.getCenter()?.lat() || 0;
+
+      // 1. Hitung resolusi (meter/pixel) di posisi saat ini
+      // Konstanta 156543.03392 berasal dari Keliling Bumi / 256 pixel (tile size)
+      const metersPerPixel = (156543.03392 * Math.cos(lat * Math.PI / 180)) / Math.pow(2, zoom);
+
+      // 2. Tentukan target jarak yang "cantik" buat ditampilkan
+      // Kita mau garisnya mewakili jarak bulat (misal 50m, 100m, 1km)
+      // Kita targetkan lebar garis sekitar 100 pixel di layar biar enak dilihat
+      const targetWidthInPixels = 100;
+      const targetDistanceInMeters = targetWidthInPixels * metersPerPixel;
+
+      // Bulatkan angka jaraknya biar cantik (misal 134m jadi 100m, 800m jadi 1km)
+      let roundedDistance = 0;
+      if (targetDistanceInMeters >= 1000) {
+         // Kalau > 1km, bulatkan ke km terdekat
+         roundedDistance = Math.round(targetDistanceInMeters / 1000) * 1000;
+      } else {
+         // Kalau < 1km, bulatkan ke kelipatan 50m atau 100m
+         roundedDistance = Math.round(targetDistanceInMeters / 100) * 100;
+         if (roundedDistance === 0) roundedDistance = 50; // Minimal 50m
+      }
+
+      // 3. Hitung lebar garis (pixel) yang sebenarnya untuk jarak bulat tadi
+      const finalWidth = roundedDistance / metersPerPixel;
+
+      // 4. Update State UI
+      setBarWidth(finalWidth);
+      
+      if (roundedDistance >= 1000) {
+        setScaleText(`${roundedDistance / 1000} km`);
+      } else {
+        setScaleText(`${roundedDistance} m`);
+      }
+    };
+
+    // Hitung pertama kali
+    calculateScale();
+
+    // Dengerin event zoom & geser (karena latitude ngaruh ke skala)
+    const listenerZoom = map.addListener('zoom_changed', calculateScale);
+    const listenerCenter = map.addListener('center_changed', calculateScale);
+
+    return () => {
+      google.maps.event.removeListener(listenerZoom);
+      google.maps.event.removeListener(listenerCenter);
+    };
+  }, [map]);
+
+  if (!map) return null;
+
+  return (
+    <div className="flex flex-col items-center bg-white/80 p-2">
+        {/* Teks Jarak */}
+        <span className="text-xs font-bold text-slate-700 mb-1 drop-shadow-md">
+            {scaleText}
+        </span>
+        
+        {/* Garis Skala */}
+        <div 
+            style={{ 
+                width: `${barWidth}px`, 
+                height: '6px',
+                // backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                border: '2px solid #334155', // Slate-700
+                borderTop: 'none', // Biar bentuknya kayak penggaris U
+                borderRadius: '0 0 2px 2px'
+            }} 
+        />
+    </div>
+  );
+}
+
+interface CheckeredIconProps {
+    color: string;       // Warna tengah (isi)
+    borderColor?: string; // Warna garis pinggir (opsional)
+}
+
+const CheckeredLegendIcon: React.FC<CheckeredIconProps> = ({ color, borderColor }) => {
+    // Style Container: Cuma buat ngatur ukuran & posisi biar sejajar sama teks
+    const containerStyle: React.CSSProperties = {
+        width: '20px',      // Tetap 24px biar ukurannya konsisten sama icon PNG lain
+        height: '20px',
+        display: 'flex',    // Flex biar lingkarannya pas di tengah
+        alignItems: 'center',
+        // justifyContent: 'center',
+        // Background kotak-kotak dihapus total
+    };
+
+    // Style Lingkaran: Fokus utamanya
+    const circleStyle: React.CSSProperties = {
+        width: '12px',
+        height: '12px',
+        borderRadius: '50%',
+        backgroundColor: color,
+        border: borderColor ? `2px solid ${borderColor}` : 'none',
+        boxSizing: 'border-box'
+    };
+
+    return (
+        <div style={containerStyle}>
+            <div style={circleStyle} />
+        </div>
+    );
+};
 
 export const MapContentEvent: React.FC<MapEventContentProps> = ({ id, name, lat, lng, type, price, onRouteClick }) => {
   const addressHref = `/explore/event/${id}`

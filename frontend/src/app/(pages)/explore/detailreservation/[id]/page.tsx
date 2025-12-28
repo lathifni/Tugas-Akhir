@@ -319,7 +319,7 @@ export default function DetailReservationIdPage({ params }: any) {
                 <button type="button" className="bg-gray-500 text-white p-2 rounded-md hover:bg-gray-700" >Continue Without Homestay</button>
               </Link>
               <button type="button" className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700" onClick={handleBookingHomestay}>
-                <FontAwesomeIcon icon={faCheck}/> Save Booking Homestay
+                <FontAwesomeIcon icon={faCheck}/> Save Reserve Homestay
               </button>
             </div>
           </div>

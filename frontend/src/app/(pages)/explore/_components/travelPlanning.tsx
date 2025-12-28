@@ -91,7 +91,7 @@ export default function TravelPlanning({
                 hasMyLocation ? 'opacity-100' : 'opacity-40 italic'
               }`}
             >
-              1. {startLabel}
+              A. {startLabel}
             </div>
           </div>
           {/* ✅ TAMPILKAN DAFTAR WAYPOINTS DI SINI */}
@@ -99,7 +99,7 @@ export default function TravelPlanning({
             <div key={waypoint.id} className="flex items-center justify-between">
               {/* Nama Waypoint dengan nomor urut */}
               <div className="flex-1 rounded border border-blue-300 bg-blue-50 px-3 py-2">
-                {index + 2}. {waypoint.name}
+                {String.fromCharCode(65 + (index + 1))}. {waypoint.name}
               </div>
 
               {/* ✅ Tombol Hapus HANYA muncul untuk item terakhir */}
