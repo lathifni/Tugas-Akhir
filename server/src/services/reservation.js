@@ -135,7 +135,7 @@ const allReservation = async() => {
 
 const getReservationAndUserById = async(params) => {
   const [rows] = await promisePool.query(
-    `SELECT R.*,RS.status,U.email,COALESCE(NULLIF(U.fullname,''), U.username) AS user_name,U.phone,P.name,P.min_capacity,P.price,p.description,PT.type_name,MAX(CAST(PD.day AS UNSIGNED)) 
+    `SELECT R.*,RS.status,U.email,COALESCE(NULLIF(U.fullname,''), U.username) AS user_name,U.phone,P.name,P.min_capacity,P.price,P.description,PT.type_name,MAX(CAST(PD.day AS UNSIGNED)) 
     AS max_day FROM reservation AS R 
     JOIN package AS P ON R.package_id=P.id JOIN package_type AS PT ON PT.id=P.type_id JOIN package_day AS PD ON PD.package_id=R.package_id 
     JOIN reservation_status AS RS ON RS.id=R.status_id JOIN users AS U ON U.id=R.user_id WHERE R.id='${params.id}'`
