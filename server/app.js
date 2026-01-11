@@ -4,8 +4,17 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require('dotenv').config();
 const cors = require('cors')
+const frontendUrl = process.env.FRONTEND_URL || '';
+
 const corsOptions = {
-  origin: ['http://localhost:3001', 'http://localhost:3000', 'https://d0tf10nc-3001.asse.devtunnels.ms'], // Sesuaikan dengan kebutuhan Anda
+  origin: [
+    frontendUrl,                 // <--- Ini domain Production (dari .env)
+    'http://localhost:3001',     // Tetap simpan buat dev lokal
+    'http://localhost:3000',     // Tetap simpan buat dev lokal
+    'https://d0tf10nc-3001.asse.devtunnels.ms'
+  ],
+  // credentials: true, // Tambahin ini kalau nanti main cookie/session
+  // optionsSuccessStatus: 200
 };
 const router = require('./src/routes/index')
 const rateLimit = require('express-rate-limit');
