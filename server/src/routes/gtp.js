@@ -1,8 +1,9 @@
 var express = require('express');
-const { getInfoHandler, getGeomHandler, getAllObjectHandler, getDataDashboardHandler, getDataRevenueHandler, getDataPackageAnalysisHandler, getDataDayAnalysisHandler, getDataPeopleAnalysisHandler, getDataReferralAnalysisHandler, getListAllAnnouncementHandler, newAnnouncementHandler, deleteAnnouncementHandler, updateAnnouncementHandler, getListAllActiveAnnouncementHandler, getInformationHandler, updateGtpHandler } = require('../handlers/gtpHandler');
+const { getInfoHandler, getGeomHandler, getAllObjectHandler, getDataDashboardHandler, getDataRevenueHandler, getDataPackageAnalysisHandler, getDataDayAnalysisHandler, getDataPeopleAnalysisHandler, getDataReferralAnalysisHandler, getListAllAnnouncementHandler, newAnnouncementHandler, deleteAnnouncementHandler, updateAnnouncementHandler, getListAllActiveAnnouncementHandler, getInformationHandler, updateGtpHandler, testHandler } = require('../handlers/gtpHandler');
 
 var router = express.Router();
 
+router.get('/test', testHandler)
 router.get('/', getInfoHandler)
 router.put('/', updateGtpHandler)
 router.get('/geom', getGeomHandler)

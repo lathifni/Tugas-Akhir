@@ -1,5 +1,18 @@
 const { getInfoController, getGeomController, getAllObjectController, getDataDashboardController, getDataRevenueController, getDataPackageAnalysisController, getDataDayAnalysisController, getDataPeopleAnalysisController, getDataReferralAnalysisController, getListAllAnnouncementController, newAnnouncementController, deleteAnnouncementController, updateAnnouncementController, getListAllActiveAnnouncementController, getInformationController, updateGtpController } = require("../controllers/gtpController");
 
+const testHandler = async (req, res) => {
+  try {
+    return res.status(200).send({
+      status: 'success',
+      data: 'berhasil'
+    })
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      status: 'failed'
+    });
+  }
+}
 const getInfoHandler = async (req, res) => {
   try {
     const info = await getInfoController();
@@ -173,5 +186,5 @@ module.exports = {
   getInfoHandler, getGeomHandler, getAllObjectHandler, getDataDashboardHandler, getDataRevenueHandler, getDataPackageAnalysisHandler
   , getDataDayAnalysisHandler, getDataPeopleAnalysisHandler, getDataReferralAnalysisHandler, getListAllAnnouncementHandler
   , newAnnouncementHandler, deleteAnnouncementHandler, updateAnnouncementHandler, getListAllActiveAnnouncementHandler
-  , getInformationHandler, updateGtpHandler, 
+  , getInformationHandler, updateGtpHandler, testHandler, 
  }
