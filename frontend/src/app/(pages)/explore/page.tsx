@@ -369,6 +369,15 @@ export default function ExplorePage() {
     toast.info('Please set your location first (use Current Location atau Set Manual Location).');
     const dialog = document.getElementById('manualLocationDialog') as HTMLDialogElement | null;
     dialog?.showModal(); // Buka dialog manual location
+    setVisibility(prev =>({
+      ...prev,
+      country: false,
+      province: false,
+      cityRegency: false,
+      district: false,
+      village: false  // Set 'country' to true
+    }));
+    setGoToObject(true)
   };
 
   const handleSection = () => {
@@ -440,6 +449,14 @@ export default function ExplorePage() {
   const handleManualLocationUpdate = () => {
     setGoToObject(true)
     const dialogElement = document.getElementById('manualLocationDialog') as HTMLDialogElement;
+    setVisibility(prev =>({
+      ...prev,
+      country: false,
+      province: false,
+      cityRegency: false,
+      district: false,
+      village: false  // Set 'country' to true
+    }));
     if (dialogElement) dialogElement.showModal();
   };
 

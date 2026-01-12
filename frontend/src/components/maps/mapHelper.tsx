@@ -543,24 +543,36 @@ export const Legend = () => {
       <div className="flex items-center mt-2">
         <img src="/icon/worship.png" alt="" className="w-4 h-5 mr-2" /><p>Worship Place</p>
       </div>
-      <div className="flex items-center mt-2">
-        <img src="/icon/negara.png" alt="" className="w-4 h-4 mr-2" /><p>Malaysia</p>
+      <div className="flex items-center mt-2 ml-0.5">
+        <CheckeredLegendIcon color="#7E3AF2" borderColor="#7E3AF2" /><p>Malaysia</p>
       </div>
+      {/* <div className="flex items-center mt-2">
+        <img src="/icon/negara.png" alt="" className="w-4 h-4 mr-2" /><p>Malaysia</p>
+      </div> */}
       {/* <div className="flex items-center mt-2">
         <img src="/icon/provinsi.png" alt="" className="w-4 h-4 mr-2" /><p>Provinsi</p>
         </div> */}
-      <div className="flex items-center mt-2">
-        <img src="/icon/kabkota.png" alt="" className="w-4 h-4 mr-2" /><p>Singapore</p>
+      <div className="flex items-center mt-2 ml-0.5">
+        <CheckeredLegendIcon color="#FF65A3" borderColor="#FF65A3" /><p>Singapore</p>
       </div>
+      {/* <div className="flex items-center mt-2">
+        <img src="/icon/kabkota.png" alt="" className="w-4 h-4 mr-2" /><p>Singapore</p>
+      </div> */}
       {/* <div className="flex items-center mt-2">
         <img src="/icon/kecamatan.png" alt="" className="w-4 h-4 mr-2" /><p>Kecamatan</p>
         </div> */}
-      <div className="flex items-center mt-2">
+      <div className="flex items-center mt-2 ml-0.5">
+        <CheckeredLegendIcon color="#FFC107" borderColor="#FFC107" /><p>Brunei Darussalam</p>
+      </div>
+      {/* <div className="flex items-center mt-2">
         <img src="/icon/nagari.png" alt="" className="w-4 h-4 mr-2" /><p>Brunei Darussalam</p>
+      </div> */}
+      <div className="flex items-center mt-2 ml-0.5">
+        <CheckeredLegendIcon color="#03C988" borderColor="#03C988" /><p>GTP Ulakan</p>
       </div>
-      <div className="flex items-center mt-2">
+      {/* <div className="flex items-center mt-2">
         <img src="/icon/desawisata.png" alt="" className="w-4 h-4 mr-2" /><p>GTP Ulakan</p>
-      </div>
+      </div> */}
       <div className="flex items-center mt-2 ml-0.5">
         <CheckeredLegendIcon color="#A0522D" borderColor="#8B4513" /><p>Estuary</p>
       </div>
@@ -681,10 +693,22 @@ const CheckeredLegendIcon: React.FC<CheckeredIconProps> = ({ color, borderColor 
         border: borderColor ? `2px solid ${borderColor}` : 'none',
         boxSizing: 'border-box'
     };
+    const squareStyle: React.CSSProperties = {
+        width: '12px',
+        height: '12px',
+        // --- BAGIAN PENTING ---
+        // borderRadius: '50%', // <-- HAPUS INI (ini yg bikin jadi lingkaran)
+        borderRadius: '2px',    // <-- GANTI JADI INI (biar jadi kotak dengan sudut tumpul dikit)
+        // Kalau mau kotak tajam sempurna, pakai: borderRadius: '0px',
+        // ----------------------
+        backgroundColor: color,
+        border: borderColor ? `2px solid ${borderColor}` : 'none',
+        boxSizing: 'border-box'
+    };
 
     return (
         <div style={containerStyle}>
-            <div style={circleStyle} />
+            <div style={squareStyle} />
         </div>
     );
 };

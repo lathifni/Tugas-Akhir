@@ -348,7 +348,7 @@ const useGeoJsonLayers = (
         const countrySources = [
             { url: 'maps/N01.geojson', color: '#FF65A3' }, // Merah Bata
             { url: 'maps/N02.geojson', color: '#7E3AF2' }, // Hijau Neon
-            { url: 'maps/N03.geojson', color: '#ffffff' }, // Biru
+            { url: 'maps/N03.geojson', color: '#ffffff' }, // putih transparan
             { url: 'maps/N06.geojson', color: '#FFC107' }, // Kuning
             ];
         const countryConfigs = countrySources.map((source, index) => {
@@ -647,7 +647,8 @@ const useObjectMarkers = (
             // addOrUpdateObjectMarkers('A', '/icon/attraction.png', MapContentAttraction);
             addOrUpdateObjectMarkers('A', '/icon/attraction.png', MapContentBrowseAttraction);
             // Tambahkan ID dari objek atraksi yang aktif ke newActiveObjectIds
-            dataListAllObject?.filter((item: { type: string }) => item.type === 'A').forEach((item: any) => newActiveObjectIds.add(item.id));
+            dataListAllObject?.filter((item: { type: string; category?: number | string }) =>
+                 item.type === 'A' && Number(item.category) === 0).forEach((item: any) => newActiveObjectIds.add(item.id));
         }
         if (objectVisibility.uniqueAttraction) {            
             // addOrUpdateObjectMarkers('A', '/icon/attraction.png', MapContentAttraction);
@@ -955,6 +956,7 @@ const useUserLocationAndRadius = (
       strokeOpacity: 0.8,
       strokeWeight: 2,
       zIndex: 100,
+      clickable: false,
     });
     circleRef.current = circle;
 
