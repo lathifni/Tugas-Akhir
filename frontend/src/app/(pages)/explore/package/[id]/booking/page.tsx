@@ -52,18 +52,50 @@ export default function BookingIdPage({ params }: any) {
   }
 
   const readDateHandleChange = async(event: React.ChangeEvent<HTMLInputElement>) => {
+    // setWeatherWarnings([])
+    // setWaterWarnings([])
+    // const inputDate = new Date(event.target.value);
+    // const daysToAdd = parseInt(dataPackageById[0].max_day)
+    // const formattedDateInput = format(inputDate, "yyyy-MM-dd HH:mm:ss");
+    // const newDate = new Date(inputDate);
+    // setDateCheckIn(formattedDateInput)
+
+    // newDate.setHours(12, 0, 0, 0);
+
+    // newDate.setDate(newDate.getDate() + daysToAdd - 1);
+    // const formattedDate = format(newDate, "yyyy-MM-dd HH:mm:ss")
+    // const check_weather = await axiosAuth.get(`integration/weather/${formattedDateInput}/${formattedDate}`)
+    // const check_water = await axiosAuth.get(`integration/water/${formattedDateInput}/${formattedDate}`)
+
+    // setWaterWarnings(check_water.data.data)
+    // setWeatherWarnings(check_weather.data.data.warnings);
+    // setDateCheckOut(formattedDate)
     setWeatherWarnings([])
     setWaterWarnings([])
+    
     const inputDate = new Date(event.target.value);
-    const daysToAdd = parseInt(dataPackageById[0].max_day)
+    // Pastikan ini angka
+    const daysToAdd = parseInt(dataPackageById[0].max_day) 
+    
     const formattedDateInput = format(inputDate, "yyyy-MM-dd HH:mm:ss");
+    
+    // Copy tanggal Check-In ke variable baru buat diotak-atik jadi Check-Out
     const newDate = new Date(inputDate);
     setDateCheckIn(formattedDateInput)
 
-    newDate.setHours(12, 0, 0, 0);
+    // --- LOGIC BARU MULAI DI SINI ---
+    if (daysToAdd === 1) {
+        // Kalo cuma 1 hari, tanggal SAMA, tapi jam jadi 18:00 (6 Sore)
+        newDate.setHours(18, 0, 0, 0);
+    } else {
+        // Kalo lebih dari 1 hari, tanggal NAMBAH, jam jadi 12:00 (12 Siang)
+        newDate.setDate(newDate.getDate() + daysToAdd - 1);
+        newDate.setHours(12, 0, 0, 0);
+    }
+    // --- LOGIC SELESAI ---
 
-    newDate.setDate(newDate.getDate() + daysToAdd - 1);
     const formattedDate = format(newDate, "yyyy-MM-dd HH:mm:ss")
+    
     const check_weather = await axiosAuth.get(`integration/weather/${formattedDateInput}/${formattedDate}`)
     const check_water = await axiosAuth.get(`integration/water/${formattedDateInput}/${formattedDate}`)
 
@@ -94,7 +126,8 @@ export default function BookingIdPage({ params }: any) {
           note: note,
           idUserReferral: idUserReferral,
           package_name: dataPackageById[0].name,
-          user_name: session.user.name
+          user_name: session.user.name,
+          phone: session.user.phone
         }
         const res = await useAxiosAuth.post('reservation/process-transaction', data)
         if (res.status == 201) {

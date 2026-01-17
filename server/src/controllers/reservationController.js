@@ -33,8 +33,10 @@ const {
 const crypto = require("crypto");
 const { bookingHomestay, bookedHomestay } = require('../services/homestay');
 const { checkCodeReferralAfterDP, makeNewCodeReferralAfterDP } = require('../services/referral');
-const { sendMessage, sendMessageConfirmationDate, sendMessageConfirmationDP, sendMessageConfirmationFP, adminSendMessageReservation, adminSendMessageDepositReservation, adminSendMessageFPReservation, adminSendMessageCancelReservation, customerSendMessageRefundProof, adminSendMessageRefundConfirmation, adminSendMessageCancelRefundReservation, customersSendMessageCancelRefundReservation, sendMessageAfterBookingHomestay, adminSendMessageAfterBookingHomestay } = require('./chatController');
+const { sendMessage, sendMessageConfirmationDate, sendMessageConfirmationDP, sendMessageConfirmationFP, adminSendMessageReservation, adminSendMessageDepositReservation, adminSendMessageFPReservation, adminSendMessageCancelReservation, customerSendMessageRefundProof, adminSendMessageRefundConfirmation, adminSendMessageCancelRefundReservation, customersSendMessageCancelRefundReservation, sendMessageAfterBookingHomestay, adminSendMessageAfterBookingHomestay, checkWhatsAppNumber } = require('./chatController');
 const { allPhoneAdmin, customerPhoneByReservation } = require('../services/users');
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const createReservationController = async (params) => {    
   const latestIdReservation = await getLatestIdReservation();
@@ -47,21 +49,40 @@ const createReservationController = async (params) => {
   idDownPayment = `DP${idNumberString}`;
 
   params.id = idReservation
-  params.dp_id = idDownPayment
+  params.dp_id = idDownPayment  
   
   const reservation = await createReservation(params);
   if (reservation == 1) {
     await sendMessage(params)
     const phoneAdminList = await allPhoneAdmin(); 
+    console.log(phoneAdminList, 'ini adalah admin phonenya');
+    
     for (const adminPhone of phoneAdminList) {
       // Pastikan nomor telepon admin valid
-      if (adminPhone && adminPhone.phone) {
-        // Tambahkan nomor telepon admin pada params
-        params.phone = adminPhone.phone;
-        // Kirim pesan ke admin
-        await adminSendMessageReservation(params);
+      // if (adminPhone && adminPhone.phone) {
+      //   // Tambahkan nomor telepon admin pada params
+      //   // params.phone = adminPhone.phone;
+      //   // // Kirim pesan ke admin
+      //   // await adminSendMessageReservation(params);
+      //   const adminParams = { 
+      //       ...params, 
+      //       phone: adminPhone.phone 
+      //   };
+      //   await adminSendMessageReservation(adminParams);
+      //   // await delay(1600);
+      // }
+        if (!adminPhone?.phone) continue;
+
+        const exists = await checkWhatsAppNumber(adminPhone.phone);
+        if (!exists) {
+          console.log(`❌ ${adminPhone.phone} bukan akun WhatsApp`);
+          // continue;
+        }
+
+        const adminParams = { ...params, phone: adminPhone.phone };
+        await adminSendMessageReservation(adminParams);
+        await delay(600);
       }
-    }
     console.log('createReservationController status 201');
     
     return { status: 201, idReservation: idReservation }

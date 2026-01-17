@@ -53,12 +53,20 @@ export default function AttractionId({ params }: any) {
                 </>
               ))}
             </div>
-            <div className="py-2 bg-white rounded-lg mb-4 px-4 shadow-lg">
+            {/* <div className="py-2 bg-white rounded-lg mb-4 px-4 shadow-lg">
               <h1 className="text-2xl font-semibold text-center">Our Gallery</h1>
               <div className="flex justify-center items-center flex-wrap">
                 <Galleries type={'attraction'} urls={dataGallery} />
               </div>
-            </div>
+            </div> */}
+            {dataGallery && Array.isArray(dataGallery) && dataGallery.length > 0 && (
+              <div className="py-2 bg-white rounded-lg mb-4 px-4 shadow-lg">
+                <h1 className="text-2xl font-semibold text-center">Our Gallery</h1>
+                <div className="flex justify-center items-center flex-wrap">
+                  <Galleries type={'attraction'} urls={dataGallery} />
+                </div>
+              </div>
+            )}
           </div>
           <div className="w-full h-full px-2 py-4 xl:w-5/12 items-center bg-white rounded-lg shadow-lg">
             <h1 className="text-2xl font-semibold text-center mb-4">Google Maps</h1>

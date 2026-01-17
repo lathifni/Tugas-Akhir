@@ -263,13 +263,15 @@ const findChatController = async (params) => {
 
 const sendMessage = async (params) => {
   // params.phone = '6285274953262'
-  params.phone = '6283152073998'
+  // params.phone = '6283152073998'
 
   try {
     const {
       phone, request_date, check_in, total_people,
       total_price, deposit, note, id, package_name, user_name
     } = params
+    console.log(params, 'ini adalah params sendMessage');
+    
 
     const message = `Hello ${user_name}, your reservation for the ${package_name} Package has been successfully placed. Here are the details:
 
@@ -817,6 +819,18 @@ const createRoomChatController = async(params) => {
   return idChatRoom;
 }
 
+const checkWhatsAppNumber = async (phone) => {
+  try {
+    
+    const jid = toJid(phone);
+    const result = await sock.onWhatsApp(jid);
+    return result?.[0]?.exists;
+  } catch (error) {
+    console.log(error);
+    
+  }
+};
+
 module.exports = {
   createChatController,
   userChatsController,
@@ -838,5 +852,6 @@ module.exports = {
   whatsAppClientController,
   customersSendMessageCancelRefundReservation,
   sendMessageAfterBookingHomestay,
-  adminSendMessageAfterBookingHomestay
+  adminSendMessageAfterBookingHomestay,
+  checkWhatsAppNumber
 };
