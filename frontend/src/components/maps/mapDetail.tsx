@@ -37,6 +37,7 @@ export default function MapDetail({ geomObject, lat, lng, name, icon }:MapDetail
 
     const mapOptions: google.maps.MapOptions = {
       center: position,
+      mapTypeId: google.maps.MapTypeId.HYBRID,
       zoom: 15,
       styles: [
         {

@@ -79,6 +79,12 @@ export default function BrowsePackage({ browseId, browseName, onShowMapClick, on
               <Link href={`/explore/package/${pkg.id}/booking`}>
                 <button className="px-4 py-2 mx-1 bg-green-500 text-white rounded-lg">Reserve</button>
               </Link>
+               <Link href={`/explore/package/${pkg.id}/extend`}>
+                <button className="px-4 py-2 mx-1 bg-green-500 text-white rounded-lg">Extend</button>
+              </Link>
+               <Link href={`/explore/package/${pkg.id}/custom`}>
+                <button className="px-4 py-2 mx-1 bg-green-500 text-white rounded-lg">Customize</button>
+              </Link>
             </div>
             {activeDay[pkg.id] !== null && pkg.days[activeDay[pkg.id]!] && pkg.days[activeDay[pkg.id]!].activities && (
               <div className="mt-2">

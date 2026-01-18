@@ -75,7 +75,7 @@ export default function Package({ onSearchAroundClick, onShowMapClick, onSelectA
               <button
                 key={index}
                 onClick={() => handleDayClick(pkg.id, index, day.activities)}
-                className="px-4 py-2 mx-1 bg-blue-500 text-white rounded-lg"
+                className="px-4 py-2 m-1 bg-blue-500 text-white rounded-lg"
               >
                 Day {day.day}
               </button>
@@ -85,7 +85,7 @@ export default function Package({ onSearchAroundClick, onShowMapClick, onSelectA
             </Link> */}
             <Link href={`/explore/package/${pkg.id}/booking`}>
               <button 
-                className="px-4 py-2 mx-1 bg-green-500 text-white rounded-lg"
+                className="px-4 py-2 m-1 bg-green-500 text-white rounded-lg"
                 onClick={(e) => {
                   // Jika session masih loading, tampilkan toast info
                   if (status === "loading") {
@@ -94,19 +94,44 @@ export default function Package({ onSearchAroundClick, onShowMapClick, onSelectA
                     return;
                   }
                   
-                  // Jika tidak ada session (belum login)
-                  // if (!session) {
-                  //   e.preventDefault();
-                  //   toast.warning("You are not login. Please login first to booking this package", {
-                  //     position: "top-center",
-                  //     autoClose: 5000,
-                  //     hideProgressBar: true,
-                  //     closeOnClick: true,
-                  //     pauseOnHover: true,
-                  //     draggable: true,
-                  //   });
-                  //   return;
-                  // }
+                  if (!session) {
+                    e.preventDefault();
+                    toast.warning(
+                      <div className="text-center">
+                        <div className="font-bold">Login Required</div>
+                        <div>Please login first to reserve this package</div>
+                        <Link href={'login'}>
+                          <button className="px-4 py- mx-1 bg-blue-500 text-white rounded-lg">
+                            Login
+                          </button>
+                        </Link>
+                      </div>, 
+                      {
+                        position: "top-center",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        // closeOnClick: true,
+                      }
+                    );
+                    return;
+                  }
+                  // Jika sudah login, biarkan navigasi berjalan normal
+                }}
+              >
+                Reserve
+              </button>
+            </Link>
+            <Link href={`/explore/package/${pkg.id}/extend`}>
+            <button 
+                className="px-4 py-2 m-1 bg-green-500 text-white rounded-lg"
+                onClick={(e) => {
+                  // Jika session masih loading, tampilkan toast info
+                  if (status === "loading") {
+                    e.preventDefault();
+                    toast.info("Checking your session...");
+                    return;
+                  }
+                  
                   if (!session) {
                     e.preventDefault();
                     toast.warning(
@@ -131,7 +156,45 @@ export default function Package({ onSearchAroundClick, onShowMapClick, onSelectA
                   // Jika sudah login, biarkan navigasi berjalan normal
                 }}
               >
-                Reserve
+                Extend
+              </button>
+            </Link>
+            <Link href={`/explore/package/${pkg.id}/custom`}>
+            <button 
+                className="px-4 py-2 m-1 bg-green-500 text-white rounded-lg"
+                onClick={(e) => {
+                  // Jika session masih loading, tampilkan toast info
+                  if (status === "loading") {
+                    e.preventDefault();
+                    toast.info("Checking your session...");
+                    return;
+                  }
+                  
+                  if (!session) {
+                    e.preventDefault();
+                    toast.warning(
+                      <div className="text-center">
+                        <div className="font-bold">Login Required</div>
+                        <div>Please login first to reserve this package</div>
+                        <Link href={'login'}>
+                          <button className="px-4 py-2 mx-1 bg-blue-500 text-white rounded-lg">
+                            Login
+                          </button>
+                        </Link>
+                      </div>, 
+                      {
+                        position: "top-center",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        // closeOnClick: true,
+                      }
+                    );
+                    return;
+                  }
+                  // Jika sudah login, biarkan navigasi berjalan normal
+                }}
+              >
+                Customize
               </button>
             </Link>
           </div>

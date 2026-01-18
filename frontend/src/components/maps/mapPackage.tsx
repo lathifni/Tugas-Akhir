@@ -77,7 +77,8 @@ export default function MapPackage({ showLegend, dataActivityDay, dataRouteActiv
         window.google = google;
         const mapOptions: google.maps.MapOptions = {
             center: position,
-            zoom: 16,
+            mapTypeId: google.maps.MapTypeId.HYBRID,
+            zoom: 15,
             // mapId: 'myTA'
             styles: [
                 {
