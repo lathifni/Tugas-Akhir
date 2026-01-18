@@ -9,7 +9,7 @@ const getListAllBasePackage = async () => {
 
 const getPackageById = async (params) => {
   const [rows] = await promisePool.query(
-    `SELECT P.name,P.type_id,P.min_capacity,P.contact_person,P.price,P.description,PT.type_name, MAX(CAST(PD.day AS UNSIGNED)) AS max_day  FROM package as P JOIN package_type AS PT ON P.type_id = PT.id 
+    `SELECT P.name,P.type_id,P.min_capacity,P.video_url,P.contact_person,P.price,P.description,PT.type_name, MAX(CAST(PD.day AS UNSIGNED)) AS max_day  FROM package as P JOIN package_type AS PT ON P.type_id = PT.id 
     JOIN package_day AS PD ON P.id=PD.package_id WHERE P.id='${params.id}'`
   );
   return rows;

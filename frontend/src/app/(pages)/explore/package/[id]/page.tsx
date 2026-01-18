@@ -4,7 +4,7 @@ import { fetchAverageRatingPackageById, fetchListAllGalleryPackageById, fetchLis
 import { useQuery } from "@tanstack/react-query";
 import { Rating } from "@mui/material"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretDown, faCartPlus, faCirclePlay, faPenClip, faRoad, faSquarePlus } from "@fortawesome/free-solid-svg-icons";
+import { faCaretDown, faCartPlus, faCirclePlay, faPenClip, faRoad, faSquarePlus, faXmark } from "@fortawesome/free-solid-svg-icons";
 import MapPackage from "@/components/maps/mapPackage";
 import { useState } from "react";
 import Link from "next/link";
@@ -45,6 +45,7 @@ export default function PackageIdPage({ params }: any) {
   const [distances, setDistances] = useState<number[]>([]);
   const [instructions, setInstructions] = useState<string[]>([]);
   const [jenisnya, setJenisnya] = useState('')
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const { data: session, status, update } = useSession()
   const router = useRouter(); // Tambahkan ini
 
@@ -56,6 +57,7 @@ export default function PackageIdPage({ params }: any) {
     queryKey: ['PackageById', params.id],
     queryFn: () => fetchPackageById(params.id)
   })
+  console.log(dataPackageById);
   const { data: dataAverageRatingById, isLoading: loadingAverageRating } = useQuery({
     queryKey: ['averageRatingById', params.id],
     queryFn: () => fetchAverageRatingPackageById(params.id)
@@ -220,6 +222,8 @@ export default function PackageIdPage({ params }: any) {
 
 
   if (dataListAllServicePackageById && dataPackageById && dataAverageRatingById && dataListAllGalleryPackageById && dataListAllReviewPackageById) {
+    console.log(dataPackageById[0]);
+    
     const serviceInclude = dataListAllServicePackageById.filter((item: { name: string, status: number; }) => item.status === 1);
     const serviceExclude = dataListAllServicePackageById.filter((item: { name: string, status: number; }) => item.status === 0);
 
@@ -288,9 +292,16 @@ export default function PackageIdPage({ params }: any) {
                 <li key={index} className="list-disc">{item.name}</li>
               ))}
             </ul>
-            <div className="w-fit border-solid border-2 p-2 mt-5 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white">
+            {/* <div className="w-fit border-solid border-2 p-2 mt-5 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white">
               <FontAwesomeIcon className="mr-2" icon={faCirclePlay} />Play Video
-            </div>
+            </div> */}
+            <button 
+              onClick={() => setIsVideoOpen(true)}
+              className="w-fit flex items-center border-solid border-2 p-2 mt-5 border-blue-500 rounded-lg text-blue-500 hover:bg-blue-500 hover:text-white transition-colors"
+            >
+              <FontAwesomeIcon className="mr-2" icon={faCirclePlay} />
+              Play Video
+            </button>
           </div>
           {/* {dataPackageActivityById && (
             <div className="py-5 bg-white rounded-lg mb-5 px-5 shadow-lg">
@@ -425,6 +436,32 @@ export default function PackageIdPage({ params }: any) {
             </div>
           )}
         </div>
+
+        {isVideoOpen && (
+          <div className="fixed inset-0 lg:ml-44 z-[9999] flex items-center justify-center bg-black bg-opacity-75 p-4 backdrop-blur-sm">
+            <div className="relative w-full max-w-4xl bg-black rounded-lg shadow-2xl overflow-hidden">
+              
+              {/* Tombol Close */}
+              <button 
+                onClick={() => setIsVideoOpen(false)}
+                className="absolute top-2 right-2 text-white bg-gray-800 hover:bg-gray-600 rounded-full w-8 h-8 flex items-center justify-center z-10"
+              >
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+
+              {/* Player Video */}
+              <video 
+                controls 
+                autoPlay 
+                className="w-full h-auto max-h-[80vh]"
+              >
+                {/* Perhatikan src diawali dengan slash (/) untuk akses folder public */}
+                <source src={`/videos/package/${dataPackageById[0].video_url}`} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
