@@ -707,7 +707,15 @@ export default function PackageIdEditPage({ params }: any) {
                     return object.type === "WP";
                   } else if (fieldAcitivityType === "SP") {
                     return object.type === "SP";
-                  } else if (fieldAcitivityType === "E") return object.type === 'E'
+                  } else if (fieldAcitivityType === "E") {
+                    return object.type === 'E'
+                  } else if (fieldAcitivityType === "A") {
+                    return object.type === 'A'
+                  } else if (fieldAcitivityType === "HO") {
+                    return object.type === 'HO'
+                  } else if (fieldAcitivityType === "FC") {
+                    return object.type === 'FC'
+                  }
                 })
                 .map((object: { id: string, name: string }) => (
                   <MenuItem key={object.id} value={object.id}>
